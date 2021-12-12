@@ -1,5 +1,5 @@
 import Control from "../common/control";
-import {SettingsPage} from "./settingsPage";
+import {SettingsModel, SettingsPage} from "./settingsPage";
 import {CategoriesPage} from "./categoriesPage";
 import {GameFieldPage} from "./gameFieldPage";
 import {GameOverPage} from "./gameOverPage";
@@ -8,11 +8,14 @@ import {QuizDataModel} from "./quizDataModel";
 
 export class Application extends Control{
   model: QuizDataModel;
+  settingsModel: SettingsModel;
 
   constructor(parentNode:HTMLElement){
     super(parentNode);
     //preloader
     const preloader = new Control(this.node, 'div', '', 'loading...');
+    this.settingsModel = new SettingsModel();
+    this.settingsModel.loadFromStorage();
     this.model = new QuizDataModel();
     this.model.build().then(result=>{
       preloader.destroy();
@@ -33,7 +36,7 @@ export class Application extends Control{
       throw new Error('Game type is not exists');
     }
 
-    const gameField = new GameFieldPage(this.node, {gameName: gameName, categoryIndex: categoryIndex}, questions);
+    const gameField = new GameFieldPage(this.node, {gameName: gameName, categoryIndex: categoryIndex, settings:this.settingsModel.getData()}, questions);
     gameField.onHome = ()=>{
       gameField.destroy();
       this.mainCycle();
@@ -77,14 +80,15 @@ export class Application extends Control{
     }
     startPage.onSettings = ()=>{
       startPage.destroy();
-      const settingsPage = new SettingsPage(this.node);
+
+      const settingsPage = new SettingsPage(this.node, this.settingsModel.getData());
       settingsPage.onBack = ()=>{
         settingsPage.destroy();
         this.mainCycle();
       }
       settingsPage.onSave = (settings)=>{
-        console.log(settings);
         settingsPage.destroy();
+        this.settingsModel.setData(settings);
         this.mainCycle();
       }
     }
