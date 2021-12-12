@@ -4,11 +4,23 @@ import {CategoriesPage} from "./categoriesPage";
 import {GameFieldPage} from "./gameFieldPage";
 import {GameOverPage} from "./gameOverPage";
 import {StartPage} from "./startPage";
+import {QuizDataModel} from "./quizDataModel";
 
 export class Application extends Control{
+  model: QuizDataModel;
+
   constructor(parentNode:HTMLElement){
     super(parentNode);
-    this.mainCycle();
+    //preloader
+    const preloader = new Control(this.node, 'div', '', 'loading...');
+    this.model = new QuizDataModel();
+    this.model.build().then(result=>{
+      preloader.destroy();
+      console.log(result.data);
+      //main
+      this.mainCycle();
+    })
+    
   }
 
   private gameCycle(gameName: string, categoryIndex: number){
