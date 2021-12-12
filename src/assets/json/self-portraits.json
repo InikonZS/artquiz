@@ -1,0 +1,114 @@
+{
+  "0": {
+    "year": "1852",
+    "picture": "0",
+    "author": { "ru": "Гюстав Курбе", "en": "Gustave Courbet" },
+    "name": { "ru": "Автопортрет", "en": "Self-portrait" }
+  },
+  "1": {
+    "year": "1641",
+    "picture": "1",
+    "author": { "ru": "Антонис ван Дейк", "en": "Anthony van Dyck" },
+    "name": { "ru": "Автопортрет", "en": "Self-portrait" }
+  },
+
+  "2": {
+    "year": "1910",
+    "picture": "2",
+    "author": { "ru": "Эгон Шиле", "en": "Egon Schiele" },
+    "name": { "ru": "Автопортрет", "en": "Self-portrait" }
+  },
+
+  "3": {
+    "year": "1500",
+    "picture": "3",
+    "author": { "ru": "Альбрехт Дюрер", "en": "Albrecht Durer" },
+    "name": { "ru": "Автопортрет", "en": "Self-portrait" }
+  },
+  "4": {
+    "year": "1986",
+    "picture": "4",
+    "author": { "ru": "Уорхол", "en": "Warhol" },
+    "name": { "ru": "Автопортрет", "en": "Self-portrait" }
+  },
+
+  "5": {
+    "year": "1659",
+    "picture": "5",
+    "author": { "ru": "Рембрандт", "en": "Rembrandt" },
+    "name": { "ru": "Автопортрет", "en": "Self-portrait" }
+  },
+  "6": {
+    "year": "1879",
+    "picture": "6",
+    "author": { "ru": "Василий Суриков", "en": "Vasily Surikov" },
+    "name": { "ru": "Автопортрет", "en": "Self-portrait" }
+  },
+
+  "7": {
+    "year": "1512",
+    "picture": "7",
+    "author": { "ru": "Леонардо да Винчи", "en": "Leonardo da Vinci" },
+    "name": { "ru": "Автопортрет", "en": "Self-portrait" }
+  },
+
+  "8": {
+    "year": "1433",
+    "picture": "8",
+    "author": { "ru": "Ян ван Эйк", "en": "Jan van Eyck" },
+    "name": { "ru": "Автопортрет", "en": "Self-portrait" }
+  },
+
+  "9": {
+    "year": "1856",
+    "picture": "9",
+    "author": { "ru": "Эдгар Дега", "en": "Edgar Degas" },
+    "name": { "ru": "Автопортрет", "en": "Self-portrait" }
+  },
+
+  "10": {
+    "year": "1888",
+    "picture": "10",
+    "author": { "ru": "Поль Гоген", "en": "Paul Gauguin" },
+    "name": { "ru": "Автопортрет", "en": "Self-portrait" }
+  },
+  "11": {
+    "year": "1635",
+    "picture": "11",
+    "author": { "ru": "Рембрандт", "en": "Rembrandt" },
+    "name": { "ru": "Автопортрет", "en": "Self-portrait" }
+  },
+  "12": {
+    "year": "1906",
+    "picture": "12",
+    "author": { "ru": "Пабло Пикассо", "en": "Pablo Picasso" },
+    "name": { "ru": "Автопортрет", "en": "Self-portrait" }
+  },
+
+  "13": {
+    "year": "1941",
+    "picture": "13",
+    "author": { "ru": "Сальвадор Дали", "en": "Salvador Dali" },
+    "name": { "ru": "Автопортрет", "en": "Self-portrait" }
+  },
+
+  "14": {
+    "year": "1910",
+    "picture": "14",
+    "author": { "ru": "Пьер Огюст Ренуар", "en": "Pierre Auguste Renoir" },
+    "name": { "ru": "Автопортрет", "en": "Self-portrait" }
+  },
+  "15": {
+    "year": "1641",
+    "picture": "15",
+    "author": { "ru": "Караваджо", "en": "Caravaggio" },
+    "name": { "ru": "Автопортрет", "en": "Self-portrait" }
+  },
+
+  "16": {
+    "year": "1887",
+    "picture": "16",
+    "author": { "ru": "Илья Репин", "en": "Ilya Repin" },
+    "name": { "ru": "Автопортрет", "en": "Self-portrait" }
+  }
+}
