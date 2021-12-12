@@ -1,7 +1,8 @@
 import Control from "../common/control";
 import {ArtistQuestionView} from "./artistQuestionView";
 import {PictureQuestionView} from "./pictureQuestionView";
-import {IArtistQuestionData} from "./IArtistQuestionData";
+//import {IArtistQuestionData} from "./IArtistQuestionData";
+import { IArtistsQuestionData, IPicturesQuestionData } from "./quizDataModel";
 
 interface IQuizOptions{
   gameName: string;
@@ -18,7 +19,7 @@ export class GameFieldPage extends Control{
   results: IQuizResults;
   answersIndicator: Control<HTMLElement>;
 
-  constructor(parentNode:HTMLElement, gameOptions: IQuizOptions){
+  constructor(parentNode:HTMLElement, gameOptions: IQuizOptions, questionsData:Array<IArtistsQuestionData| IPicturesQuestionData>){
     super(parentNode);
     console.log(gameOptions);
     const header = new Control(this.node, 'h1', '', `${gameOptions.gameName} - ${gameOptions.categoryIndex}`);
@@ -36,15 +37,15 @@ export class GameFieldPage extends Control{
     this.progressIndicator = new Control(this.node, 'div', '', '');
     this.answersIndicator = new Control(this.node, 'div', '', '');
 
-    const questions: Array<IArtistQuestionData> = [{answers:[1,2,3,4], correctAnswerIndex:1}, {answers:[1,2,3,4], correctAnswerIndex: 2}, {answers:[1,2,3,4], correctAnswerIndex:3}];
+    //const questions: Array<IArtistQuestionData> = [{answers:[1,2,3,4], correctAnswerIndex:1}, {answers:[1,2,3,4], correctAnswerIndex: 2}, {answers:[1,2,3,4], correctAnswerIndex:3}];
     this.results = [];
-    this.questionCycle(gameOptions.gameName, questions, 0, ()=>{
+    this.questionCycle(gameOptions.gameName, questionsData, 0, ()=>{
       this.onFinish(this.results);
     });
 
   }
 
-  questionCycle(gameName:string, questions:Array<IArtistQuestionData>, index:number, onFinish:()=>void){
+  questionCycle(gameName:string, questions:Array<any>, index:number, onFinish:()=>void){
     if (index >= questions.length){ 
       onFinish();
       return;
