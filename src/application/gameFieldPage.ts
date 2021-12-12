@@ -4,11 +4,12 @@ import {PictureQuestionView} from "./pictureQuestionView";
 //import {IArtistQuestionData} from "./IArtistQuestionData";
 import { IArtistsQuestionData, IPicturesQuestionData } from "./quizDataModel";
 import { IQuizSettings } from "./settingsPage";
+import {SoundManager} from "./soundManager";
 
 interface IQuizOptions{
   gameName: string;
   categoryIndex: number;
-  settings:IQuizSettings
+  settings:IQuizSettings;
 }
 
 type IQuizResults = Array<boolean>;
@@ -96,6 +97,7 @@ export class GameFieldPage extends Control{
       this.timer.onTimeout = ()=>{
         _quest.destroy();
         this.results.push(false);
+        SoundManager.fail();
         this.questionCycle(gameName, questions, index+1, onFinish);
       }
     }
@@ -105,7 +107,13 @@ export class GameFieldPage extends Control{
       _quest = question;
       question.onAnswer = answerIndex=>{
         question.destroy();
-        this.results.push(answerIndex === questions[index].correctAnswerIndex);
+        const result = answerIndex === questions[index].correctAnswerIndex;
+        if (result) {
+          SoundManager.ok();
+        } else {
+          SoundManager.fail();
+        }
+        this.results.push(result);
         this.questionCycle(gameName, questions, index+1, onFinish);
       };
     } else if (gameName == 'pictures'){
@@ -113,7 +121,13 @@ export class GameFieldPage extends Control{
       _quest = question;
       question.onAnswer = answerIndex=>{
         question.destroy();
-        this.results.push(answerIndex === questions[index].correctAnswerIndex);
+        const result = answerIndex === questions[index].correctAnswerIndex;
+        if (result) {
+          SoundManager.ok();
+        } else {
+          SoundManager.fail();
+        }
+        this.results.push(result);
         this.questionCycle(gameName, questions, index+1, onFinish);
       };
     } else {

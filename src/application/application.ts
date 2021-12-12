@@ -5,6 +5,7 @@ import {GameFieldPage} from "./gameFieldPage";
 import {GameOverPage} from "./gameOverPage";
 import {StartPage} from "./startPage";
 import {QuizDataModel} from "./quizDataModel";
+import {SoundManager} from "./soundManager";
 
 export class Application extends Control{
   model: QuizDataModel;
@@ -14,6 +15,7 @@ export class Application extends Control{
     super(parentNode);
     //preloader
     const preloader = new Control(this.node, 'div', '', 'loading...');
+    SoundManager.preload();
     this.settingsModel = new SettingsModel();
     this.settingsModel.loadFromStorage();
     this.model = new QuizDataModel();
