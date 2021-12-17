@@ -1,0 +1,37 @@
+.page_wrapper{
+
+}
+.main_wrapper{
+  position: relative;
+  transition-duration: 500ms;
+  left: 0;
+}
+
+.hide{
+  left: 100%;
+}
+
+.select_wrapper{
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.select_item{
+  width: 300px;
+  height: 300px;
+  border: 1px solid #000;
+  margin: 20px;
+}
+
+.main_bottom{
+  display: flex;
+  justify-content: center;
+}
+.button{
+  width: 300px;
+  height: 100px;
+  border: 1px solid #000;
+}
+.settings_button{
+
+}
