@@ -22,7 +22,15 @@ export class CategoriesPage extends AnimatedControl{
     const categoriesContainer = new Control(this.node, 'div', style["categories"]);
     //const categoriesList = [1,2,3,4,5,6,7];
     const categoryButtons = quizCategoriesData.map((it, i) => {
-      const category = new Control(categoriesContainer.node, 'div', style["category"]);
+      return new CategoryItem(categoriesContainer.node, it, {
+        onSelect: ()=>{
+          this.onSelect(i);
+        },
+        onScore: ()=>{
+          console.log('score', i);
+        }
+      });
+      /*const category = new Control(categoriesContainer.node, 'div', style["category"]);
 
       const button = new Control(category.node, 'div', style["category_img"], it.name.toString());
       button.node.style.backgroundImage = `url('${it.picture}')`;
@@ -33,7 +41,30 @@ export class CategoriesPage extends AnimatedControl{
         this.onSelect(i);
       }
       const score = new Control(category.node, 'div', style["category_score"], 'score');
-      return category;
+      return category;*/
     });
   }
+}
+
+interface ICategoryItemController {
+  onScore: ()=>void;
+  onSelect: ()=>void;
+}
+
+class CategoryItem extends Control{
+  constructor(parentNode: HTMLElement, data:ICategoryData, controller: ICategoryItemController){
+    super(parentNode, 'div', style["category"]);
+    const button = new Control(this.node, 'div', style["category_img"], data.name.toString());
+      button.node.style.backgroundImage = `url('${data.picture}')`;
+      
+      button.node.onclick = ()=>{
+        controller.onSelect();
+        //this.onSelect(i);
+      }
+      const score = new Control(this.node, 'div', style["category_score"], 'score');
+      score.node.onclick = ()=>{
+        controller.onScore();
+      }
+  };
+
 }
