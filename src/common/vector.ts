@@ -16,19 +16,19 @@ export class Vector {
       return new Vector(this.x, this.y);
   }
 
-  add(vector) {
+  add(vector:Vector) {
       this.x += vector.x;
       this.y += vector.y;
       return this;
   }
 
-  sub(vector) {
+  sub(vector:Vector) {
       this.x -= vector.x;
       this.y -= vector.y;
       return this;
   }
 
-  scale(scaler) {
+  scale(scaler:number) {
       this.x *= scaler;
       this.y *= scaler;
       return this;

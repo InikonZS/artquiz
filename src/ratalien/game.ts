@@ -1,6 +1,8 @@
 import Control from "../common/control";
 import style from "./style.css";
 import red from "./red.css";
+import {Vector, IVector} from "../common/vector";
+
 const obj = [
   '0000'.split(''),
   '0110'.split(''),
@@ -8,7 +10,29 @@ const obj = [
   '1111'.split(''),
 ]
 
+const obj1 = [
+  '0000'.split(''),
+  '1100'.split(''),
+  '1111'.split(''),
+  '1111'.split(''),
+]
+
+const obj2 = [
+  '0011'.split(''),
+  '0011'.split(''),
+  '1111'.split(''),
+  '0011'.split(''),
+]
+
+const buildMap = new Map<string, Array<Array<string>>>([
+  ['ms', obj],
+  ['cs', obj1],
+  ['tc', obj2]
+])
+
 class GameSide extends Control{
+  onBuildSelect: (name:string, clearFunc:()=>void)=>void;
+
   constructor(parentNode: HTMLElement){
     super(parentNode, 'div', red['game_side']);
     const radar = new Control(this.node, 'div', red["game_radar"]);
@@ -18,8 +42,30 @@ class GameSide extends Control{
     const buildingsW = new Control(buildItems.node, 'div', red["builds_column"]);
     const buildings = new Control(buildingsW.node, 'div', red["column_items"]);
     const blds = ['ms', 'cs', 'tc'];
-    blds.forEach(it=>{
+    blds.forEach((it, i)=>{
       const build = new Control(buildings.node, 'div', red["builds_item"], it);
+      let isBuilding = false;
+      let isBuilded = false;
+      let progress = 0;
+      build.node.onclick = ()=>{
+        if (isBuilded == false && isBuilding ==false){
+          isBuilding = true;
+          let intId = setInterval(()=>{
+            progress+=0.1;
+            build.node.textContent = `${it} - ${(progress*100).toFixed(0)} / 100`;
+            if (progress >= 1){
+              progress = 1;
+              build.node.textContent = `${it} - ready`;
+              isBuilded = true;
+              isBuilding = false;
+              clearInterval(intId);
+            }
+          }, 300);
+        }
+        if (isBuilded){
+          this.onBuildSelect(it, ()=>{});
+        }
+      }
     });
     
     const unitsW = new Control(buildItems.node, 'div', red["builds_column"]);
@@ -38,6 +84,18 @@ export class Game extends Control{
     const main = new Control(this.node, 'div', red["global_main"]);
     const field = new GameField(main.node);
     const side = new GameSide(main.node);
+    side.onBuildSelect = (name)=>{
+      field.setMode(1, name);
+    }
+  }
+}
+
+class MapObject{
+  position: {x:number, y:number};
+  tiles: Array<Array<number>>;
+  sprite: HTMLImageElement;
+  constructor(){
+
   }
 }
 
@@ -50,6 +108,9 @@ export class GameField extends Control{
   map:Array<Array<number>>;
   sz:number = 55;
   canvas: Control<HTMLCanvasElement>;
+  objects: MapObject[]=[];
+  mode: number = 0;
+  currentBuilding: string[][];
   constructor(parentNode: HTMLElement){
     super(parentNode, 'div', red['game_field']);
     const canvas = new Control<HTMLCanvasElement>(this.node, 'canvas');
@@ -93,13 +154,17 @@ export class GameField extends Control{
       console.log('d');
       //overlay.node.requestPointerLock();
       const cursorTile = this.getTileCursor();
-      this.addMtx(obj, cursorTile.x, cursorTile.y);
+      //this.addMtx(obj, cursorTile.x, cursorTile.y);
+      if (this.mode == 1){
+        this.addObject(this.currentBuilding, cursorTile.x, cursorTile.y);
+        this.setMode(0, null);
+      }
     }
     document.body.onmouseleave = ()=>{
       console.log('df');
     }
-    /*
-    this.currentMove = null;
+    
+    /*this.currentMove = null;
     this.position = {x:0, y:0};
     for(let i=0; i<9; i++){
       const bound = new Control(overlay.node, 'div', style['bound'+i.toString()]);
@@ -160,14 +225,32 @@ export class GameField extends Control{
     }
   }
 
+  setMode(mode:number, name:string){
+    this.mode = mode;
+    this.currentBuilding = buildMap.get(name);
+  }
+
+  addObject(obj:Array<Array<string>>, x:number, y:number){
+    let object = new MapObject();
+    object.tiles = obj.map(it=>it.map(jt=>parseInt(jt)));
+    object.position = new Vector(x,y);
+    this.objects.push(object);
+  }
+
+  renderObjects(ctx:CanvasRenderingContext2D){
+    this.objects.forEach(it=>{
+      this.drawObject(ctx, it.tiles, it.position, this.position, "#ff49");
+    });
+  }
+
   renderMtx(ctx:CanvasRenderingContext2D, obj:Array<Array<string>>, px:number, py:number){
-    let sz = 55;
+    let sz = this.sz;
     //this.cursorTile.x = Math.floor((this.position.x % sz +Math.floor(this.cursor.x/sz)*sz)/sz);
     //this.cursorTile.y = Math.floor((this.position.y % sz +Math.floor(this.cursor.y/sz)*sz)/sz);
     for(let i = 0; i < 4; i++){
       for(let j = 0; j < 4; j++){
         if (obj[j][i] == '1'){
-        ctx.fillStyle = "#ff09";
+        /*ctx.fillStyle = "#ff09";
         ctx.strokeStyle = "#000";
         ctx.lineWidth = 1;
         ctx.beginPath();
@@ -175,7 +258,8 @@ export class GameField extends Control{
         ctx.rect(px+0 +i*sz, py+0+j*sz, sz, sz);
         ctx.closePath();
         ctx.fill();
-        ctx.stroke();
+        ctx.stroke();*/
+        this.drawTile(ctx, new Vector(i, j), new Vector(px, py), '#ff09');
         }
         //ctx.strokeText(i.toString() + ' / '+ j.toString(), this.position.x+0 +i*sz, this.position.y+0+j*sz)
         //ctx.drawImage(this.tile, this.position.x+0 +i*sz, this.position.y+0+j*sz, sz, sz);
@@ -183,9 +267,30 @@ export class GameField extends Control{
     }
   }
 
+  drawObject(ctx:CanvasRenderingContext2D, object:Array<Array<any>>, position:IVector, camera:IVector, color:string){
+    object.forEach((row, i)=>row.forEach((cell, j)=>{
+      if (object[i][j]!='0'){
+        this.drawTile(ctx, new Vector(j+position.x, i+position.y), camera, color);
+      }
+    }));
+  }
+
+  drawTile(ctx:CanvasRenderingContext2D, position:IVector, camera:IVector, color:string){
+    const sz = this.sz;
+    ctx.fillStyle = color;
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.rect(camera.x + position.x * sz, camera.y+ position.y *sz, sz, sz);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+  }
+
   renderMap(ctx: CanvasRenderingContext2D){
     ctx.fillStyle="#000";
-    ctx.fillRect(0, 0, 800, 600);
+    const canvasSize = this.getCanvasSize();
+    ctx.fillRect(0, 0, canvasSize.width, canvasSize.height);
     const obi:Array<string> = [
       "#fff",
       "#f00",
@@ -251,6 +356,7 @@ export class GameField extends Control{
     //this.cursorTile.y = Math.floor((-this.position.y +this.cursor.y)/sz);
 
     this.renderMap(ctx);
+    this.renderObjects(ctx);
 
     ctx.fillStyle = "#00f";
     ctx.beginPath();
@@ -259,6 +365,9 @@ export class GameField extends Control{
     ctx.stroke();  
 
     const cursorTile = this.getTileCursor();
-    this.renderMtx(ctx, obj, this.position.x+0 +cursorTile.x*sz, this.position.y+0+cursorTile.y*sz);/*this.position.x % sz +Math.floor(this.cursor.x/sz)*sz, this.position.y % sz +Math.floor(this.cursor.y/sz)*sz*/
+    if (this.mode==1){
+      this.drawObject(ctx, this.currentBuilding, cursorTile, this.position, "#ff06");
+    }
+    //this.renderMtx(ctx, obj, this.position.x+0 +cursorTile.x*sz, this.position.y+0+cursorTile.y*sz);/*this.position.x % sz +Math.floor(this.cursor.x/sz)*sz, this.position.y % sz +Math.floor(this.cursor.y/sz)*sz*/
   }
 }
