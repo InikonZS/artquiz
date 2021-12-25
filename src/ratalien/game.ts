@@ -193,6 +193,7 @@ class UnitObject extends InteractiveObject{
   target: Vector = null;
   speed: number = 1;
   attackRadius: number = 200;
+  name:string;
   attackTarget: {damage:(amount:number)=>void} = null;
   constructor(){
     super();
@@ -240,6 +241,8 @@ export class GameField extends Control{
   currentBuilding: {name:string, mtx:string[][]};
   selectedUnit: UnitObject = null;
   modeCallback: () => void;
+  hoveredObject: MapObject[] =[];
+  hoveredUnit: UnitObject[] = [];
   constructor(parentNode: HTMLElement){
     super(parentNode, 'div', red['game_field']);
     const canvas = new Control<HTMLCanvasElement>(this.node, 'canvas');
@@ -379,9 +382,16 @@ export class GameField extends Control{
   //  console.log(name);
     let unit = new UnitObject();
     unit.position = new Vector(20, 20);
+    unit.name = name;
     unit.onClick = ()=>{
       this.selectedUnit = unit;
       this.mode = 2;
+    }
+    unit.onMouseEnter = ()=>{
+      this.hoveredUnit.push(unit);
+    }
+    unit.onMouseLeave = ()=>{
+      this.hoveredUnit = this.hoveredUnit.filter(it=>it!=unit);
     }
     this.units.push(unit);
   }
@@ -417,6 +427,12 @@ export class GameField extends Control{
         console.log(this.selectedUnit);
         this.selectedUnit.attackTarget = object;
       }
+    }
+    object.onMouseEnter = ()=>{
+      this.hoveredObject.push(object);
+    }
+    object.onMouseLeave = ()=>{
+      this.hoveredObject = this.hoveredObject.filter(it=>it!=object);
     }
     this.objects.push(object);
   }
@@ -570,7 +586,27 @@ export class GameField extends Control{
     let r =2;
     ctx.ellipse(this.cursor.x -r, this.cursor.y-r, r*2, r*2, 0, 0, Math.PI * 2);
     ctx.fill();
-    ctx.stroke();  
+    ctx.stroke(); 
+    // 
+    let label = 'ground';
+    if (this.hoveredUnit[this.hoveredUnit.length-1]){
+       label = 'unit: '+this.hoveredUnit[this.hoveredUnit.length-1].name
+    } else if(this.hoveredObject[this.hoveredObject.length-1]){
+       label = 'build: '+this.hoveredObject[this.hoveredObject.length-1]?.name
+    }
+    ctx.fillText( label , this.cursor.x, this.cursor.y -10);
+
+    let mode = 'select';
+    if (this.mode ==1){
+       mode = 'building'
+    } else if(this.mode ==2 && this.hoveredObject[this.hoveredObject.length-1]){
+       mode = 'atack'
+    } else if(this.mode ==2){
+      mode = 'move'
+   }
+    ctx.fillText( mode , this.cursor.x, this.cursor.y -20);
+    
+    
 
     const cursorTile = this.getTileCursor();
     if (this.mode==1){
