@@ -271,7 +271,7 @@ export class GameField extends Control{
     
     canvas.node.onclick=e=>{
       let sz=55;
-      console.log('d');
+      //console.log('d');
       //overlay.node.requestPointerLock();
       const cursorTile = this.getTileCursor();
       //this.addMtx(obj, cursorTile.x, cursorTile.y);
@@ -299,7 +299,7 @@ export class GameField extends Control{
       }
     }
     document.body.onmouseleave = ()=>{
-      console.log('df');
+     // console.log('df');
     }
     
     /*this.currentMove = null;
@@ -353,7 +353,7 @@ export class GameField extends Control{
   }
 
   addUnit(name:string){
-    console.log(name);
+  //  console.log(name);
     let unit = new UnitObject();
     unit.position = new Vector(20, 20);
     unit.onClick = ()=>{
@@ -364,7 +364,7 @@ export class GameField extends Control{
   }
 
   addMtx(obj:Array<Array<string>>, x: number, y:number, pivot:Vector){
-    console.log(x, y);
+    //console.log(x, y);
     for(let i = 0; i < obj.length; i++){
       for(let j = 0; j < obj[0].length; j++){
         if (obj[j][i] == '1'){
