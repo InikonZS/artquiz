@@ -3,6 +3,14 @@ import style from "./style.css";
 import red from "./red.css";
 import {Vector, IVector} from "../common/vector";
 
+const view = [
+  '00100'.split(''),
+  '01110'.split(''),
+  '11111'.split(''),
+  '01110'.split(''),
+  '00100'.split(''),
+]
+
 const obj = [
   '0000'.split(''),
   '0110'.split(''),
@@ -355,12 +363,14 @@ export class GameField extends Control{
     this.units.push(unit);
   }
 
-  addMtx(obj:Array<Array<string>>, x: number, y:number){
+  addMtx(obj:Array<Array<string>>, x: number, y:number, pivot:Vector){
     console.log(x, y);
-    for(let i = 0; i < 4; i++){
-      for(let j = 0; j < 4; j++){
+    for(let i = 0; i < obj.length; i++){
+      for(let j = 0; j < obj[0].length; j++){
         if (obj[j][i] == '1'){
-          this.map[i+x][j+y] = 2;
+          if (this.map[i+x-pivot.x] && this.map[i+x-pivot.x][j+y-pivot.y]!=null){
+            this.map[i+x-pivot.x][j+y-pivot.y] = 2;
+          }
         }
       }
     }
@@ -389,6 +399,7 @@ export class GameField extends Control{
     this.units.forEach(it=>{
       it.step();
       this.drawUnit(ctx, it.position, this.position, it.isHovered?"#9999":"#0ff9");
+      this.addMtx(view,Math.floor(it.position.x/this.sz), Math.floor(it.position.y/this.sz), new Vector(2,2));
     });
   }
 
@@ -455,7 +466,7 @@ export class GameField extends Control{
     const obi:Array<string> = [
       "#fff",
       "#f00",
-      "#ff0"
+      "#0f0"
     ]
     const sz = this.sz;
     const {minx, maxx, miny, maxy} = this.getVisibleTileRect();
