@@ -1,0 +1,18 @@
+.game_wrapper{
+  position: relative;
+  width: min-content;
+  /*transform: scale(1,0.5) rotate(45deg);*/
+}
+
+.bounds{
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  display: grid;
+  grid-template-columns: 50px 1fr 50px;
+  grid-template-rows: 50px 1fr 50px;
+}
+
+
