@@ -243,6 +243,7 @@ export class GameField extends Control{
   modeCallback: () => void;
   hoveredObject: MapObject[] =[];
   hoveredUnit: UnitObject[] = [];
+  multiStart: Vector;
   constructor(parentNode: HTMLElement){
     super(parentNode, 'div', red['game_field']);
     const canvas = new Control<HTMLCanvasElement>(this.node, 'canvas');
@@ -274,17 +275,30 @@ export class GameField extends Control{
       {x:0, y:1},
       {x:1, y:1}, 
     ];
+
+    canvas.node.onmousedown =e=>{
+      if (this.mode != 0) return;
+      this.multiStart = new Vector(e.clientX, e.clientY);
+      let listener = ()=>{
+        this.multiStart = null;
+        window.removeEventListener('mouseup', listener);
+      }
+      window.addEventListener('mouseup', listener);
+    }
+
     canvas.node.onmousemove=e=>{
       this.cursor.x = e.clientX;
       this.cursor.y = e.clientY;
       
-      const tile = this.getTileCursor()
-      this.objects.forEach(it=>{
-        it.handleMove(new Vector(tile.x, tile.y));
-      });
-      this.units.forEach(it=>{
-        it.handleMove(new Vector(this.cursor.x, this.cursor.y));
-      });
+      if (!this.multiStart){
+        const tile = this.getTileCursor()
+        this.objects.forEach(it=>{
+          it.handleMove(new Vector(tile.x, tile.y));
+        });
+        this.units.forEach(it=>{
+          it.handleMove(new Vector(this.cursor.x, this.cursor.y));
+        });
+      }
       //this.cursor.x+=e.movementX;
       //this.cursor.y+=e.movementY;
     }
@@ -604,10 +618,14 @@ export class GameField extends Control{
     } else if(this.mode ==2){
       mode = 'move'
    }
+   
     ctx.fillText( mode , this.cursor.x, this.cursor.y -20);
     
     
-
+    if (this.multiStart){
+      ctx.fillStyle = '#fff4';
+      ctx.fillRect(this.multiStart.x, this.multiStart.y, this.cursor.x -this.multiStart.x, this.cursor.y -this.multiStart.y);
+    }
     const cursorTile = this.getTileCursor();
     if (this.mode==1){
       this.drawObject(ctx, this.currentBuilding.mtx, cursorTile, this.position, "#ff06");
