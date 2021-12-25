@@ -118,19 +118,85 @@ export class Game extends Control{
   }
 }
 
-class MapObject{
-  position: {x:number, y:number};
-  tiles: Array<Array<number>>;
-  sprite: HTMLImageElement;
+class InteractiveObject{
+  isHovered: boolean;
+  onMouseMove: any;
+  onMouseEnter: any;
+  onMouseLeave: any;
+  onClick: any;
+
   constructor(){
 
   }
+
+  handleMove(tile:Vector){
+    if (this.inShape(tile)){
+      this.onMouseMove?.(tile);
+      if (!this.isHovered) {
+        this.isHovered = true;
+        this.onMouseEnter?.(tile);
+      }
+    } else {
+      if (this.isHovered) {
+        this.isHovered = false;
+        this.onMouseLeave?.(tile);
+      }
+    }  
+  }
+
+  handleClick(e:Vector){
+    if (this.inShape(e)){
+      this.onClick?.(e);
+    }
+  }
+
+  inShape(tile:Vector){
+    return false;
+  }
 }
 
-class UnitObject{
+class MapObject extends InteractiveObject{
   position: {x:number, y:number};
-  constructor(){
+  tiles: Array<Array<number>>;
+  sprite: HTMLImageElement;
 
+  constructor(){
+    super();
+  }
+
+  inShape(tile:Vector){
+    let pos = tile.clone().sub(new Vector(this.position.x, this.position.y));
+    if (this.tiles[pos.y] && this.tiles[pos.y][pos.x]!=null && this.tiles[pos.y][pos.x]!=0){
+      return true;
+    }
+    return false;
+  }
+
+}
+
+class UnitObject extends InteractiveObject{
+  position: {x:number, y:number};
+  target: Vector = null;
+  speed: number = 1;
+  constructor(){
+    super();
+  }
+
+  inShape(tile:Vector){
+    let pos = tile.clone().sub(new Vector(this.position.x, this.position.y));
+    if (pos.abs()<15){
+      return true;
+    }
+    return false;
+  }
+
+  step(){
+    if (this.target){
+      this.position = new Vector(this.position.x, this.position.y).add(new Vector(this.position.x, this.position.y).sub(this.target).normalize().scale(-this.speed));
+      if (new Vector(this.position.x, this.position.y).sub(this.target).abs()<5){
+        this.target = null;
+      }
+    }
   }
 }
 
@@ -147,6 +213,7 @@ export class GameField extends Control{
   units: UnitObject[]=[];
   mode: number = 0;
   currentBuilding: string[][];
+  selectedUnit: UnitObject = null;
   modeCallback: () => void;
   constructor(parentNode: HTMLElement){
     super(parentNode, 'div', red['game_field']);
@@ -182,6 +249,14 @@ export class GameField extends Control{
     canvas.node.onmousemove=e=>{
       this.cursor.x = e.clientX;
       this.cursor.y = e.clientY;
+      
+      const tile = this.getTileCursor()
+      this.objects.forEach(it=>{
+        it.handleMove(new Vector(tile.x, tile.y));
+      });
+      this.units.forEach(it=>{
+        it.handleMove(new Vector(this.cursor.x, this.cursor.y));
+      });
       //this.cursor.x+=e.movementX;
       //this.cursor.y+=e.movementY;
     }
@@ -192,10 +267,27 @@ export class GameField extends Control{
       //overlay.node.requestPointerLock();
       const cursorTile = this.getTileCursor();
       //this.addMtx(obj, cursorTile.x, cursorTile.y);
+      if (this.mode ==0){
+        this.objects.forEach(it=>{
+         // it.handleMove(new Vector(tile.x, tile.y));
+        });
+        this.units.forEach(it=>{
+          it.handleClick(new Vector(this.cursor.x, this.cursor.y));
+        });
+        return;
+      }
       if (this.mode == 1){
         this.addObject(this.currentBuilding, cursorTile.x, cursorTile.y);
         this.modeCallback();
         this.setMode(0, null, null);
+        return;
+      }
+
+      if (this.mode == 2){
+        this.mode = 0;
+        this.selectedUnit.target= new Vector(this.cursor.x, this.cursor.y);
+        this.selectedUnit = null;
+        return;
       }
     }
     document.body.onmouseleave = ()=>{
@@ -256,6 +348,10 @@ export class GameField extends Control{
     console.log(name);
     let unit = new UnitObject();
     unit.position = new Vector(20, 20);
+    unit.onClick = ()=>{
+      this.selectedUnit = unit;
+      this.mode = 2;
+    }
     this.units.push(unit);
   }
 
@@ -285,13 +381,14 @@ export class GameField extends Control{
 
   renderObjects(ctx:CanvasRenderingContext2D){
     this.objects.forEach(it=>{
-      this.drawObject(ctx, it.tiles, it.position, this.position, "#ff49");
+      this.drawObject(ctx, it.tiles, it.position, this.position, it.isHovered?"#9999":"#ff49");
     });
   }
 
   renderUnits(ctx:CanvasRenderingContext2D){
     this.units.forEach(it=>{
-      this.drawUnit(ctx, it.position, this.position, "#0ff9");
+      it.step();
+      this.drawUnit(ctx, it.position, this.position, it.isHovered?"#9999":"#0ff9");
     });
   }
 
@@ -425,7 +522,8 @@ export class GameField extends Control{
 
     ctx.fillStyle = "#00f";
     ctx.beginPath();
-    ctx.ellipse(this.cursor.x -5, this.cursor.y-5, 10, 10, 0, 0, Math.PI * 2);
+    let r =2;
+    ctx.ellipse(this.cursor.x -r, this.cursor.y-r, r*2, r*2, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();  
 
