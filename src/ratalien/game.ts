@@ -167,9 +167,12 @@ class MapObject extends InteractiveObject{
   position: {x:number, y:number};
   tiles: Array<Array<number>>;
   sprite: HTMLImageElement;
+  health:number;
+  name:string;
 
   constructor(){
     super();
+    this.health = 100;
   }
 
   inShape(tile:Vector){
@@ -180,12 +183,17 @@ class MapObject extends InteractiveObject{
     return false;
   }
 
+  damage(amount:number){
+    this.health -=1;
+  }
 }
 
 class UnitObject extends InteractiveObject{
   position: {x:number, y:number};
   target: Vector = null;
   speed: number = 1;
+  attackRadius: number = 200;
+  attackTarget: {damage:(amount:number)=>void} = null;
   constructor(){
     super();
   }
@@ -204,6 +212,15 @@ class UnitObject extends InteractiveObject{
       if (new Vector(this.position.x, this.position.y).sub(this.target).abs()<5){
         this.target = null;
       }
+    } else {
+      this.attack();
+    }
+  }
+
+  attack(){
+    if (this.attackTarget){
+      console.log('atack');
+      this.attackTarget.damage(1);
     }
   }
 }
@@ -220,7 +237,7 @@ export class GameField extends Control{
   objects: MapObject[]=[];
   units: UnitObject[]=[];
   mode: number = 0;
-  currentBuilding: string[][];
+  currentBuilding: {name:string, mtx:string[][]};
   selectedUnit: UnitObject = null;
   modeCallback: () => void;
   constructor(parentNode: HTMLElement){
@@ -278,24 +295,30 @@ export class GameField extends Control{
       if (this.mode ==0){
         this.objects.forEach(it=>{
          // it.handleMove(new Vector(tile.x, tile.y));
+          it.handleClick(new Vector(cursorTile.x, cursorTile.y));
         });
         this.units.forEach(it=>{
           it.handleClick(new Vector(this.cursor.x, this.cursor.y));
         });
-        return;
-      }
+        //return;
+      } else
       if (this.mode == 1){
         this.addObject(this.currentBuilding, cursorTile.x, cursorTile.y);
         this.modeCallback();
         this.setMode(0, null, null);
-        return;
-      }
+        //return;
+      } else
 
       if (this.mode == 2){
         this.mode = 0;
         this.selectedUnit.target= new Vector(this.cursor.x, this.cursor.y);
+        this.selectedUnit.attackTarget = null;
+        this.objects.forEach(it=>{
+          // it.handleMove(new Vector(tile.x, tile.y));
+           it.handleClick(new Vector(cursorTile.x, cursorTile.y));
+         });
         this.selectedUnit = null;
-        return;
+        //return;
       }
     }
     document.body.onmouseleave = ()=>{
@@ -378,20 +401,31 @@ export class GameField extends Control{
 
   setMode(mode:number, name:string, callback:()=>void){
     this.mode = mode;
-    this.currentBuilding = buildMap.get(name);
+    this.currentBuilding = {name:name, mtx:buildMap.get(name)};
     this.modeCallback = callback;
   }
 
-  addObject(obj:Array<Array<string>>, x:number, y:number){
+  addObject(obj:{name:string, mtx:Array<Array<string>>}, x:number, y:number){
     let object = new MapObject();
-    object.tiles = obj.map(it=>it.map(jt=>parseInt(jt)));
+    object.tiles = obj.mtx.map(it=>it.map(jt=>parseInt(jt)));
+    object.name = obj.name;
     object.position = new Vector(x,y);
+    object.onClick = ()=>{
+      //object.health -=1;
+      console.log(object.name);
+      if ( this.selectedUnit){
+        console.log(this.selectedUnit);
+        this.selectedUnit.attackTarget = object;
+      }
+    }
     this.objects.push(object);
   }
 
   renderObjects(ctx:CanvasRenderingContext2D){
     this.objects.forEach(it=>{
       this.drawObject(ctx, it.tiles, it.position, this.position, it.isHovered?"#9999":"#ff49");
+      ctx.strokeText(`health: ${it.health.toString()}/100` , it.position.x*this.sz, it.position.y*this.sz +20);
+      ctx.strokeText(it.name, it.position.x*this.sz, it.position.y*this.sz +35);
     });
   }
 
@@ -540,7 +574,7 @@ export class GameField extends Control{
 
     const cursorTile = this.getTileCursor();
     if (this.mode==1){
-      this.drawObject(ctx, this.currentBuilding, cursorTile, this.position, "#ff06");
+      this.drawObject(ctx, this.currentBuilding.mtx, cursorTile, this.position, "#ff06");
     }
     //this.renderMtx(ctx, obj, this.position.x+0 +cursorTile.x*sz, this.position.y+0+cursorTile.y*sz);/*this.position.x % sz +Math.floor(this.cursor.x/sz)*sz, this.position.y % sz +Math.floor(this.cursor.y/sz)*sz*/
   }
