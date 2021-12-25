@@ -32,6 +32,7 @@ const buildMap = new Map<string, Array<Array<string>>>([
 
 class GameSide extends Control{
   onBuildSelect: (name:string, clearFunc:()=>void)=>void;
+  onUnitReady: (name:string)=>void;
 
   constructor(parentNode: HTMLElement){
     super(parentNode, 'div', red['game_side']);
@@ -63,7 +64,11 @@ class GameSide extends Control{
           }, 300);
         }
         if (isBuilded){
-          this.onBuildSelect(it, ()=>{});
+          this.onBuildSelect(it, ()=>{
+            isBuilded = false; 
+            progress = 0;
+            build.node.textContent = it;
+          });
         }
       }
     });
@@ -73,6 +78,26 @@ class GameSide extends Control{
     const uns = ['msu', 'csu', 'tcu', 'asd'];
     uns.forEach(it=>{
       const unit = new Control(units.node, 'div', red["builds_item"], it);
+      let isBuilding = false;
+      //let isBuilded = false;
+      let progress = 0;
+      unit.node.onclick = ()=>{
+        if (isBuilding ==false){
+          isBuilding = true;
+          let intId = setInterval(()=>{
+            progress+=0.1;
+            unit.node.textContent = `${it} - ${(progress*100).toFixed(0)} / 100`;
+            if (progress >= 1){
+              progress = 0;
+              unit.node.textContent = it;//`${it} - ready`;
+              //isBuilded = true;
+              isBuilding = false;
+              this.onUnitReady(it);
+              clearInterval(intId);
+            }
+          }, 300);
+        }  
+      }
     });
   } 
 }
@@ -84,8 +109,11 @@ export class Game extends Control{
     const main = new Control(this.node, 'div', red["global_main"]);
     const field = new GameField(main.node);
     const side = new GameSide(main.node);
-    side.onBuildSelect = (name)=>{
-      field.setMode(1, name);
+    side.onBuildSelect = (name, callback)=>{
+      field.setMode(1, name, callback);
+    }
+    side.onUnitReady = (name:string)=>{
+      field.addUnit(name);
     }
   }
 }
@@ -94,6 +122,13 @@ class MapObject{
   position: {x:number, y:number};
   tiles: Array<Array<number>>;
   sprite: HTMLImageElement;
+  constructor(){
+
+  }
+}
+
+class UnitObject{
+  position: {x:number, y:number};
   constructor(){
 
   }
@@ -109,8 +144,10 @@ export class GameField extends Control{
   sz:number = 55;
   canvas: Control<HTMLCanvasElement>;
   objects: MapObject[]=[];
+  units: UnitObject[]=[];
   mode: number = 0;
   currentBuilding: string[][];
+  modeCallback: () => void;
   constructor(parentNode: HTMLElement){
     super(parentNode, 'div', red['game_field']);
     const canvas = new Control<HTMLCanvasElement>(this.node, 'canvas');
@@ -157,7 +194,8 @@ export class GameField extends Control{
       //this.addMtx(obj, cursorTile.x, cursorTile.y);
       if (this.mode == 1){
         this.addObject(this.currentBuilding, cursorTile.x, cursorTile.y);
-        this.setMode(0, null);
+        this.modeCallback();
+        this.setMode(0, null, null);
       }
     }
     document.body.onmouseleave = ()=>{
@@ -214,6 +252,13 @@ export class GameField extends Control{
     })
   }
 
+  addUnit(name:string){
+    console.log(name);
+    let unit = new UnitObject();
+    unit.position = new Vector(20, 20);
+    this.units.push(unit);
+  }
+
   addMtx(obj:Array<Array<string>>, x: number, y:number){
     console.log(x, y);
     for(let i = 0; i < 4; i++){
@@ -225,9 +270,10 @@ export class GameField extends Control{
     }
   }
 
-  setMode(mode:number, name:string){
+  setMode(mode:number, name:string, callback:()=>void){
     this.mode = mode;
     this.currentBuilding = buildMap.get(name);
+    this.modeCallback = callback;
   }
 
   addObject(obj:Array<Array<string>>, x:number, y:number){
@@ -240,6 +286,12 @@ export class GameField extends Control{
   renderObjects(ctx:CanvasRenderingContext2D){
     this.objects.forEach(it=>{
       this.drawObject(ctx, it.tiles, it.position, this.position, "#ff49");
+    });
+  }
+
+  renderUnits(ctx:CanvasRenderingContext2D){
+    this.units.forEach(it=>{
+      this.drawUnit(ctx, it.position, this.position, "#0ff9");
     });
   }
 
@@ -282,6 +334,18 @@ export class GameField extends Control{
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.rect(camera.x + position.x * sz, camera.y+ position.y *sz, sz, sz);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+  }
+
+  drawUnit(ctx:CanvasRenderingContext2D, position:IVector, camera:IVector, color:string){
+    const sz = 10;
+    ctx.fillStyle = color;
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.ellipse(camera.x + position.x, camera.y+ position.y, sz, sz, 0, 0, Math.PI*2);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
@@ -357,6 +421,7 @@ export class GameField extends Control{
 
     this.renderMap(ctx);
     this.renderObjects(ctx);
+    this.renderUnits(ctx);
 
     ctx.fillStyle = "#00f";
     ctx.beginPath();
