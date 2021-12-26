@@ -617,7 +617,11 @@ export class GameField extends Control{
        mode = 'atack'
     } else if(this.mode ==2){
       mode = 'move'
-   }
+   } 
+
+  /* if (this.multiStart){
+     mode = "multiselect"
+   }*/
    
     ctx.fillText( mode , this.cursor.x, this.cursor.y -20);
     
