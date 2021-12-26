@@ -110,9 +110,44 @@ class GameSide extends Control{
   } 
 }
 
+const moves = [
+  {x:-1, y:-1},
+  {x:0, y:-1}, 
+  {x:1, y:-1},
+
+  {x:-1, y:0}, 
+  null,
+  {x:1, y:0},
+
+  {x:-1, y:1}, 
+  {x:0, y:1},
+  {x:1, y:1}, 
+];
+
 export class Game extends Control{
   constructor(parentNode: HTMLElement){
     super(parentNode, 'div', red['global_wrapper']);
+    this.node.onmouseleave = (e)=>{
+      console.log(e.offsetX, e.offsetY);
+      if (e.offsetX>this.node.clientWidth){
+        field.currentMove = moves[5]
+      }
+      if (e.offsetX<0){
+        field.currentMove = moves[3]
+      }
+      if (e.offsetY>this.node.clientHeight){
+        field.currentMove = moves[7]
+      }
+      if (e.offsetY<0){
+        field.currentMove = moves[1]
+      }
+    }
+    this.node.onmouseenter = ()=>{
+      field.currentMove = null;
+    }
+    /*window.onmousemove = ()=>{
+      console.log('mv');
+    }*/
     const head = new Control(this.node, 'div', red["global_header"]);
     const main = new Control(this.node, 'div', red["global_main"]);
     const field = new GameField(main.node);
@@ -262,7 +297,7 @@ export class GameField extends Control{
     /*window.onmousemove =(e:MouseEvent)=>{
       console.log(e.clientX);
     }*/
-    const moves = [
+    /*const moves = [
       {x:-1, y:-1},
       {x:0, y:-1}, 
       {x:1, y:-1},
@@ -274,7 +309,7 @@ export class GameField extends Control{
       {x:-1, y:1}, 
       {x:0, y:1},
       {x:1, y:1}, 
-    ];
+    ];*/
 
     canvas.node.onmousedown =e=>{
       if (this.mode != 0) return;
@@ -295,8 +330,9 @@ export class GameField extends Control{
         this.objects.forEach(it=>{
           it.handleMove(new Vector(tile.x, tile.y));
         });
+        const cursor = this.getPixelCursor();
         this.units.forEach(it=>{
-          it.handleMove(new Vector(this.cursor.x, this.cursor.y));
+          it.handleMove(new Vector(cursor.x, cursor.y));
         });
       }
       //this.cursor.x+=e.movementX;
@@ -308,6 +344,7 @@ export class GameField extends Control{
       //console.log('d');
       //overlay.node.requestPointerLock();
       const cursorTile = this.getTileCursor();
+      const cursor = this.getPixelCursor();
       //this.addMtx(obj, cursorTile.x, cursorTile.y);
       if (this.mode ==0){
         this.objects.forEach(it=>{
@@ -315,7 +352,7 @@ export class GameField extends Control{
           it.handleClick(new Vector(cursorTile.x, cursorTile.y));
         });
         this.units.forEach(it=>{
-          it.handleClick(new Vector(this.cursor.x, this.cursor.y));
+          it.handleClick(new Vector(cursor.x, cursor.y));
         });
         //return;
       } else
@@ -328,7 +365,7 @@ export class GameField extends Control{
 
       if (this.mode == 2){
         this.mode = 0;
-        this.selectedUnit.target= new Vector(this.cursor.x, this.cursor.y);
+        this.selectedUnit.target= new Vector(cursor.x, cursor.y);
         this.selectedUnit.attackTarget = null;
         this.objects.forEach(it=>{
           // it.handleMove(new Vector(tile.x, tile.y));
@@ -454,8 +491,9 @@ export class GameField extends Control{
   renderObjects(ctx:CanvasRenderingContext2D){
     this.objects.forEach(it=>{
       this.drawObject(ctx, it.tiles, it.position, this.position, it.isHovered?"#9999":"#ff49");
-      ctx.strokeText(`health: ${it.health.toString()}/100` , it.position.x*this.sz, it.position.y*this.sz +20);
-      ctx.strokeText(it.name, it.position.x*this.sz, it.position.y*this.sz +35);
+      const pos = this.toMapPixelVector(new Vector(it.position.x*this.sz, it.position.y*this.sz));
+      ctx.strokeText(`health: ${it.health.toString()}/100` , pos.x, pos.y +20);
+      ctx.strokeText(it.name, pos.x, pos.y +35);
     });
   }
 
@@ -571,6 +609,20 @@ export class GameField extends Control{
     return {
       x: Math.floor((-this.position.x +this.cursor.x)/this.sz),
       y: Math.floor((-this.position.y +this.cursor.y)/this.sz)
+    }
+  }
+
+  getPixelCursor(){
+    return {
+      x: -this.position.x + this.cursor.x,
+      y: -this.position.y + this.cursor.y
+    }
+  }
+  
+  toMapPixelVector(vector:IVector):IVector{
+    return {
+      x: this.position.x + vector.x,
+      y: this.position.y + vector.y,
     }
   }
 
