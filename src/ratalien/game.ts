@@ -2,6 +2,8 @@ import Control from "../common/control";
 import style from "./style.css";
 import red from "./red.css";
 import {Vector, IVector} from "../common/vector";
+import {GameSide} from "./gameSidePanel";
+import {MapObject, UnitObject} from "./interactives";
 
 const view = [
   '00100'.split(''),
@@ -37,78 +39,6 @@ const buildMap = new Map<string, Array<Array<string>>>([
   ['cs', obj1],
   ['tc', obj2]
 ])
-
-class GameSide extends Control{
-  onBuildSelect: (name:string, clearFunc:()=>void)=>void;
-  onUnitReady: (name:string)=>void;
-
-  constructor(parentNode: HTMLElement){
-    super(parentNode, 'div', red['game_side']);
-    const radar = new Control(this.node, 'div', red["game_radar"]);
-    const builds = new Control(this.node, 'div', red["game_builds"]);
-    const buildTools = new Control(builds.node, 'div', red["builds_tool"]);
-    const buildItems = new Control(builds.node, 'div', red["builds_items"]);
-    const buildingsW = new Control(buildItems.node, 'div', red["builds_column"]);
-    const buildings = new Control(buildingsW.node, 'div', red["column_items"]);
-    const blds = ['ms', 'cs', 'tc'];
-    blds.forEach((it, i)=>{
-      const build = new Control(buildings.node, 'div', red["builds_item"], it);
-      let isBuilding = false;
-      let isBuilded = false;
-      let progress = 0;
-      build.node.onclick = ()=>{
-        if (isBuilded == false && isBuilding ==false){
-          isBuilding = true;
-          let intId = setInterval(()=>{
-            progress+=0.1;
-            build.node.textContent = `${it} - ${(progress*100).toFixed(0)} / 100`;
-            if (progress >= 1){
-              progress = 1;
-              build.node.textContent = `${it} - ready`;
-              isBuilded = true;
-              isBuilding = false;
-              clearInterval(intId);
-            }
-          }, 300);
-        }
-        if (isBuilded){
-          this.onBuildSelect(it, ()=>{
-            isBuilded = false; 
-            progress = 0;
-            build.node.textContent = it;
-          });
-        }
-      }
-    });
-    
-    const unitsW = new Control(buildItems.node, 'div', red["builds_column"]);
-    const units = new Control(unitsW.node, 'div', red["column_items"]);
-    const uns = ['msu', 'csu', 'tcu', 'asd'];
-    uns.forEach(it=>{
-      const unit = new Control(units.node, 'div', red["builds_item"], it);
-      let isBuilding = false;
-      //let isBuilded = false;
-      let progress = 0;
-      unit.node.onclick = ()=>{
-        if (isBuilding ==false){
-          isBuilding = true;
-          let intId = setInterval(()=>{
-            progress+=0.1;
-            unit.node.textContent = `${it} - ${(progress*100).toFixed(0)} / 100`;
-            if (progress >= 1){
-              progress = 0;
-              unit.node.textContent = it;//`${it} - ready`;
-              //isBuilded = true;
-              isBuilding = false;
-              this.onUnitReady(it);
-              clearInterval(intId);
-            }
-          }, 300);
-        }  
-      }
-    });
-  } 
-}
 
 const moves = [
   {x:-1, y:-1},
@@ -161,105 +91,6 @@ export class Game extends Control{
   }
 }
 
-class InteractiveObject{
-  isHovered: boolean;
-  onMouseMove: any;
-  onMouseEnter: any;
-  onMouseLeave: any;
-  onClick: any;
-
-  constructor(){
-
-  }
-
-  handleMove(tile:Vector){
-    if (this.inShape(tile)){
-      this.onMouseMove?.(tile);
-      if (!this.isHovered) {
-        this.isHovered = true;
-        this.onMouseEnter?.(tile);
-      }
-    } else {
-      if (this.isHovered) {
-        this.isHovered = false;
-        this.onMouseLeave?.(tile);
-      }
-    }  
-  }
-
-  handleClick(e:Vector){
-    if (this.inShape(e)){
-      this.onClick?.(e);
-    }
-  }
-
-  inShape(tile:Vector){
-    return false;
-  }
-}
-
-class MapObject extends InteractiveObject{
-  position: {x:number, y:number};
-  tiles: Array<Array<number>>;
-  sprite: HTMLImageElement;
-  health:number;
-  name:string;
-
-  constructor(){
-    super();
-    this.health = 100;
-  }
-
-  inShape(tile:Vector){
-    let pos = tile.clone().sub(new Vector(this.position.x, this.position.y));
-    if (this.tiles[pos.y] && this.tiles[pos.y][pos.x]!=null && this.tiles[pos.y][pos.x]!=0){
-      return true;
-    }
-    return false;
-  }
-
-  damage(amount:number){
-    this.health -=1;
-  }
-}
-
-class UnitObject extends InteractiveObject{
-  position: {x:number, y:number};
-  target: Vector = null;
-  speed: number = 1;
-  attackRadius: number = 200;
-  name:string;
-  attackTarget: {damage:(amount:number)=>void} = null;
-  constructor(){
-    super();
-  }
-
-  inShape(tile:Vector){
-    let pos = tile.clone().sub(new Vector(this.position.x, this.position.y));
-    if (pos.abs()<15){
-      return true;
-    }
-    return false;
-  }
-
-  step(){
-    if (this.target){
-      this.position = new Vector(this.position.x, this.position.y).add(new Vector(this.position.x, this.position.y).sub(this.target).normalize().scale(-this.speed));
-      if (new Vector(this.position.x, this.position.y).sub(this.target).abs()<5){
-        this.target = null;
-      }
-    } else {
-      this.attack();
-    }
-  }
-
-  attack(){
-    if (this.attackTarget){
-      console.log('atack');
-      this.attackTarget.damage(1);
-    }
-  }
-}
 
 export class GameField extends Control{
   currentMove: {x:number, y:number};
