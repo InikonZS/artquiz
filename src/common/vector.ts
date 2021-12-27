@@ -12,6 +12,10 @@ export class Vector {
       this.y = y;
   }
 
+  static fromIVector(vector:IVector){
+    return new Vector(vector.x, vector.y);
+  }
+
   clone() {
       return new Vector(this.x, this.y);
   }

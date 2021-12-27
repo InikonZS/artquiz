@@ -270,7 +270,30 @@ export class GameField extends Control{
   addUnit(name:string){
   //  console.log(name);
     let unit = new UnitObject();
-    unit.position = new Vector(20, 20);
+    unit.position = new Vector(20, 20); //for demo
+
+    if (name =='msu'){
+      let barrac = Object.values(this.primaries).find(it=>it.name == 'ms');
+      if (barrac){
+        unit.position = Vector.fromIVector({x:barrac.position.x*this.sz, y: barrac.position.y*this.sz});
+      } 
+    }
+
+    if (name =='csu'){
+      let barrac = Object.values(this.primaries).find(it=>it.name == 'cs');
+      if (barrac){
+        unit.position = Vector.fromIVector({x:barrac.position.x*this.sz, y: barrac.position.y*this.sz});
+      } 
+    }
+
+    if (name =='tcu' || name =='asd'){
+      let barrac = Object.values(this.primaries).find(it=>it.name == 'tc');
+      if (barrac){
+        unit.position = Vector.fromIVector({x:barrac.position.x*this.sz, y: barrac.position.y*this.sz});
+      } 
+    }
+    
+    
     unit.name = name;
     unit.onClick = ()=>{
       this.selectedUnit = unit;
