@@ -112,11 +112,11 @@ export class GameField extends Control{
   currentBuilding: {name:string, mtx:string[][]};
   selectedUnit: UnitObject = null;
   modeCallback: () => void;
-  hoveredObject: MapObject[] =[];
+  hoveredObject: {action:string, object:MapObject}[] =[];
   hoveredUnit: UnitObject[] = [];
   multiStart: Vector;
   selectedBuild: MapObject;
-  primaries: Record<string, MapObject>;
+  primaries: Record<string, MapObject> ={};
   constructor(parentNode: HTMLElement){
     super(parentNode, 'div', red['game_field']);
     const canvas = new Control<HTMLCanvasElement>(this.node, 'canvas');
@@ -309,6 +309,20 @@ export class GameField extends Control{
     object.tiles = obj.mtx.map(it=>it.map(jt=>parseInt(jt)));
     object.name = obj.name;
     object.position = new Vector(x,y);
+    if (this.primaries[object.name]==null){
+      this.primaries[object.name] = object;
+    } 
+
+    const getAction = ()=>{
+      if ( this.selectedUnit){
+        return 'attack'
+      } else if(this.selectedBuild == object){
+        return this.primaries[object.name] == this.selectedBuild? 'already_primary': 'set_primary';
+      } else {
+        return 'select_object'
+      }
+    }
+
     object.onClick = ()=>{
       //object.health -=1;
       console.log(object.name);
@@ -320,12 +334,16 @@ export class GameField extends Control{
       } else {
         this.selectedBuild = object;
       }
+      let updateObject = this.hoveredObject.find(it=>it.object == object);
+      if (updateObject){
+       updateObject.action = getAction();
+      }
     }
     object.onMouseEnter = ()=>{
-      this.hoveredObject.push(object);
+      this.hoveredObject.push({action: getAction(), object:object});
     }
     object.onMouseLeave = ()=>{
-      this.hoveredObject = this.hoveredObject.filter(it=>it!=object);
+      this.hoveredObject = this.hoveredObject.filter(it=>it.object!=object);
     }
     this.objects.push(object);
   }
@@ -334,8 +352,14 @@ export class GameField extends Control{
     this.objects.forEach(it=>{
       this.drawObject(ctx, it.tiles, it.position, this.position, it.isHovered?"#9999":"#ff49");
       const pos = this.toMapPixelVector(new Vector(it.position.x*this.sz, it.position.y*this.sz));
-      ctx.strokeText(`health: ${it.health.toString()}/100` , pos.x, pos.y +20);
-      ctx.strokeText(it.name, pos.x, pos.y +35);
+      ctx.strokeText(`health: ${it.health.toString()}/100` , pos.x, pos.y +10);
+      ctx.strokeText(it.name, pos.x, pos.y +20);
+      if (it==this.selectedBuild){
+        ctx.strokeText('selected', pos.x, pos.y +30);
+      }
+      if (Object.keys(this.primaries).find(obj=>this.primaries[obj]==it)){
+        ctx.strokeText('primary', pos.x, pos.y +40);
+      }
     });
   }
 
@@ -500,15 +524,15 @@ export class GameField extends Control{
     if (this.hoveredUnit[this.hoveredUnit.length-1]){
        label = 'unit: '+this.hoveredUnit[this.hoveredUnit.length-1].name
     } else if(this.hoveredObject[this.hoveredObject.length-1]){
-       label = 'build: '+this.hoveredObject[this.hoveredObject.length-1]?.name
+       label = 'build: '+this.hoveredObject[this.hoveredObject.length-1]?.object.name
     }
     ctx.fillText( label , this.cursor.x, this.cursor.y -10);
 
     let mode = 'select';
     if (this.mode ==1){
        mode = 'building'
-    } else if(this.mode ==2 && this.hoveredObject[this.hoveredObject.length-1]){
-       mode = 'atack'
+    } else if(/*this.mode ==2 && */this.hoveredObject[this.hoveredObject.length-1]){
+       mode = this.hoveredObject[this.hoveredObject.length-1].action //'atack'
     } else if(this.mode ==2){
       mode = 'move'
    } 
