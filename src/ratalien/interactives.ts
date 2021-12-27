@@ -43,6 +43,9 @@ export class MapObject extends InteractiveObject{
   sprite: HTMLImageElement;
   health:number;
   name:string;
+  player:number;
+
+  onDestroyed: ()=>void;
 
   constructor(){
     super();
@@ -59,6 +62,9 @@ export class MapObject extends InteractiveObject{
 
   damage(amount:number){
     this.health -=1;
+    if (this.health<=0){
+      this.onDestroyed();
+    }
   }
 }
 
@@ -68,7 +74,10 @@ export class UnitObject extends InteractiveObject{
   speed: number = 1;
   attackRadius: number = 200;
   name:string;
-  attackTarget: {damage:(amount:number)=>void} = null;
+  attackTarget: {damage:(amount:number)=>void, position:IVector} = null;
+  player:number;
+  time: number= 0;
+
   constructor(){
     super();
   }
@@ -81,21 +90,33 @@ export class UnitObject extends InteractiveObject{
     return false;
   }
 
-  step(){
+  step(delta:number){
+        //fix logic atack and move
+    this.time -= delta;
     if (this.target){
       this.position = new Vector(this.position.x, this.position.y).add(new Vector(this.position.x, this.position.y).sub(this.target).normalize().scale(-this.speed));
       if (new Vector(this.position.x, this.position.y).sub(this.target).abs()<5){
         this.target = null;
       }
     } else {
-      this.attack();
+      
+      this.attack(delta);
     }
   }
 
-  attack(){
+  attack(delta:number){
+    //fix logic atack and move
     if (this.attackTarget){
-      console.log('atack');
-      this.attackTarget.damage(1);
+     // console.log('atack');
+      if (Vector.fromIVector(this.attackTarget.position).scale(55).sub(Vector.fromIVector(this.position)).abs()< this.attackRadius ){
+        this.target = null;
+        if (this.time<=0){
+          this.time = 500;
+          this.attackTarget.damage(1);
+        }
+      } else {
+        this.target = Vector.fromIVector(this.attackTarget.position).scale(55);
+      }
     }
   }
 }

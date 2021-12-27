@@ -5,6 +5,7 @@ import {Vector, IVector} from "../common/vector";
 import {GameSide} from "./gameSidePanel";
 import {MapObject, UnitObject} from "./interactives";
 import {GamePlayer} from "./gamePlayer";
+import {BotPlayer} from "./botPlayer";
 
 const view = [
   '00100'.split(''),
@@ -55,9 +56,15 @@ const moves = [
   {x:1, y:1}, 
 ];
 
+const colors = [
+  '#ff0a',
+  '#f0fa',
+  '#0ffa'
+]
+
 export class Game extends Control{
   player:GamePlayer;
-
+  currentPlayer:number = 0;
   constructor(parentNode: HTMLElement){
     super(parentNode, 'div', red['global_wrapper']);
     this.node.onmouseleave = (e)=>{
@@ -85,13 +92,37 @@ export class Game extends Control{
     const main = new Control(this.node, 'div', red["global_main"]);
     const field = new GameField(main.node);
     const player = new GamePlayer();
+    const botPlayer = new BotPlayer(new Vector(20, 20));
+    botPlayer.onBuild = (pos)=>{
+      field.addObject(1, {name: 'cs', mtx:buildMap.get('cs')}, pos.x, pos.y);
+    }
+
+    botPlayer.onUnit = ()=>{
+      field.addUnit(1, 'csu');
+    }
+
+    //botPlayer.
+
+    botPlayer.onAttack = ()=>{
+      let botUnits = field.units.filter(it=>it.player==1);
+      let playerBuilds = field.objects.filter(it=>it.player==0);
+      if (playerBuilds.length == 0) return;
+      /*botUnits.forEach(it=>{
+        if (it.attackTarget.health<=0){
+          it.attackTarget = null;
+        }
+      })*/
+      if (botUnits.length ==0) return;
+      botUnits[Math.floor(Math.random()* botUnits.length)].attackTarget = playerBuilds[Math.floor(Math.random()* playerBuilds.length)];
+    }
     
+
     const side = new GameSide(main.node);
     side.onBuildSelect = (name, callback)=>{
       field.setMode(1, name, callback);
     }
     side.onUnitReady = (name:string)=>{
-      field.addUnit(name);
+      field.addUnit(0, name);
     }
   }
 }
@@ -116,7 +147,8 @@ export class GameField extends Control{
   hoveredUnit: UnitObject[] = [];
   multiStart: Vector;
   selectedBuild: MapObject;
-  primaries: Record<string, MapObject> ={};
+  primaries: Array<Record<string, MapObject>> =[{},{}];
+
   constructor(parentNode: HTMLElement){
     super(parentNode, 'div', red['game_field']);
     const canvas = new Control<HTMLCanvasElement>(this.node, 'canvas');
@@ -195,7 +227,7 @@ export class GameField extends Control{
         //return;
       } else
       if (this.mode == 1){
-        this.addObject(this.currentBuilding, cursorTile.x, cursorTile.y);
+        this.addObject(0, this.currentBuilding, cursorTile.x, cursorTile.y);
         this.modeCallback();
         this.setMode(0, null, null);
         //return;
@@ -237,8 +269,12 @@ export class GameField extends Control{
       render()
     }
 
+    let lastTime:number =null;
     const render=()=>{
-      requestAnimationFrame(()=>{
+      requestAnimationFrame((timeStamp)=>{
+        if (!lastTime){
+          lastTime = timeStamp;
+        }
         if (this.currentMove){
           this.position.x -= this.currentMove.x*10;
           this.position.y -= this.currentMove.y*10;
@@ -256,8 +292,8 @@ export class GameField extends Control{
           this.position.y = -this.map[0].length*this.sz+600;
         }
         
-        this.render(ctx);
-
+        this.render(ctx, timeStamp - lastTime);
+        lastTime = timeStamp;
         render();
       })
     }
@@ -267,27 +303,28 @@ export class GameField extends Control{
     })
   }
 
-  addUnit(name:string){
+  addUnit(player:number, name:string){
   //  console.log(name);
     let unit = new UnitObject();
+    unit.player = player;
     unit.position = new Vector(20, 20); //for demo
 
     if (name =='msu'){
-      let barrac = Object.values(this.primaries).find(it=>it.name == 'ms');
+      let barrac = Object.values(this.primaries[player]).find(it=>it.name == 'ms');
       if (barrac){
         unit.position = Vector.fromIVector({x:barrac.position.x*this.sz, y: barrac.position.y*this.sz});
       } 
     }
 
     if (name =='csu'){
-      let barrac = Object.values(this.primaries).find(it=>it.name == 'cs');
+      let barrac = Object.values(this.primaries[player]).find(it=>it.name == 'cs');
       if (barrac){
         unit.position = Vector.fromIVector({x:barrac.position.x*this.sz, y: barrac.position.y*this.sz});
       } 
     }
 
     if (name =='tcu' || name =='asd'){
-      let barrac = Object.values(this.primaries).find(it=>it.name == 'tc');
+      let barrac = Object.values(this.primaries[player]).find(it=>it.name == 'tc');
       if (barrac){
         unit.position = Vector.fromIVector({x:barrac.position.x*this.sz, y: barrac.position.y*this.sz});
       } 
@@ -327,20 +364,21 @@ export class GameField extends Control{
     this.modeCallback = callback;
   }
 
-  addObject(obj:{name:string, mtx:Array<Array<string>>}, x:number, y:number){
+  addObject(player:number, obj:{name:string, mtx:Array<Array<string>>}, x:number, y:number){
     let object = new MapObject();
     object.tiles = obj.mtx.map(it=>it.map(jt=>parseInt(jt)));
     object.name = obj.name;
     object.position = new Vector(x,y);
-    if (this.primaries[object.name]==null){
-      this.primaries[object.name] = object;
+    object.player = player;
+    if (this.primaries[player][object.name]==null){
+      this.primaries[player][object.name] = object;
     } 
 
     const getAction = ()=>{
-      if ( this.selectedUnit){
+      if ( this.selectedUnit && object.player!==0){
         return 'attack'
-      } else if(this.selectedBuild == object){
-        return this.primaries[object.name] == this.selectedBuild? 'already_primary': 'set_primary';
+      } else if(this.selectedBuild == object && object.player==0){
+        return this.primaries[player][object.name] == this.selectedBuild? 'already_primary': 'set_primary';
       } else {
         return 'select_object'
       }
@@ -349,11 +387,11 @@ export class GameField extends Control{
     object.onClick = ()=>{
       //object.health -=1;
       console.log(object.name);
-      if ( this.selectedUnit){
+      if ( this.selectedUnit && object.player!==0){
         console.log(this.selectedUnit);
         this.selectedUnit.attackTarget = object;
-      } else if(this.selectedBuild == object){
-        this.primaries[this.selectedBuild.name] = this.selectedBuild;
+      } else if(this.selectedBuild == object && object.player==0){
+        this.primaries[player][this.selectedBuild.name] = this.selectedBuild;
       } else {
         this.selectedBuild = object;
       }
@@ -368,28 +406,31 @@ export class GameField extends Control{
     object.onMouseLeave = ()=>{
       this.hoveredObject = this.hoveredObject.filter(it=>it.object!=object);
     }
+    object.onDestroyed = ()=>{
+      this.objects = this.objects.filter(it=>it!=object);
+    }
     this.objects.push(object);
   }
 
   renderObjects(ctx:CanvasRenderingContext2D){
     this.objects.forEach(it=>{
-      this.drawObject(ctx, it.tiles, it.position, this.position, it.isHovered?"#9999":"#ff49");
+      this.drawObject(ctx, it.tiles, it.position, this.position, it.isHovered?"#9999":colors[it.player]);
       const pos = this.toMapPixelVector(new Vector(it.position.x*this.sz, it.position.y*this.sz));
       ctx.strokeText(`health: ${it.health.toString()}/100` , pos.x, pos.y +10);
       ctx.strokeText(it.name, pos.x, pos.y +20);
       if (it==this.selectedBuild){
         ctx.strokeText('selected', pos.x, pos.y +30);
       }
-      if (Object.keys(this.primaries).find(obj=>this.primaries[obj]==it)){
+      if (Object.keys(this.primaries[0]).find(obj=>this.primaries[0][obj]==it)){
         ctx.strokeText('primary', pos.x, pos.y +40);
       }
     });
   }
 
-  renderUnits(ctx:CanvasRenderingContext2D){
+  renderUnits(ctx:CanvasRenderingContext2D, delta:number){
     this.units.forEach(it=>{
-      it.step();
-      this.drawUnit(ctx, it.position, this.position, it.isHovered?"#9999":"#0ff9");
+      it.step(delta);
+      this.drawUnit(ctx, it.position, this.position, it.isHovered?"#9999":colors[it.player]);
       this.addMtx(view,Math.floor(it.position.x/this.sz), Math.floor(it.position.y/this.sz), new Vector(2,2));
     });
   }
@@ -527,14 +568,14 @@ export class GameField extends Control{
     this.canvas.node.height = this.node.clientHeight;
   }
 
-  render(ctx: CanvasRenderingContext2D){
+  render(ctx: CanvasRenderingContext2D, delta:number){
     let sz = this.sz;
     //this.cursorTile.x = ;
     //this.cursorTile.y = Math.floor((-this.position.y +this.cursor.y)/sz);
 
     this.renderMap(ctx);
     this.renderObjects(ctx);
-    this.renderUnits(ctx);
+    this.renderUnits(ctx, delta);
 
     ctx.fillStyle = "#00f";
     ctx.beginPath();
