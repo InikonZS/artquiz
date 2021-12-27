@@ -4,6 +4,7 @@ import red from "./red.css";
 import {Vector, IVector} from "../common/vector";
 import {GameSide} from "./gameSidePanel";
 import {MapObject, UnitObject} from "./interactives";
+import {GamePlayer} from "./gamePlayer";
 
 const view = [
   '00100'.split(''),
@@ -55,6 +56,8 @@ const moves = [
 ];
 
 export class Game extends Control{
+  player:GamePlayer;
+
   constructor(parentNode: HTMLElement){
     super(parentNode, 'div', red['global_wrapper']);
     this.node.onmouseleave = (e)=>{
@@ -81,6 +84,8 @@ export class Game extends Control{
     const head = new Control(this.node, 'div', red["global_header"]);
     const main = new Control(this.node, 'div', red["global_main"]);
     const field = new GameField(main.node);
+    const player = new GamePlayer();
+    
     const side = new GameSide(main.node);
     side.onBuildSelect = (name, callback)=>{
       field.setMode(1, name, callback);
@@ -110,6 +115,8 @@ export class GameField extends Control{
   hoveredObject: MapObject[] =[];
   hoveredUnit: UnitObject[] = [];
   multiStart: Vector;
+  selectedBuild: MapObject;
+  primaries: Record<string, MapObject>;
   constructor(parentNode: HTMLElement){
     super(parentNode, 'div', red['game_field']);
     const canvas = new Control<HTMLCanvasElement>(this.node, 'canvas');
@@ -308,6 +315,10 @@ export class GameField extends Control{
       if ( this.selectedUnit){
         console.log(this.selectedUnit);
         this.selectedUnit.attackTarget = object;
+      } else if(this.selectedBuild == object){
+        this.primaries[this.selectedBuild.name] = this.selectedBuild;
+      } else {
+        this.selectedBuild = object;
       }
     }
     object.onMouseEnter = ()=>{
