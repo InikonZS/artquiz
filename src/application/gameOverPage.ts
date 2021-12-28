@@ -21,3 +21,16 @@ export class GameOverPage extends Control{
     }
   }
 }
+
+/*
+type MyHandler = (ev:number|null)=>string;
+type MyFunc = (callback:MyHandler)=>number;
+
+const func:MyFunc = (callback)=>{
+  return 0;
+}
+
+const h:MyHandler = (ev)=>{
+  return '';
+}
+func(h);*/
