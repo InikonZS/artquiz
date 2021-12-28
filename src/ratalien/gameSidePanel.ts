@@ -10,22 +10,27 @@ export class GameSide extends Control{
   model: GamePlayer;
   buildings: Control<HTMLElement>;
   dataBuild: Control<HTMLElement>[]=[];
+  money: Control<HTMLElement>;
+  isReading:boolean = false;
 
   constructor(parentNode: HTMLElement, player: GamePlayer){
     super(parentNode, 'div', red['game_side']);
     this.model = player;
     this.updateBuildHandler = () => {
       this.createBuild();
+      this.updateMoney();
     }
     player.onUpdateBuild.add(this.updateBuildHandler);
-    
-    const radar = new Control(this.node, 'div', red["game_radar"]);
+
+    const radar = new Control(this.node, 'div', red["game_radar"])
+    this.money = new Control(radar.node, 'div');
     const builds = new Control(this.node, 'div', red["game_builds"]);
     const buildTools = new Control(builds.node, 'div', red["builds_tool"]);
     const buildItems = new Control(builds.node, 'div', red["builds_items"]);
     const buildingsW = new Control(buildItems.node, 'div', red["builds_column"]);
     this.buildings = new Control(buildingsW.node, 'div', red["column_items"]);
     this.createBuild();
+    this.updateMoney();
     
     const unitsW = new Control(buildItems.node, 'div', red["builds_column"]);
     const units = new Control(unitsW.node, 'div', red["column_items"]);
@@ -55,6 +60,9 @@ export class GameSide extends Control{
     });
   } 
   
+  updateMoney(){
+    this.money.node.textContent = this.model.money.toString();
+  }
 
   createBuild() {
     const blds = this.model.getAvailableBuilds();
@@ -67,8 +75,9 @@ export class GameSide extends Control{
       let isBuilded = false;
       let progress = 0;
       build.node.onclick = ()=>{
-        if (isBuilded == false && isBuilding ==false){
+        if (isBuilded == false && isBuilding ==false&&this.isReading == false){
           isBuilding = true;
+          this.isReading = true;
           let intId = setInterval(()=>{
             progress+=1;
             build.node.textContent = `${name} - ${(progress*10).toFixed(0)} / ${it.time}`;
@@ -86,6 +95,7 @@ export class GameSide extends Control{
             isBuilded = false; 
             progress = 0;
             build.node.textContent = name;
+            this.isReading = false;
             this.model.setBuilds(it);
           });
         }

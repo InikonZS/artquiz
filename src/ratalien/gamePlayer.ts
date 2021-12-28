@@ -18,7 +18,7 @@ interface IUnitInfo{
 
 export class GamePlayer{
   colorIndex:number;
-  money:number;
+  money:number=5000;
   //energy:number;
   builds: Array<IBuildInfo> = [];
   units:Array<IUnitInfo> = [];
@@ -30,6 +30,7 @@ export class GamePlayer{
   }
 
   setBuilds(build: IBuildInfo) {
+    this.money -= build.cost;
     this.builds.push(build);
     console.log(this.builds)
     this.onUpdateBuild.emit();
