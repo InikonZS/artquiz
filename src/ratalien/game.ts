@@ -4,8 +4,8 @@ import red from "./red.css";
 import {Vector, IVector} from "../common/vector";
 import {GameSide} from "./gameSidePanel";
 import {MapObject, UnitObject} from "./interactives";
-import {GamePlayer} from "./gamePlayer";
 import {BotPlayer} from "./botPlayer";
+import {GamePlayer, IBuildInfo} from "./gamePlayer";
 
 const view = [
   '00100'.split(''),
@@ -37,9 +37,18 @@ const obj2 = [
 ]
 
 const buildMap = new Map<string, Array<Array<string>>>([
-  ['ms', obj],
-  ['cs', obj1],
-  ['tc', obj2]
+  ['buildingCenter', obj],
+  ['energyPlant', obj1],
+  ['barracs', obj2],
+  ['dogHouse', obj],
+  ['oreFactoryBig', obj1],
+  ['oreFactorySmall', obj2],
+  ['carFactory', obj],
+  ['energyCenter', obj1],
+  ['defendTower', obj2],
+  ['radar', obj1],
+  ['repairStation', obj2],
+  ['techCenter', obj]
 ])
 
 const moves = [
@@ -94,7 +103,7 @@ export class Game extends Control{
     const player = new GamePlayer();
     const botPlayer = new BotPlayer(new Vector(20, 20));
     botPlayer.onBuild = (pos)=>{
-      field.addObject(1, {name: 'cs', mtx:buildMap.get('cs')}, pos.x, pos.y);
+      field.addObject(1, {name: 'barracs', mtx:buildMap.get('barracs')}, pos.x, pos.y);
     }
 
     botPlayer.onUnit = ()=>{
@@ -117,9 +126,12 @@ export class Game extends Control{
     }
     
 
-    const side = new GameSide(main.node);
+    //const side = new GameSide(main.node);
+    //player.getAvailableBuilds();
+    
+    const side = new GameSide(main.node, player);
     side.onBuildSelect = (name, callback)=>{
-      field.setMode(1, name, callback);
+      field.setMode(1, name.desc[0], callback);
     }
     side.onUnitReady = (name:string)=>{
       field.addUnit(0, name);
@@ -317,7 +329,7 @@ export class GameField extends Control{
     }
 
     if (name =='csu'){
-      let barrac = Object.values(this.primaries[player]).find(it=>it.name == 'cs');
+      let barrac = Object.values(this.primaries[player]).find(it=>it.name == 'barracs');
       if (barrac){
         unit.position = Vector.fromIVector({x:barrac.position.x*this.sz, y: barrac.position.y*this.sz});
       } 
