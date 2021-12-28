@@ -4,7 +4,7 @@ import red from "./red.css";
 import {Vector, IVector} from "../common/vector";
 import {GameSide} from "./gameSidePanel";
 import {MapObject, UnitObject} from "./interactives";
-import {GamePlayer} from "./gamePlayer";
+import {GamePlayer, IBuildInfo} from "./gamePlayer";
 
 const view = [
   '00100'.split(''),
@@ -36,9 +36,18 @@ const obj2 = [
 ]
 
 const buildMap = new Map<string, Array<Array<string>>>([
-  ['ms', obj],
-  ['cs', obj1],
-  ['tc', obj2]
+  ['buildingCenter', obj],
+  ['energyPlant', obj1],
+  ['barracs', obj2],
+  ['dogHouse', obj],
+  ['oreFactoryBig', obj1],
+  ['oreFactorySmall', obj2],
+  ['carFactory', obj],
+  ['energyCenter', obj1],
+  ['defendTower', obj2],
+  ['radar', obj1],
+  ['repairStation', obj2],
+  ['techCenter', obj]
 ])
 
 const moves = [
@@ -85,10 +94,11 @@ export class Game extends Control{
     const main = new Control(this.node, 'div', red["global_main"]);
     const field = new GameField(main.node);
     const player = new GamePlayer();
+    //player.getAvailableBuilds();
     
-    const side = new GameSide(main.node);
+    const side = new GameSide(main.node, player);
     side.onBuildSelect = (name, callback)=>{
-      field.setMode(1, name, callback);
+      field.setMode(1, name.desc[0], callback);
     }
     side.onUnitReady = (name:string)=>{
       field.addUnit(name);

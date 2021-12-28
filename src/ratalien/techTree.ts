@@ -1,7 +1,8 @@
 //root
 const buildingCenter = {
   deps: ['rootAccess'],
-  desc: ['building center'],
+  desc: ['buildingCenter'],
+  name: 'building center',
   energy: 0,
   cost: 2000,
   time: 100
@@ -10,7 +11,8 @@ const buildingCenter = {
 //low
 const energyPlant = {
   deps: ['buildingCenter'],
-  desc: ['energy plant'],
+  desc: ['energyPlant'],
+  name: 'energy plant',
   energy: -5,
   cost: 200,
   time: 10,
@@ -20,6 +22,7 @@ const energyPlant = {
 const barracs = {
   deps: ['buildingCenter', 'energyPlant'],
   desc: ['barracs'],
+  name: 'barracs',
   energy: 3,
   cost: 400,
   time: 10
@@ -27,7 +30,8 @@ const barracs = {
 
 const dogHouse = {
   deps: ['buildingCenter', 'energyPlant', 'barracs'],
-  desc: ['dog house'],
+  desc: ['dogHouse'],
+  name: 'dog house',
   energy: 2,
   cost: 200,
   time: 10
@@ -35,15 +39,17 @@ const dogHouse = {
 
 const oreFactory = {
   deps: ['buildingCenter', 'energyPlant'],
-  desc: ['ore factory'],
+  desc: ['oreFactoryBig'],
+  name: 'ore factory',
   energy: 5,
   cost: 1000,
   time: 50
 }
 
 const oreBarrel = {
-  deps: ['buildingCenter', 'energyPlant', 'oreFactory'],
-  desc: ['ore factory'],
+  deps: ['buildingCenter', 'energyPlant', 'oreFactoryBig'],
+  desc: ['oreFactorySmall'],
+  name: 'ore factory',
   energy: 1,
   cost: 100,
   time: 5
@@ -51,7 +57,8 @@ const oreBarrel = {
 
 const carFactory = {
   deps: ['buildingCenter', 'energyPlant'],
-  desc: ['car factory'],
+  desc: ['carFactory'],
+  name: 'car factory',
   energy: 5,
   cost: 1500,
   time: 50
@@ -59,7 +66,8 @@ const carFactory = {
 
 const bigEnergyPlant = {
   deps: ['buildingCenter', 'energyPlant'],
-  desc: ['energy center'],
+  desc: ['energyCenter'],
+  name: 'energy center',
   energy: -12,
   cost: 400,
   time: 20
@@ -67,7 +75,8 @@ const bigEnergyPlant = {
 
 const defendTower = {
   deps: ['buildingCenter', 'energyPlant'],
-  desc: ['defend tower'],
+  desc: ['defendTower'],
+  name: 'defend tower',
   energy: 5,
   cost: 1000,
   time: 30
@@ -77,6 +86,7 @@ const defendTower = {
 const radar = {
   deps: ['buildingCenter', 'energyPlant'],
   desc: ['radar'],
+  name: 'radar',
   energy: 10,
   cost: 1000,
   time: 50
@@ -84,7 +94,8 @@ const radar = {
 
 const repairStation = {
   deps: ['buildingCenter', 'energyPlant'],
-  desc: ['repair station'],
+  desc: ['repairStation'],
+  name: 'repair station',
   energy: 10,
   cost: 1500,
   time: 50
@@ -92,7 +103,8 @@ const repairStation = {
 
 const techCenter = {
   deps: ['buildingCenter', 'energyPlant', "radar", "repairStation"],
-  desc: ['tech center'],
+  desc: ['techCenter'],
+  name: 'tech center',
   energy: 10,
   cost: 1500,
   time: 100
@@ -142,7 +154,7 @@ const bomber = {
 }
 
 export const tech = {
-  biulds:{
+  builds:[
     buildingCenter,
     barracs,
     energyPlant,
@@ -155,14 +167,14 @@ export const tech = {
     oreBarrel,
     oreFactory,
     defendTower
-  },
-  units:{
+  ],
+  units:[
     solder,
     truck,
     bomber,
     tank,
     heavyTank,
     dog
-  }
+  ]
 }
 
