@@ -44,6 +44,7 @@ export class MapObject extends InteractiveObject{
   health:number;
   name:string;
   player:number;
+  type:string = 'build';
 
   onDestroyed: ()=>void;
 
@@ -77,9 +78,20 @@ export class UnitObject extends InteractiveObject{
   attackTarget: {damage:(amount:number)=>void, position:IVector} = null;
   player:number;
   time: number= 0;
+  health: number=100;
+  type:string = 'unit';
+  onWait: ()=>void;
+  onDestroyed: ()=>void;
 
   constructor(){
     super();
+  }
+
+  damage(amount:number){
+    this.health -=10;
+    if (this.health<=0){
+      this.onDestroyed();
+    }
   }
 
   inShape(tile:Vector){
@@ -108,15 +120,21 @@ export class UnitObject extends InteractiveObject{
     //fix logic atack and move
     if (this.attackTarget){
      // console.log('atack');
-      if (Vector.fromIVector(this.attackTarget.position).scale(55).sub(Vector.fromIVector(this.position)).abs()< this.attackRadius ){
+     //@ts-ignore
+     let scaler = this.attackTarget.type == 'unit'? 1:55;
+      if (Vector.fromIVector(this.attackTarget.position).scale(scaler).sub(Vector.fromIVector(this.position)).abs()< this.attackRadius ){
         this.target = null;
         if (this.time<=0){
           this.time = 500;
-          this.attackTarget.damage(1);
+          this.attackTarget.damage(20);
         }
       } else {
-        this.target = Vector.fromIVector(this.attackTarget.position).scale(55);
+        this.target = Vector.fromIVector(this.attackTarget.position).scale(scaler);
       }
+    } else {
+      setTimeout(()=>{ this.onWait();},1000);
+     
+      //findClosestUnit(this.position, )
     }
   }
 }

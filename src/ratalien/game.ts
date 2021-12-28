@@ -6,6 +6,7 @@ import {GameSide} from "./gameSidePanel";
 import {MapObject, UnitObject} from "./interactives";
 import {BotPlayer} from "./botPlayer";
 import {GamePlayer, IBuildInfo} from "./gamePlayer";
+import {findClosestUnit} from './distance';
 
 const view = [
   '00100'.split(''),
@@ -320,6 +321,17 @@ export class GameField extends Control{
     let unit = new UnitObject();
     unit.player = player;
     unit.position = new Vector(20, 20); //for demo
+    unit.onDestroyed = ()=>{
+      this.units = this.units.filter(it=>it!=unit);
+      this.units.forEach(it=>{if (it.attackTarget == unit){ it.attackTarget = null}});
+    }
+    unit.onWait =()=>{
+      let enemies = this.units.filter(it => it.player !=unit.player);
+      let closest = findClosestUnit(Vector.fromIVector(unit.position), enemies);
+      if (closest.distance < unit.attackRadius){
+        unit.attackTarget = closest.unit;
+      }
+    }
 
     if (name =='msu'){
       let barrac = Object.values(this.primaries[player]).find(it=>it.name == 'ms');
@@ -443,6 +455,7 @@ export class GameField extends Control{
     this.units.forEach(it=>{
       it.step(delta);
       this.drawUnit(ctx, it.position, this.position, it.isHovered?"#9999":colors[it.player]);
+      ctx.strokeText(it.health.toString(), this.position.x +it.position.x, this.position.y +it.position.y -10);
       this.addMtx(view,Math.floor(it.position.x/this.sz), Math.floor(it.position.y/this.sz), new Vector(2,2));
     });
   }
