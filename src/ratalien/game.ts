@@ -321,28 +321,12 @@ export class GameField extends Control{
     let unit = new UnitObject();
     unit.player = player;
     unit.position = new Vector(20, 20); //for demo
-    console.log(this.currentBuilding)
-
-    if (name =='dog'){
-      let barrac = Object.values(this.primaries[player]).find(it=>it.name == 'dogHouse');
-      if (barrac){
-        unit.position = Vector.fromIVector({x:barrac.position.x*this.sz, y: barrac.position.y*this.sz});
-      } 
-    }
-
-    if (name =='solder'){
-      let barrac = Object.values(this.primaries[player]).find(it=>it.name == 'barracs');
-      if (barrac){
-        unit.position = Vector.fromIVector({x:barrac.position.x*this.sz, y: barrac.position.y*this.sz});
-      } 
-    }
-
-    if (name =='tank' || name =='truck'|| name=='heavy tank'){
-      let barrac = Object.values(this.primaries[player]).find(it=>it.name == 'carFactory');
-      if (barrac){
-        unit.position = Vector.fromIVector({x:barrac.position.x*this.sz, y: barrac.position.y*this.sz});
-      } 
-    }
+    const spawn = tech.units.filter(item => item.name == name)[0].spawn[0];
+    
+    let barrac = Object.values(this.primaries[player]).find(it=>it.name == spawn);
+    if (barrac){
+      unit.position = Vector.fromIVector({x:barrac.position.x*this.sz, y: barrac.position.y*this.sz});
+    } 
     
     
     unit.name = name;
