@@ -52,7 +52,7 @@ export class GameSide extends Control{
       //let isBuilded = false;
       let progress = 0;
       unit.node.onclick = ()=>{
-        if (isBuilding == false && this.isReadingUnit == false) {
+        if (isBuilding == false && this.isReadingUnit == false&&this.model.money>0) {
           let money = this.model.money;
           const cost = it.cost/it.time;
           isBuilding = true;
@@ -61,7 +61,11 @@ export class GameSide extends Control{
             progress += 1;
             this.updateMoney(money - cost);
             money -= cost;
-            unit.node.textContent = `${it.name} - ${(progress*10).toFixed(0)} / ${it.time*10}`;
+            unit.node.textContent = `${it.name} - ${(progress * 10).toFixed(0)} / ${it.time * 10}`;
+            if (money <= 0) {
+              this.updateMoney(0);
+              clearInterval(intId);
+            }
             if (progress >= it.time){
               progress = 0;
               unit.node.textContent = it.name;//`${it} - ready`;
@@ -89,7 +93,7 @@ export class GameSide extends Control{
       let isBuilded = false;
       let progress = 0;
       build.node.onclick = ()=>{
-        if (isBuilded == false && isBuilding == false && this.isReadingBuild == false) {
+        if (isBuilded == false && isBuilding == false && this.isReadingBuild == false&&this.model.money>0) {
           let money = this.model.money;
           const cost = it.cost/(it.time/10);
           isBuilding = true;
@@ -98,7 +102,11 @@ export class GameSide extends Control{
             progress += 1;
             this.updateMoney(money - cost);
             money -= cost;
-            build.node.textContent = `${name} - ${(progress*10).toFixed(0)} / ${it.time}`;
+            build.node.textContent = `${name} - ${(progress * 10).toFixed(0)} / ${it.time}`;
+            if (money <= 0) {
+              this.updateMoney(0);
+              clearInterval(intId);
+            }
             if (progress >= it.time/10){
               progress = 1;
               build.node.textContent = `${name} - ready`;
