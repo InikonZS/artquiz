@@ -1,4 +1,5 @@
 import {Vector, IVector} from "../common/vector";
+import {TraceMap} from "./traceMap";
 
 export class InteractiveObject{
   isHovered: boolean;
@@ -77,9 +78,11 @@ export class UnitObject extends InteractiveObject{
   attackTarget: {damage:(amount:number)=>void, position:IVector} = null;
   player:number;
   time: number= 0;
+  private stepIndex: number;
 
   constructor(){
     super();
+    this.stepIndex = 0
   }
 
   inShape(tile:Vector){
@@ -90,15 +93,34 @@ export class UnitObject extends InteractiveObject{
     return false;
   }
 
-  step(delta:number){
+  step(delta:number,traceMap: TraceMap){
         //fix logic atack and move
     this.time -= delta;
-    if (this.target){
-      this.position = new Vector(this.position.x, this.position.y).add(new Vector(this.position.x, this.position.y).sub(this.target).normalize().scale(-this.speed));
-      if (new Vector(this.position.x, this.position.y).sub(this.target).abs()<5){
-        this.target = null;
+    if (this.target) {
+      //TODO unit each Step
+      const path = traceMap.getPath()
+      if (path && this.stepIndex < path.length) {
+        this.position = new Vector(path[this.stepIndex].x * 50 + 50, path[this.stepIndex].y * 50 + 50)
+          .add(new Vector(path[this.stepIndex].x * 50 + 50, path[this.stepIndex].y * 50 + 50)
+            .sub(this.target).normalize().scale(-this.speed));
+
+        if (new Vector(this.position.x, this.position.y).sub(this.target).abs() < 5) {
+          this.target = null;
+        }
+        this.stepIndex++
+      }else if(path && this.stepIndex < path.length){
+        console.log('TTTT')
       }
-    } else {
+
+
+    }
+    // if (this.target){
+    //   this.position = new Vector(this.position.x, this.position.y).add(new Vector(this.position.x, this.position.y).sub(this.target).normalize().scale(-this.speed));
+    //   if (new Vector(this.position.x, this.position.y).sub(this.target).abs()<5){
+    //     this.target = null;
+    //   }
+    // }
+    else {
       
       this.attack(delta);
     }

@@ -6,6 +6,7 @@ import {GameSide} from "./gameSidePanel";
 import {MapObject, UnitObject} from "./interactives";
 import {BotPlayer} from "./botPlayer";
 import {GamePlayer, IBuildInfo} from "./gamePlayer";
+import {TraceMap} from "./traceMap";
 
 const view = [
   '00100'.split(''),
@@ -160,20 +161,24 @@ export class GameField extends Control{
   multiStart: Vector;
   selectedBuild: MapObject;
   primaries: Array<Record<string, MapObject>> =[{},{}];
+  private traceMap: TraceMap;
 
   constructor(parentNode: HTMLElement){
     super(parentNode, 'div', red['game_field']);
     const canvas = new Control<HTMLCanvasElement>(this.node, 'canvas');
     this.canvas = canvas;
+    this.traceMap = new TraceMap()
+    const mapMap: Map<string, number> = new Map()
     this.map = [];
     for(let i = 0; i < 96; i++){
       let row = [];
       for(let j = 0; j < 96; j++){
         row.push(1);
+        mapMap.set(`${i}-${j}`, 1)
       }
       this.map.push(row);
     }
-    
+    this.traceMap.setMapData(mapMap)
     //const overlay = new Control(this.node, 'div', style['bounds']);
 
     /*window.onmousemove =(e:MouseEvent)=>{
@@ -247,6 +252,8 @@ export class GameField extends Control{
 
       if (this.mode == 2){
         this.mode = 0;
+        this.traceMap.setPathFinishPoint({x: cursorTile.x, y: cursorTile.y})
+
         this.selectedUnit.target= new Vector(cursor.x, cursor.y);
         this.selectedUnit.attackTarget = null;
         this.objects.forEach(it=>{
@@ -345,6 +352,10 @@ export class GameField extends Control{
     
     unit.name = name;
     unit.onClick = ()=>{
+      const cursorTile = this.getTileCursor();
+      console.log('Tile', cursorTile, unit)
+      this.traceMap.activeUnitCoordinates(cursorTile)
+
       this.selectedUnit = unit;
       this.mode = 2;
     }
@@ -422,6 +433,8 @@ export class GameField extends Control{
       this.objects = this.objects.filter(it=>it!=object);
     }
     this.objects.push(object);
+    console.log('***', this.objects)
+    this.traceMap.addObjectData(object)
   }
 
   renderObjects(ctx:CanvasRenderingContext2D){
@@ -441,7 +454,7 @@ export class GameField extends Control{
 
   renderUnits(ctx:CanvasRenderingContext2D, delta:number){
     this.units.forEach(it=>{
-      it.step(delta);
+      it.step(delta,this.traceMap);
       this.drawUnit(ctx, it.position, this.position, it.isHovered?"#9999":colors[it.player]);
       this.addMtx(view,Math.floor(it.position.x/this.sz), Math.floor(it.position.y/this.sz), new Vector(2,2));
     });
