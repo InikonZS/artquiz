@@ -33,13 +33,12 @@ export class GamePlayer{
   setBuilds(build: IBuildInfo) {
     this.money -= build.cost;
     this.builds.push(build);
-    console.log(this.builds)
     this.onUpdateBuild.emit();
   }
 
   setUnit(unit: IUnitInfo) {
-    this.units.push(unit);
     this.money -= unit.cost;
+    this.units.push(unit);    
   }
 
   getEnergy():{incoming:number, outcoming:number}{

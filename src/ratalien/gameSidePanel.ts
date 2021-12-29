@@ -21,7 +21,6 @@ export class GameSide extends Control{
     this.updateBuildHandler = () => {
       this.createBuild();
       this.createUnits();
-      this.updateMoney();
     }
     player.onUpdateBuild.add(this.updateBuildHandler);
 
@@ -33,15 +32,15 @@ export class GameSide extends Control{
     const buildingsW = new Control(buildItems.node, 'div', red["builds_column"]);
     this.buildings = new Control(buildingsW.node, 'div', red["column_items"]);
     this.createBuild();
-    this.updateMoney();
+    this.updateMoney(player.money);
     
     const unitsW = new Control(buildItems.node, 'div', red["builds_column"]);
     this.units = new Control(unitsW.node, 'div', red["column_items"]);
     this.createUnits();
   } 
   
-  updateMoney(){
-    this.money.node.textContent = this.model.money.toString();
+  updateMoney(value: number){
+    this.money.node.textContent = Math.round(value).toString();
   }
 
   createUnits() {
@@ -53,11 +52,15 @@ export class GameSide extends Control{
       //let isBuilded = false;
       let progress = 0;
       unit.node.onclick = ()=>{
-        if (isBuilding ==false&&this.isReadingUnit==false){
+        if (isBuilding == false && this.isReadingUnit == false) {
+          let money = this.model.money;
+          const cost = it.cost/it.time;
           isBuilding = true;
           this.isReadingUnit = true;
           let intId = setInterval(()=>{
-            progress+=1;
+            progress += 1;
+            this.updateMoney(money - cost);
+            money -= cost;
             unit.node.textContent = `${it.name} - ${(progress*10).toFixed(0)} / ${it.time*10}`;
             if (progress >= it.time){
               progress = 0;
@@ -66,6 +69,7 @@ export class GameSide extends Control{
               isBuilding = false;
               this.isReadingUnit = false;
               this.onUnitReady(it.name);
+              this.model.setUnit(it);
               clearInterval(intId);
             }
           }, 300);
@@ -85,11 +89,15 @@ export class GameSide extends Control{
       let isBuilded = false;
       let progress = 0;
       build.node.onclick = ()=>{
-        if (isBuilded == false && isBuilding ==false&&this.isReadingBuild == false){
+        if (isBuilded == false && isBuilding == false && this.isReadingBuild == false) {
+          let money = this.model.money;
+          const cost = it.cost/(it.time/10);
           isBuilding = true;
           this.isReadingBuild = true;
           let intId = setInterval(()=>{
-            progress+=1;
+            progress += 1;
+            this.updateMoney(money - cost);
+            money -= cost;
             build.node.textContent = `${name} - ${(progress*10).toFixed(0)} / ${it.time}`;
             if (progress >= it.time/10){
               progress = 1;
