@@ -11,13 +11,16 @@ export class GameSide extends Control{
   buildings: Control<HTMLElement>;
   dataBuild: Control<HTMLElement>[]=[];
   money: Control<HTMLElement>;
-  isReading:boolean = false;
+  isReadingBuild: boolean = false;
+  isReadingUnit:boolean = false;
+  units: Control<HTMLElement>;
 
   constructor(parentNode: HTMLElement, player: GamePlayer){
     super(parentNode, 'div', red['game_side']);
     this.model = player;
     this.updateBuildHandler = () => {
       this.createBuild();
+      this.createUnits();
       this.updateMoney();
     }
     player.onUpdateBuild.add(this.updateBuildHandler);
@@ -33,35 +36,42 @@ export class GameSide extends Control{
     this.updateMoney();
     
     const unitsW = new Control(buildItems.node, 'div', red["builds_column"]);
-    const units = new Control(unitsW.node, 'div', red["column_items"]);
-    const uns = ['msu', 'csu', 'tcu', 'asd'];
+    this.units = new Control(unitsW.node, 'div', red["column_items"]);
+    this.createUnits();
+  } 
+  
+  updateMoney(){
+    this.money.node.textContent = this.model.money.toString();
+  }
+
+  createUnits() {
+    this.units.node.textContent = '';
+    const uns = this.model.getAvailableUnits();
     uns.forEach(it=>{
-      const unit = new Control(units.node, 'div', red["builds_item"], it);
+      const unit = new Control(this.units.node, 'div', red["builds_item"], it.name);
       let isBuilding = false;
       //let isBuilded = false;
       let progress = 0;
       unit.node.onclick = ()=>{
-        if (isBuilding ==false){
+        if (isBuilding ==false&&this.isReadingUnit==false){
           isBuilding = true;
+          this.isReadingUnit = true;
           let intId = setInterval(()=>{
-            progress+=0.1;
-            unit.node.textContent = `${it} - ${(progress*100).toFixed(0)} / 100`;
-            if (progress >= 1){
+            progress+=1;
+            unit.node.textContent = `${it.name} - ${(progress*10).toFixed(0)} / ${it.time*10}`;
+            if (progress >= it.time){
               progress = 0;
-              unit.node.textContent = it;//`${it} - ready`;
+              unit.node.textContent = it.name;//`${it} - ready`;
               //isBuilded = true;
               isBuilding = false;
-              this.onUnitReady(it);
+              this.isReadingUnit = false;
+              this.onUnitReady(it.name);
               clearInterval(intId);
             }
           }, 300);
         }  
       }
     });
-  } 
-  
-  updateMoney(){
-    this.money.node.textContent = this.model.money.toString();
   }
 
   createBuild() {
@@ -75,9 +85,9 @@ export class GameSide extends Control{
       let isBuilded = false;
       let progress = 0;
       build.node.onclick = ()=>{
-        if (isBuilded == false && isBuilding ==false&&this.isReading == false){
+        if (isBuilded == false && isBuilding ==false&&this.isReadingBuild == false){
           isBuilding = true;
-          this.isReading = true;
+          this.isReadingBuild = true;
           let intId = setInterval(()=>{
             progress+=1;
             build.node.textContent = `${name} - ${(progress*10).toFixed(0)} / ${it.time}`;
@@ -95,7 +105,7 @@ export class GameSide extends Control{
             isBuilded = false; 
             progress = 0;
             build.node.textContent = name;
-            this.isReading = false;
+            this.isReadingBuild = false;
             this.model.setBuilds(it);
           });
         }

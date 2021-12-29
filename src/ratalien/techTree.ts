@@ -114,6 +114,7 @@ const techCenter = {
 const solder = {
   deps: ["barracs"],
   spawn: ["barracs"],
+  name: 'solder',
   cost: 100,
   time: 5
 }
@@ -121,6 +122,7 @@ const solder = {
 const dog = {
   deps: ["dogHouse"],
   spawn: ["dogHouse"],
+  name: 'dog',
   cost: 150,
   time: 5
 }
@@ -128,6 +130,7 @@ const dog = {
 const tank = {
   deps: ["carFactory"],
   spawn: ["carFactory"],
+  name: 'tank',
   cost: 700,
   time: 20
 }
@@ -135,6 +138,7 @@ const tank = {
 const truck = {
   deps: ["carFactory"],
   spawn: ["carFactory"],
+  name: 'truck',
   cost: 1000,
   time: 30
 }
@@ -142,6 +146,7 @@ const truck = {
 const heavyTank = {
   deps: ["carFactory", "techCenter"],
   spawn: ["carFactory"],
+  name: 'heavy tank',
   cost: 1500,
   time: 50
 }
@@ -149,6 +154,7 @@ const heavyTank = {
 const bomber = {
   deps: ["barracs", "techCenter"],
   spawn: ["barracs"],
+  name: 'bomber',
   cost: 1000,
   time: 20
 }
