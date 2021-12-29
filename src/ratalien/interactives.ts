@@ -1,4 +1,5 @@
 import {Vector, IVector} from "../common/vector";
+import {TraceMap} from "./traceMap";
 
 export class InteractiveObject{
   isHovered: boolean;
@@ -77,9 +78,12 @@ export class UnitObject extends InteractiveObject{
   attackTarget: {damage:(amount:number)=>void, position:IVector} = null;
   player:number;
   time: number= 0;
+  private _stepIndex: number;
 
   constructor(){
     super();
+    this._stepIndex = 1
+
   }
 
   inShape(tile:Vector){
@@ -90,20 +94,52 @@ export class UnitObject extends InteractiveObject{
     return false;
   }
 
-  step(delta:number){
+  step(delta:number,traceMap: TraceMap){
         //fix logic atack and move
+
     this.time -= delta;
-    if (this.target){
-      this.position = new Vector(this.position.x, this.position.y).add(new Vector(this.position.x, this.position.y).sub(this.target).normalize().scale(-this.speed));
-      if (new Vector(this.position.x, this.position.y).sub(this.target).abs()<5){
-        this.target = null;
+    const stepIndex = Math.floor(this._stepIndex);
+    if (this.target) {
+      //TODO check Tile quarter-> offset insideTile
+      const path = traceMap.getPath()
+      if (path && stepIndex < path.length) {
+        const pathVector = new Vector(path[stepIndex].x * 55+55/2, path[stepIndex].y * 55+55/2)
+        /*this.position = pathVector.clone()
+          .add(pathVector
+            .sub(this.target).normalize().scale(-this.speed));*/
+            this.position = new Vector(this.position.x, this.position.y).add(new Vector(this.position.x, this.position.y).sub(pathVector).normalize().scale(-this.speed));
+         
+
+        if (new Vector(this.position.x, this.position.y).sub(this.target).abs() < 5) {
+          this.target = null;
+        }
+        
+        //this._stepIndex+=0.1;
+        //теперь он ходит плавно
+        if (new Vector(this.position.x, this.position.y).sub(pathVector).abs()<this.speed*2){
+          this.position = pathVector.clone()/*
+          .add(pathVector
+            .sub(this.target).normalize().scale(-this.speed));*/
+            this._stepIndex+=1;
+        }
+      }else if(path && stepIndex == path.length){
       }
-    } else {
+    }
+    // if (this.target){
+    //   this.position = new Vector(this.position.x, this.position.y).add(new Vector(this.position.x, this.position.y).sub(this.target).normalize().scale(-this.speed));
+    //   if (new Vector(this.position.x, this.position.y).sub(this.target).abs()<5){
+    //     this.target = null;
+    //   }
+    // }
+    else {
       
       this.attack(delta);
     }
   }
-
+clearStepIndex(){
+    console.log("index",this._stepIndex)
+  this._stepIndex=1
+}
   attack(delta:number){
     //fix logic atack and move
     if (this.attackTarget){

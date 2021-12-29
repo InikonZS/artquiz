@@ -5,8 +5,9 @@ import {Vector, IVector} from "../common/vector";
 import {GameSide} from "./gameSidePanel";
 import {MapObject, UnitObject} from "./interactives";
 import {BotPlayer} from "./botPlayer";
-import { GamePlayer, IBuildInfo } from "./gamePlayer";
 import { tech } from "./techTree";
+import {GamePlayer, IBuildInfo} from "./gamePlayer";
+import {TraceMap} from "./traceMap";
 
 const view = [
   '00100'.split(''),
@@ -78,7 +79,7 @@ export class Game extends Control{
   constructor(parentNode: HTMLElement){
     super(parentNode, 'div', red['global_wrapper']);
     this.node.onmouseleave = (e)=>{
-      console.log(e.offsetX, e.offsetY);
+     // console.log(e.offsetX, e.offsetY);
       if (e.offsetX>this.node.clientWidth){
         field.currentMove = moves[5]
       }
@@ -161,20 +162,25 @@ export class GameField extends Control{
   multiStart: Vector;
   selectedBuild: MapObject;
   primaries: Array<Record<string, MapObject>> =[{},{}];
+  private traceMap: TraceMap;
+  private startUnitsPosition: number;
 
   constructor(parentNode: HTMLElement){
     super(parentNode, 'div', red['game_field']);
     const canvas = new Control<HTMLCanvasElement>(this.node, 'canvas');
     this.canvas = canvas;
+    this.traceMap = new TraceMap()
+    const mapMap: Map<string, number> = new Map()
     this.map = [];
     for(let i = 0; i < 96; i++){
       let row = [];
       for(let j = 0; j < 96; j++){
         row.push(1);
+        mapMap.set(`${i}-${j}`, 1)
       }
       this.map.push(row);
     }
-    
+    this.traceMap.setMapData(mapMap)
     //const overlay = new Control(this.node, 'div', style['bounds']);
 
     /*window.onmousemove =(e:MouseEvent)=>{
@@ -230,6 +236,7 @@ export class GameField extends Control{
       const cursor = this.getPixelCursor();
       //this.addMtx(obj, cursorTile.x, cursorTile.y);
       if (this.mode ==0){
+
         this.objects.forEach(it=>{
          // it.handleMove(new Vector(tile.x, tile.y));
           it.handleClick(new Vector(cursorTile.x, cursorTile.y));
@@ -248,6 +255,8 @@ export class GameField extends Control{
 
       if (this.mode == 2){
         this.mode = 0;
+        this.traceMap.setPathFinishPoint({x: cursorTile.x, y: cursorTile.y})
+
         this.selectedUnit.target= new Vector(cursor.x, cursor.y);
         this.selectedUnit.attackTarget = null;
         this.objects.forEach(it=>{
@@ -256,6 +265,7 @@ export class GameField extends Control{
          });
         this.selectedUnit = null;
         //return;
+
       }
     }
     document.body.onmouseleave = ()=>{
@@ -277,6 +287,7 @@ export class GameField extends Control{
     const ctx = canvas.node.getContext('2d');
 
     this.tile = new Image();
+    this.startUnitsPosition=1
     this.tile.src = "./public/img/pictures/0.jpg";
     this.tile.onload = ()=>{
       render()
@@ -317,8 +328,10 @@ export class GameField extends Control{
   }
 //возможно, тут лучше передвать не нейм, а сам объект созданного солдата? 
   addUnit(player:number, name:string){
+    //TODO check is empty,else, check neighbor
   //  console.log(name);
     let unit = new UnitObject();
+    //console.log(unit)
     unit.player = player;
     unit.position = new Vector(20, 20); //for demo
     const spawn = tech.units.filter(item => item.name == name)[0].spawn[0];
@@ -331,8 +344,14 @@ export class GameField extends Control{
     
     unit.name = name;
     unit.onClick = ()=>{
+      const cursorTile = this.getTileCursor();
+      unit.clearStepIndex()
+      this.traceMap.clearData()
+      this.traceMap.activeUnitCoordinates(unit,cursorTile)
+      console.log(this.units)
       this.selectedUnit = unit;
       this.mode = 2;
+
     }
     unit.onMouseEnter = ()=>{
       this.hoveredUnit.push(unit);
@@ -340,6 +359,7 @@ export class GameField extends Control{
     unit.onMouseLeave = ()=>{
       this.hoveredUnit = this.hoveredUnit.filter(it=>it!=unit);
     }
+
     this.units.push(unit);
   }
 
@@ -384,7 +404,7 @@ export class GameField extends Control{
 
     object.onClick = ()=>{
       //object.health -=1;
-      console.log(object.name);
+    //  console.log(object.name);
       if ( this.selectedUnit && object.player!==0){
         console.log(this.selectedUnit);
         this.selectedUnit.attackTarget = object;
@@ -408,6 +428,8 @@ export class GameField extends Control{
       this.objects = this.objects.filter(it=>it!=object);
     }
     this.objects.push(object);
+    //console.log('***', this.objects)
+    this.traceMap.addObjectData(object)
   }
 
   renderObjects(ctx:CanvasRenderingContext2D){
@@ -427,7 +449,7 @@ export class GameField extends Control{
 
   renderUnits(ctx:CanvasRenderingContext2D, delta:number){
     this.units.forEach(it=>{
-      it.step(delta);
+      it.step(delta,this.traceMap);
       this.drawUnit(ctx, it.position, this.position, it.isHovered?"#9999":colors[it.player]);
       this.addMtx(view,Math.floor(it.position.x/this.sz), Math.floor(it.position.y/this.sz), new Vector(2,2));
     });
