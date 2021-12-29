@@ -1,8 +1,31 @@
 import { Vector } from "../common/vector";
+import { tech } from './techTree';
 
+export interface IBuildInfo{
+  desc:Array<string>,
+  energy:number,
+  deps: Array<string>,
+  name: string,
+  time:number,
+  cost:number
+}
+
+interface IUnitInfo{
+  spawn:Array<string>,
+  deps: Array<string>,
+  name: string,
+  time:number,
+  cost: number,
+  radius: number,
+  speed: number,
+  minRadius: number, 
+  reloadingTime: number,
+}
 export class BotPlayer{
   startPoint: Vector;
   radius: number = 0;
+  builds: Array<IBuildInfo> = [];
+  units:Array<IUnitInfo> = [];
   //onMove:(pos:Vector)=>void;
   onBuild:(pos:Vector)=>void;
   onUnit:()=>void;
@@ -12,6 +35,30 @@ export class BotPlayer{
     this.startPoint = startPoint;
     this.randomMove();
   }
+  setBuilds(build: IBuildInfo) {
+    this.builds.push(build);
+    //this.onUpdateBuild.emit();
+  }
+
+  setUnit(unit: IUnitInfo) {
+    this.units.push(unit);    
+  }
+  
+  getAvailableBuilds():Array<IBuildInfo> {
+    if (!this.builds.length) {
+      return tech.builds.filter(item => item.deps.includes('rootAccess'));
+    }
+    const nameBuild = Array.from(new Set(this.builds.map(item => item.desc[0])));
+
+    return tech.builds.filter(item => item.deps.includes('rootAccess'))
+      .concat(tech.builds.filter(item => item.deps.every(elem=>nameBuild.includes(elem))));
+  }
+
+  getAvailableUnits(): Array<IUnitInfo>{
+    const nameBuild = this.builds.map(item => item.desc[0]);
+    return tech.units.filter(item=>item.deps.every(elem=>nameBuild.includes(elem)))
+  }
+
 
   randomMove(){
     setTimeout(()=>{
