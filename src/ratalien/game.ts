@@ -109,7 +109,7 @@ export class Game extends Control{
     }
 
     botPlayer.onUnit = ()=>{
-      field.addUnit(1, 'csu');
+      field.addUnit(1, 'solder');
     }
 
     //botPlayer.
@@ -383,6 +383,7 @@ export class GameField extends Control{
   }
 
   addObject(player:number, obj:{name:string, mtx:Array<Array<string>>}, x:number, y:number){
+
     let object = new MapObject();
     object.tiles = obj.mtx.map(it=>it.map(jt=>parseInt(jt)));
     object.name = obj.name;
