@@ -14,7 +14,11 @@ interface IUnitInfo{
   deps: Array<string>,
   name: string,
   time:number,
-  cost:number,
+  cost: number,
+  radius: number,
+  speed: number,
+  minRadius: number, 
+  reloadingTime: number,
 }
 
 export class GamePlayer{
