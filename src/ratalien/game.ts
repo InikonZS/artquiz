@@ -78,7 +78,7 @@ export class Game extends Control{
   constructor(parentNode: HTMLElement){
     super(parentNode, 'div', red['global_wrapper']);
     this.node.onmouseleave = (e)=>{
-      console.log(e.offsetX, e.offsetY);
+     // console.log(e.offsetX, e.offsetY);
       if (e.offsetX>this.node.clientWidth){
         field.currentMove = moves[5]
       }
@@ -162,6 +162,7 @@ export class GameField extends Control{
   selectedBuild: MapObject;
   primaries: Array<Record<string, MapObject>> =[{},{}];
   private traceMap: TraceMap;
+  private startUnitsPosition: number;
 
   constructor(parentNode: HTMLElement){
     super(parentNode, 'div', red['game_field']);
@@ -234,6 +235,7 @@ export class GameField extends Control{
       const cursor = this.getPixelCursor();
       //this.addMtx(obj, cursorTile.x, cursorTile.y);
       if (this.mode ==0){
+
         this.objects.forEach(it=>{
          // it.handleMove(new Vector(tile.x, tile.y));
           it.handleClick(new Vector(cursorTile.x, cursorTile.y));
@@ -262,6 +264,7 @@ export class GameField extends Control{
          });
         this.selectedUnit = null;
         //return;
+
       }
     }
     document.body.onmouseleave = ()=>{
@@ -283,6 +286,7 @@ export class GameField extends Control{
     const ctx = canvas.node.getContext('2d');
 
     this.tile = new Image();
+    this.startUnitsPosition=1
     this.tile.src = "./public/img/pictures/0.jpg";
     this.tile.onload = ()=>{
       render()
@@ -323,11 +327,13 @@ export class GameField extends Control{
   }
 
   addUnit(player:number, name:string){
+    //TODO check is empty,else, check neighbor
   //  console.log(name);
     let unit = new UnitObject();
+    //console.log(unit)
     unit.player = player;
-    unit.position = new Vector(20, 20); //for demo
-
+    unit.position = new Vector(20*this.startUnitsPosition, 20*this.startUnitsPosition); //for demo
+this.startUnitsPosition++
     if (name =='msu'){
       let barrac = Object.values(this.primaries[player]).find(it=>it.name == 'ms');
       if (barrac){
@@ -348,16 +354,18 @@ export class GameField extends Control{
         unit.position = Vector.fromIVector({x:barrac.position.x*this.sz, y: barrac.position.y*this.sz});
       } 
     }
-    
+
     
     unit.name = name;
     unit.onClick = ()=>{
       const cursorTile = this.getTileCursor();
-      console.log('Tile', cursorTile, unit)
-      this.traceMap.activeUnitCoordinates(cursorTile)
-
+      unit.clearStepIndex()
+      this.traceMap.clearData()
+      this.traceMap.activeUnitCoordinates(unit,cursorTile)
+      console.log(this.units)
       this.selectedUnit = unit;
       this.mode = 2;
+
     }
     unit.onMouseEnter = ()=>{
       this.hoveredUnit.push(unit);
@@ -365,6 +373,7 @@ export class GameField extends Control{
     unit.onMouseLeave = ()=>{
       this.hoveredUnit = this.hoveredUnit.filter(it=>it!=unit);
     }
+
     this.units.push(unit);
   }
 
@@ -409,7 +418,7 @@ export class GameField extends Control{
 
     object.onClick = ()=>{
       //object.health -=1;
-      console.log(object.name);
+    //  console.log(object.name);
       if ( this.selectedUnit && object.player!==0){
         console.log(this.selectedUnit);
         this.selectedUnit.attackTarget = object;
@@ -433,7 +442,7 @@ export class GameField extends Control{
       this.objects = this.objects.filter(it=>it!=object);
     }
     this.objects.push(object);
-    console.log('***', this.objects)
+    //console.log('***', this.objects)
     this.traceMap.addObjectData(object)
   }
 

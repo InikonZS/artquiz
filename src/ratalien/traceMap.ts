@@ -1,4 +1,4 @@
-import {MapObject} from "./interactives";
+import {MapObject, UnitObject} from "./interactives";
 
 interface IPathPoint {
   x: number,
@@ -17,11 +17,13 @@ export class TraceMap {
   private finishTileCoordinates: Record<string, number>;
   private path: IPathPoint[];
 //TODO когда статус поменяется на mode 0, обнулить данные класса и изменить положение человечка там где они объявляются
+  private activeUnitsObj: UnitObject[];
   constructor() {
     this.matrixMap
     this.activeUnits = []
     this.finishTileCoordinates
     this.path
+    this.activeUnitsObj=[]
   }
 
   setMapData(map: Map<string, number>) {
@@ -38,13 +40,18 @@ export class TraceMap {
     }
   }
 
-  activeUnitCoordinates(coordinates: Record<string, number>) {
-    console.log(this.activeUnits,'&&')
+  activeUnitCoordinates(unit:UnitObject,coordinates: Record<string, number>) {
+    this.activeUnits.length>0 && (this.activeUnits.length=0)
+    console.log(this.activeUnits,'ActiveUnits')
+   const rrr= this.activeUnitsObj.filter((el)=>el===unit)
+    console.log('isHere',rrr)
+    this.activeUnitsObj.push(unit)
     this.activeUnits.push(coordinates)
   }
 
 //finish index=50
   setPathFinishPoint(coordinates: Record<string, number>) {
+
     this.finishTileCoordinates = coordinates
     this.matrixMap.set(`${coordinates.y}-${coordinates.x}`, 50);
     this.path = this.buildPath()
@@ -52,7 +59,8 @@ export class TraceMap {
   }
 
   buildPath() {
-    const matrixCopy=new Map(this.matrixMap)
+    let matrixCopy=new Map(this.matrixMap)
+    this.path && (this.path.length=0)
     const steps = [
       {x: -1, y: -1}, {x: -1, y: 1}, {x: 1, y: 1}, {x: 1, y: -1}, {x: -1, y: 0}, {x: 1, y: 0}, {
         x: 0,
@@ -61,8 +69,8 @@ export class TraceMap {
     ]
     const pathForOne = (startPointIndex: number) => {
       let isFinished = false
+      matrixCopy=new Map(this.matrixMap)
       const pathSteps: IPathPoint[] = []
-
       const makeStep = (data: IPathPoint) => {
         let currentStep = 1
         let arrIndex = 0
@@ -104,8 +112,8 @@ export class TraceMap {
           ind++
         } while (!isFinished)
       }
-      makeStep(this.activeUnits[0])
-      console.log('###', pathSteps)
+      makeStep(this.activeUnits[this.activeUnits.length-1])
+     // console.log('###', pathSteps)
 
       function getPath() {
         const path = []
@@ -125,13 +133,10 @@ export class TraceMap {
 
       const pathArray = getPath()
       console.log(pathArray)
-      // pathArray.forEach((p, i) => {
-      //   (i > 0 && i < pathArray.length - 2)
-      //   && (cellElements.get(`${p.y}-${p.x}`).style.background = 'yellow')
-      //
-      // })
+     // this.activeUnitsObj[0].position={x:pathArray[pathArray.length-1].x,y:pathArray[pathArray.length-1].y}
       return pathArray
     }
+
     return pathForOne(0)
   }
 
@@ -139,4 +144,10 @@ export class TraceMap {
     return this.path
   }
 
+  clearData() {
+    this.path=[]
+    this.activeUnits = []
+    this.finishTileCoordinates=null
+
+  }
 }

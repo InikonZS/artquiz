@@ -83,6 +83,7 @@ export class UnitObject extends InteractiveObject{
   constructor(){
     super();
     this.stepIndex = 0
+
   }
 
   inShape(tile:Vector){
@@ -97,22 +98,19 @@ export class UnitObject extends InteractiveObject{
         //fix logic atack and move
     this.time -= delta;
     if (this.target) {
-      //TODO unit each Step
+      //TODO check Tile quarter-> offset insideTile
       const path = traceMap.getPath()
       if (path && this.stepIndex < path.length) {
-        this.position = new Vector(path[this.stepIndex].x * 50 + 50, path[this.stepIndex].y * 50 + 50)
-          .add(new Vector(path[this.stepIndex].x * 50 + 50, path[this.stepIndex].y * 50 + 50)
+        this.position = new Vector(path[this.stepIndex].x * 55+20, path[this.stepIndex].y * 55+20)
+          .add(new Vector(path[this.stepIndex].x * 55+20, path[this.stepIndex].y * 55+20)
             .sub(this.target).normalize().scale(-this.speed));
 
         if (new Vector(this.position.x, this.position.y).sub(this.target).abs() < 5) {
           this.target = null;
         }
         this.stepIndex++
-      }else if(path && this.stepIndex < path.length){
-        console.log('TTTT')
+      }else if(path && this.stepIndex == path.length){
       }
-
-
     }
     // if (this.target){
     //   this.position = new Vector(this.position.x, this.position.y).add(new Vector(this.position.x, this.position.y).sub(this.target).normalize().scale(-this.speed));
@@ -125,7 +123,10 @@ export class UnitObject extends InteractiveObject{
       this.attack(delta);
     }
   }
-
+clearStepIndex(){
+    console.log("index",this.stepIndex)
+  this.stepIndex=0
+}
   attack(delta:number){
     //fix logic atack and move
     if (this.attackTarget){
