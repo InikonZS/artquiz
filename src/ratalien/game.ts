@@ -5,7 +5,8 @@ import {Vector, IVector} from "../common/vector";
 import {GameSide} from "./gameSidePanel";
 import {MapObject, UnitObject} from "./interactives";
 import {BotPlayer} from "./botPlayer";
-import {GamePlayer, IBuildInfo} from "./gamePlayer";
+import { GamePlayer, IBuildInfo } from "./gamePlayer";
+import { tech } from "./techTree";
 
 const view = [
   '00100'.split(''),
@@ -314,33 +315,18 @@ export class GameField extends Control{
       this.autoSizeCanvas();
     })
   }
-
+//возможно, тут лучше передвать не нейм, а сам объект созданного солдата? 
   addUnit(player:number, name:string){
   //  console.log(name);
     let unit = new UnitObject();
     unit.player = player;
     unit.position = new Vector(20, 20); //for demo
-
-    if (name =='msu'){
-      let barrac = Object.values(this.primaries[player]).find(it=>it.name == 'ms');
-      if (barrac){
-        unit.position = Vector.fromIVector({x:barrac.position.x*this.sz, y: barrac.position.y*this.sz});
-      } 
-    }
-
-    if (name =='csu'){
-      let barrac = Object.values(this.primaries[player]).find(it=>it.name == 'barracs');
-      if (barrac){
-        unit.position = Vector.fromIVector({x:barrac.position.x*this.sz, y: barrac.position.y*this.sz});
-      } 
-    }
-
-    if (name =='tcu' || name =='asd'){
-      let barrac = Object.values(this.primaries[player]).find(it=>it.name == 'tc');
-      if (barrac){
-        unit.position = Vector.fromIVector({x:barrac.position.x*this.sz, y: barrac.position.y*this.sz});
-      } 
-    }
+    const spawn = tech.units.filter(item => item.name == name)[0].spawn[0];
+    
+    let barrac = Object.values(this.primaries[player]).find(it=>it.name == spawn);
+    if (barrac){
+      unit.position = Vector.fromIVector({x:barrac.position.x*this.sz, y: barrac.position.y*this.sz});
+    } 
     
     
     unit.name = name;

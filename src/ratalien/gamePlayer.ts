@@ -11,9 +11,14 @@ export interface IBuildInfo{
 
 interface IUnitInfo{
   spawn:Array<string>,
-  deps:Array<string>,
+  deps: Array<string>,
+  name: string,
   time:number,
-  cost:number,
+  cost: number,
+  radius: number,
+  speed: number,
+  minRadius: number, 
+  reloadingTime: number,
 }
 
 export class GamePlayer{
@@ -32,8 +37,12 @@ export class GamePlayer{
   setBuilds(build: IBuildInfo) {
     this.money -= build.cost;
     this.builds.push(build);
-    console.log(this.builds)
     this.onUpdateBuild.emit();
+  }
+
+  setUnit(unit: IUnitInfo) {
+    this.money -= unit.cost;
+    this.units.push(unit);    
   }
 
   getEnergy():{incoming:number, outcoming:number}{
@@ -42,18 +51,19 @@ export class GamePlayer{
     return {incoming, outcoming};
   }
 
-  getAvailableBuilds()/*:Array<any>*/ {
+  getAvailableBuilds():Array<IBuildInfo> {
     if (!this.builds.length) {
       return tech.builds.filter(item => item.deps.includes('rootAccess'));
     }
-    const name = Array.from(new Set(this.builds.map(item => item.desc[0])));
+    const nameBuild = Array.from(new Set(this.builds.map(item => item.desc[0])));
 
     return tech.builds.filter(item => item.deps.includes('rootAccess'))
-      .concat(tech.builds.filter(item => item.deps.every(elem=>name.includes(elem))));
+      .concat(tech.builds.filter(item => item.deps.every(elem=>nameBuild.includes(elem))));
   }
 
-  getAvailableUnits():Array<any>{
-    return [];
+  getAvailableUnits(): Array<IUnitInfo>{
+    const nameBuild = this.builds.map(item => item.desc[0]);
+    return tech.units.filter(item=>item.deps.every(elem=>nameBuild.includes(elem)))
   }
 
   getMaxMoney():number{
