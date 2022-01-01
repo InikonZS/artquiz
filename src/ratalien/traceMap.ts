@@ -1,6 +1,6 @@
 import {MapObject, UnitObject} from "./interactives";
 
-interface IPathPoint {
+export interface IPathPoint {
   x: number,
   y: number,
   step?: number,

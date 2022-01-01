@@ -1,5 +1,5 @@
 import {Vector, IVector} from "../common/vector";
-import {TraceMap} from "./traceMap";
+import {TraceMap, IPathPoint} from "./traceMap";
 
 export class InteractiveObject{
   isHovered: boolean;
@@ -79,6 +79,7 @@ export class UnitObject extends InteractiveObject{
   player:number;
   time: number= 0;
   private _stepIndex: number;
+  path: IPathPoint[]; 
 
   constructor(){
     super();
@@ -101,7 +102,11 @@ export class UnitObject extends InteractiveObject{
     const stepIndex = Math.floor(this._stepIndex);
     if (this.target) {
       //TODO check Tile quarter-> offset insideTile
-      const path = traceMap.getPath()
+      if (!this.path){
+        this.path = traceMap.getPath()
+      }
+      const path = this.path;
+
       if (path && stepIndex < path.length) {
         const pathVector = new Vector(path[stepIndex].x * 55+55/2, path[stepIndex].y * 55+55/2)
         /*this.position = pathVector.clone()
@@ -112,6 +117,7 @@ export class UnitObject extends InteractiveObject{
 
         if (new Vector(this.position.x, this.position.y).sub(this.target).abs() < 5) {
           this.target = null;
+          this.path = null;
         }
         
         //this._stepIndex+=0.1;
@@ -121,6 +127,7 @@ export class UnitObject extends InteractiveObject{
           .add(pathVector
             .sub(this.target).normalize().scale(-this.speed));*/
             this._stepIndex+=1;
+            //this.path = traceMap.getPath();
         }
       }else if(path && stepIndex == path.length){
       }
@@ -138,7 +145,8 @@ export class UnitObject extends InteractiveObject{
   }
 clearStepIndex(){
     console.log("index",this._stepIndex)
-  this._stepIndex=1
+  this._stepIndex=1;
+  this.path = null;
 }
   attack(delta:number){
     //fix logic atack and move
