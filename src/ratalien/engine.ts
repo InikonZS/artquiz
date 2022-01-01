@@ -2,7 +2,7 @@ import Control from "../common/control";
 import Signal from "../common/signal";
 import {Vector, IVector} from "../common/vector";
 import { InteractiveObject } from "./interactives";
-import {getMapFromImageData, getImageData, loadImage, findPath, indexateAsync} from "./tracer";
+import {getMapFromImageData, getImageData, loadImage, findPath, indexateAsync, steps, tracePathes} from "./tracer";
 import mpfile from './map96.png';
 
 class BaseNode{
@@ -193,12 +193,34 @@ class RoundNode extends InteractiveObject{
 
   step(){
     if (this.target && this.tileChecker && !this.tileChecker(new Vector(Math.floor(this.target.x / 10), Math.floor(this.target.y / 10)))){
+      //this.target = this.getTilePosition().scale(10);
       this.position = this.getTilePosition().scale(10);
+      /*if (!this.path[this.path.length-1]) return;
+      let stp:Array<Vector> = [];
+      steps.forEach(step=>{
+        if (this.tileChecker(new Vector(Math.floor(this.getTilePosition().x + step.x), Math.floor(this.getTilePosition().y + step.y)))){ 
+          let ep = new Vector(Math.floor(this.getTilePosition().x + step.x), Math.floor(this.getTilePosition().y + step.y)).scale(10);
+          stp.push(ep);
+          //return true;
+        }
+        //return false;
+      })
+      let mv = null;
+      let ml = Number.MAX_SAFE_INTEGER;
+      stp.forEach(it=>{
+        let len = it.clone().sub(this.path[this.path.length-1]).abs();
+        if (len< ml){
+          ml = len;
+          mv = it;
+        }
+      });
+      this.target = mv;*/
       return;
     }
     if (this.target){
-      this.position = this.position.clone().add(this.target.clone().sub(this.position).normalize().scale(3.5));
-      if (this.position.clone().sub(this.target).abs()<=3.5){
+      const speed = 0.5;
+      this.position = this.position.clone().add(this.target.clone().sub(this.position).normalize().scale(speed));
+      if (this.position.clone().sub(this.target).abs()<=speed){
         this.position = this.target.clone();
         if (this.path && this.path.length){
           this.target = this.path.pop().clone().scale(10);
@@ -306,6 +328,7 @@ export class MainCanvas extends Control{
   mainSlot: MainSlot;
   map: GameMap;
   renderList: RenderList;
+  pathes: Vector[][];
   constructor(parentNode:HTMLElement){
     super(parentNode, 'div');
     const canvas = new Control<HTMLCanvasElement>(this.node, 'canvas');
@@ -316,7 +339,8 @@ export class MainCanvas extends Control{
     const renderList = new RenderList();
     this.renderList = renderList;
     this.mainSlot = new MainSlot();
-    const pathes:Array<Array<Vector>> = [];
+    let pathes:Array<Array<Vector>> = [];
+    this.pathes = pathes;
 
     const map = new GameMap();
     this.map = map;
@@ -327,7 +351,7 @@ export class MainCanvas extends Control{
       if (e.button == 2) {
         let mp = map.map.map(it=>it.map(jt=>jt==0?Number.MAX_SAFE_INTEGER:-1));
         let indexPoint = {x:Math.floor(e.offsetX/10), y:Math.floor(e.offsetY/10)};
-        indexateAsync(mp, [indexPoint], 0, ()=>{
+        /*indexateAsync(mp, [indexPoint], 0, ()=>{
           this.mainSlot.list.forEach(unit=>{
             //if (!indexPoint) { return;}
             let path = findPath(mp, Vector.fromIVector(indexPoint), new Vector(Math.floor(unit.position.x/10)*1, Math.floor(unit.position.y/10)*1));
@@ -337,7 +361,18 @@ export class MainCanvas extends Control{
               console.log(path);
             }
           });
-        }, Date.now())
+        }, Date.now())*/
+        const destinations = this.mainSlot.list.map(unit=>{
+          return new Vector(Math.floor(unit.position.x/10), Math.floor(unit.position.y/10))
+        });
+        const units = [...this.mainSlot.list];
+        tracePathes(mp, indexPoint, destinations, (pathes)=>{
+          this.pathes = pathes;
+          pathes.forEach((path, i)=>{
+            const unit = units[i];
+            unit.setPath(path, (pos)=>this.isEmptyTile(pos, unit));
+          })
+        })
         return; 
       } 
       //if (this.mode != 0) return;
@@ -381,10 +416,10 @@ export class MainCanvas extends Control{
       context.clearRect(0,0, 800, 600);
       map.render(context, time, new Vector(0, 0));
       renderList.render(context, time, new Vector(0,0));
-      pathes.forEach(it=>{
+      this.pathes.forEach(it=>{
         it.forEach(point=>{
-          context.fillStyle = '#0ff';
-         // context.fillRect(point.x * 10, point.y* 10, 10, 10);
+          context.fillStyle = '#0ff2';
+          context.fillRect(point.x * 10, point.y* 10, 10, 10);
         });
       })
       context.fillStyle = "#0003";

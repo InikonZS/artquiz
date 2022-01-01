@@ -24,7 +24,7 @@ function generateEmptyMap(width:number, height:number){
   return map;
 }
 
-const steps = [
+export const steps = [
   {x: -1, y: 0}, {x: 1, y: 0}, {
    x: 0,
    y: 1
@@ -50,22 +50,49 @@ function iteration(map:Array<Array<number>>, points:Array<{x:number, y:number}>,
 
 export function indexate(map:Array<Array<number>>, points:Array<{x:number, y:number}>, generation:number){
   const nextPoints = iteration(map, points, generation);
-  if (!points.length) { return; }
-  /*points.forEach(point=>{
-    steps.forEach(step=>{
-      const px = point.x+step.x;
-      const py = point.y+step.y;
-      const row = map[py];
-      if (row && row[px]!=null && row[px]>generation){
-        row[px] = generation;
-        nextPoints.push({x:px, y:py});
-      }
-    })
-  });*/
+  if (!points.length) { return generation; }
   indexate(map, nextPoints, generation+1);
 }
 
-export function indexateAsync(map:Array<Array<number>>, points:Array<{x:number, y:number}>, generation:number, onFinish:()=>void, startTime?:number){
+export function* indexGenerator(map:Array<Array<number>>, points:Array<{x:number, y:number}>, generation:number){
+  let gen = generation;
+  let nextPoints = points;
+  do {
+    nextPoints = iteration(map, nextPoints, gen);
+    gen+=1;
+    yield {generation:gen, points:nextPoints};
+  } while (nextPoints.length); 
+  return {gen};
+  //indexGenerator(map, nextPoints, generation+1);
+}
+
+/*export function indexateAsync( map:Array<Array<number>>, points:Array<{x:number, y:number}>, generation:number, onFinish:()=>void){
+  let gen = indexGenerator(map, points, generation);
+  indexateAsyncGen(gen, map, points, generation, onFinish, Date.now());
+}*/
+
+export function indexateAsync( map:Array<Array<number>>, points:Array<{x:number, y:number}>, generation:number, onFinish:()=>void, startTime?:number){
+  let gen = indexGenerator(map, points, generation);
+  let iterationStart = new Date();
+  let res:any;
+
+  const chunkLength = 300;
+  for (let i=0; i<chunkLength; i++){
+    res = gen.next();  
+    if (res.done){
+      break;
+    }
+  }
+  if (res.done){
+    console.log('finished ', (new Date()).valueOf() - startTime.valueOf());
+    onFinish();
+  }else {
+    setTimeout(()=>{
+      console.log('iteration '+ generation.toString(), (new Date()).valueOf() - iterationStart.valueOf());
+      indexateAsync( map, res.value.points, res.value.generation, onFinish, startTime);
+    }, 0);
+  }
+
   //let startTime = new Date();
   /*setTimeout(()=>{
     let iterationStart = new Date();
@@ -80,9 +107,30 @@ export function indexateAsync(map:Array<Array<number>>, points:Array<{x:number, 
     //}
     indexateAsync(map, nextPoints, generation+1, onFinish, startTime);
   }, 0);*/
-  indexate(map, points, generation);
-  console.log('finished ', (new Date()).valueOf() - startTime.valueOf());
-  onFinish();
+  //indexate(map, points, generation);
+  //console.log('finished ', (new Date()).valueOf() - startTime.valueOf());
+  //onFinish();
+}
+
+
+export function tracePath(map:Array<Array<number>>, indexPoint:IVector, destination:IVector, onFinish:(path:Array<Vector>)=>void){
+  indexateAsync(map, [indexPoint], 0, ()=>{
+    const path = findPath(map, Vector.fromIVector(indexPoint), Vector.fromIVector(destination));
+    onFinish(path);
+  }, Date.now())
+}
+
+export function tracePathes(map:Array<Array<number>>, indexPoint:IVector, destinations:Array<IVector>, onFinish:(pathes:Array<Array<Vector>>)=>void){
+  const pathes: Array<Array<Vector>> = [];
+  indexateAsync(map, [indexPoint], 0, ()=>{
+    destinations.forEach(destination=>{
+      const path = findPath(map, Vector.fromIVector(indexPoint), Vector.fromIVector(destination));
+      if (path){
+        pathes.push(path);
+      }
+    });
+    onFinish(pathes);
+  }, Date.now())
 }
 
 export function findPath(map:Array<Array<number>>, indexPoint:Vector, destPoint:Vector){
