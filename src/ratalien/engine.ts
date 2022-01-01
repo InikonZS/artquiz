@@ -142,6 +142,7 @@ class RoundNode extends InteractiveObject{
   selected: boolean = false;
   path:Array<Vector> = [];
   target:Vector = null;
+  tileChecker: (pos: Vector) => boolean;
 
   constructor(){
     super();
@@ -166,7 +167,7 @@ class RoundNode extends InteractiveObject{
     ctx.strokeStyle = "#000";
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.ellipse(camera.x + this.position.x, camera.y+ this.position.y, sz, sz, 0, 0, Math.PI*2);
+    ctx.ellipse(camera.x+5 + this.position.x, camera.y+ this.position.y+5, sz, sz, 0, 0, Math.PI*2);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
@@ -180,14 +181,24 @@ class RoundNode extends InteractiveObject{
     this.selected = false;
   }
 
-  setPath(path:Array<Vector>){
+  setPath(path:Array<Vector>, tileChecker:(pos:Vector)=>boolean){
     this.path = [...path].reverse();
+    this.target = this.path.pop().clone().scale(10);
+    this.tileChecker = tileChecker;
+  }
+
+  getTilePosition(){
+    return new Vector(Math.floor(this.position.x / 10), Math.floor(this.position.y / 10));
   }
 
   step(){
+    if (this.target && this.tileChecker && !this.tileChecker(new Vector(Math.floor(this.target.x / 10), Math.floor(this.target.y / 10)))){
+      this.position = this.getTilePosition().scale(10);
+      return;
+    }
     if (this.target){
-      this.position = this.position.clone().add(this.target.clone().sub(this.position).normalize().scale(2.5));
-      if (this.position.clone().sub(this.target).abs()<=2.5){
+      this.position = this.position.clone().add(this.target.clone().sub(this.position).normalize().scale(3.5));
+      if (this.position.clone().sub(this.target).abs()<=3.5){
         this.position = this.target.clone();
         if (this.path && this.path.length){
           this.target = this.path.pop().clone().scale(10);
@@ -213,7 +224,7 @@ class MultiSelect{
 interface ISelectable{
   select:()=>void;
   unselect:()=>void;
-  setPath:(path:Array<Vector>)=>void;
+  setPath:(path:Array<Vector>, tileChecker:(pos:Vector)=>boolean)=>void;
   position: Vector;
 }
 
@@ -293,6 +304,8 @@ export class MainCanvas extends Control{
   multiSelect:MultiSelect;
   cursor: Vector;
   mainSlot: MainSlot;
+  map: GameMap;
+  renderList: RenderList;
   constructor(parentNode:HTMLElement){
     super(parentNode, 'div');
     const canvas = new Control<HTMLCanvasElement>(this.node, 'canvas');
@@ -301,10 +314,12 @@ export class MainCanvas extends Control{
     const context = canvas.node.getContext('2d');
     this.engine = new Engine();
     const renderList = new RenderList();
+    this.renderList = renderList;
     this.mainSlot = new MainSlot();
     const pathes:Array<Array<Vector>> = [];
 
     const map = new GameMap();
+    this.map = map;
     map.loadFromFile(mpfile);
 
     canvas.node.onmousedown =e=>{
@@ -318,7 +333,7 @@ export class MainCanvas extends Control{
             let path = findPath(mp, Vector.fromIVector(indexPoint), new Vector(Math.floor(unit.position.x/10)*1, Math.floor(unit.position.y/10)*1));
             if (path){
               pathes.push(path.map(it=>it));
-              unit.setPath(path);
+              unit.setPath(path, (pos)=>this.isEmptyTile(pos, unit));
               console.log(path);
             }
           });
@@ -369,7 +384,7 @@ export class MainCanvas extends Control{
       pathes.forEach(it=>{
         it.forEach(point=>{
           context.fillStyle = '#0ff';
-          context.fillRect(point.x * 10, point.y* 10, 10, 10);
+         // context.fillRect(point.x * 10, point.y* 10, 10, 10);
         });
       })
       context.fillStyle = "#0003";
@@ -378,7 +393,7 @@ export class MainCanvas extends Control{
         //context.fillRect(this.multiStart.x, this.multiStart.y, -this.multiStart.x + this.cursor.x, -this.multiStart.y + this.cursor.y)
       }
     })
-    for (let i =0; i< 10; i++){
+    for (let i =0; i< 40; i++){
       const round = new RoundNode();
       round.position = new Vector(Math.random()*800, Math.random()*600);
       round.color = "#f00";
@@ -386,6 +401,19 @@ export class MainCanvas extends Control{
     }
     //this.engine.rootNode.append(renderList);
     this.engine.start();
+  }
+
+  isEmptyTile(pos:Vector, unit:any){
+    if (this.map.map[pos.y][pos.x]!=0) return false;
+    let result = this.renderList.list.find(it=>{
+      if (unit == it) return false;
+      const near = (it as RoundNode).getTilePosition().sub(pos).abs();
+      //if (near< 20){
+       // console.log(near);
+      //}
+      return near<1;
+    });
+    return result == null;
   }
 }
 
