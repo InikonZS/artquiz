@@ -142,7 +142,10 @@ class RoundNode extends InteractiveObject{
   selected: boolean = false;
   path:Array<Vector> = [];
   target:Vector = null;
+  attackTarget:Vector = null;
   tileChecker: (pos: Vector) => boolean;
+  reloadTime: number = 0;
+  bullet: Vector;
 
   constructor(){
     super();
@@ -171,6 +174,26 @@ class RoundNode extends InteractiveObject{
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
+    if (this.bullet){
+      this.bullet.sub(this.bullet.clone().sub(this.attackTarget).normalize());
+      if (this.bullet.clone().sub(this.attackTarget).abs()<1){
+        this.bullet = null;
+        return;
+      }
+      this.renderBullet(ctx, time, camera);
+    }
+  }
+
+  renderBullet(ctx:CanvasRenderingContext2D, time:number, camera:Vector){
+    const sz = 2;
+    ctx.fillStyle = "#0ff";
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.ellipse(camera.x+5 + this.bullet.x, camera.y+ this.bullet.y+5, sz, sz, 0, 0, Math.PI*2);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
   }
 
   select(){
@@ -191,10 +214,18 @@ class RoundNode extends InteractiveObject{
     return new Vector(Math.floor(this.position.x / 10), Math.floor(this.position.y / 10));
   }
 
+  shot(){
+    if (this.reloadTime<=0){
+      this.bullet = this.position.clone();
+      this.reloadTime = 300;
+    }
+  }
+
   step(){
+    this.reloadTime--;
     if (this.target && this.tileChecker && !this.tileChecker(new Vector(Math.floor(this.target.x / 10), Math.floor(this.target.y / 10)))){
       //this.target = this.getTilePosition().scale(10);
-      this.position = this.getTilePosition().scale(10);
+      //this.position = this.getTilePosition().scale(10);
       /*if (!this.path[this.path.length-1]) return;
       let stp:Array<Vector> = [];
       steps.forEach(step=>{
@@ -229,6 +260,15 @@ class RoundNode extends InteractiveObject{
     }else {
       if (this.path && this.path.length){
         this.target = this.path.pop().clone().scale(10);
+      }
+    }
+
+    if (this.attackTarget){
+      let dist = this.attackTarget.clone().sub(this.position).abs();
+      if (dist < 100){
+        this.target = null;
+        this.path = null;
+        this.shot();
       }
     }
   } 
@@ -271,8 +311,9 @@ class GameMap{
   map:Array<Array<number>> = [[]];
   sz = 10;
   canvas: HTMLCanvasElement;
-  constructor(){
-
+  textures: Record<string, HTMLImageElement>;
+  constructor(textures:Record<string, HTMLImageElement>){
+    this.textures = textures;
   }
 
   loadFromFile(src:string):Promise<GameMap>{
@@ -293,8 +334,10 @@ class GameMap{
     ctx.beginPath();
     ctx.rect(camera.x + position.x * sz, camera.y+ position.y *sz, sz, sz);
     ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
+    //ctx.fill();
+    //ctx.stroke();
+    ctx.drawImage(this.textures['grass'], camera.x + position.x * sz, camera.y+ position.y *sz, sz, sz);
+    ctx.drawImage(this.textures[color=='#f00'?'grass':'rocks'], camera.x + position.x * sz, camera.y+ position.y *sz, sz, sz);
   }
 
   preRender(){
@@ -329,7 +372,7 @@ export class MainCanvas extends Control{
   map: GameMap;
   renderList: RenderList;
   pathes: Vector[][];
-  constructor(parentNode:HTMLElement){
+  constructor(parentNode:HTMLElement, textures: Record<string, HTMLImageElement>){
     super(parentNode, 'div');
     const canvas = new Control<HTMLCanvasElement>(this.node, 'canvas');
     canvas.node.width = 800;
@@ -342,7 +385,7 @@ export class MainCanvas extends Control{
     let pathes:Array<Array<Vector>> = [];
     this.pathes = pathes;
 
-    const map = new GameMap();
+    const map = new GameMap(textures);
     this.map = map;
     map.loadFromFile(mpfile);
 
@@ -371,6 +414,7 @@ export class MainCanvas extends Control{
           pathes.forEach((path, i)=>{
             const unit = units[i];
             unit.setPath(path, (pos)=>this.isEmptyTile(pos, unit));
+            (unit as RoundNode).attackTarget = Vector.fromIVector(indexPoint).scale(10);
           })
         })
         return; 
