@@ -327,7 +327,7 @@ class GameMap{
   }
 
   drawTile(ctx:CanvasRenderingContext2D, position:IVector, camera:IVector, color:string){
-    const sz = this.sz;
+    const sz = 52//this.sz;
     ctx.fillStyle = color;
     ctx.strokeStyle = "#000";
     ctx.lineWidth = 1;
@@ -336,8 +336,10 @@ class GameMap{
     ctx.closePath();
     //ctx.fill();
     //ctx.stroke();
-    ctx.drawImage(this.textures['grass'], camera.x + position.x * sz, camera.y+ position.y *sz, sz, sz);
-    ctx.drawImage(this.textures[color=='#f00'?'grass':'rocks'], camera.x + position.x * sz, camera.y+ position.y *sz, sz, sz);
+    //ctx.drawImage(this.textures['grass'], camera.x + position.x * sz, camera.y+ position.y *sz, sz, sz);
+    if (color!='#f00'){
+    ctx.drawImage(this.textures['rocks'],camera.x + position.x * sz, camera.y+ position.y *sz-64, sz, sz*1.5);
+    }
   }
 
   preRender(){
