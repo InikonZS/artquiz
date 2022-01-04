@@ -104,12 +104,24 @@ export class Game extends Control{
     const field = new GameField(main.node);
     const player = new GamePlayer();
     const botPlayer = new BotPlayer(new Vector(20, 20));
-    botPlayer.onBuild = (pos)=>{
-      field.addObject(1, {name: 'barracs', mtx:buildMap.get('barracs')}, pos.x, pos.y);
+
+    botPlayer.onBuild = (pos) => {
+      
+      let build = botPlayer.getBuild();
+      console.log(build.name)
+      botPlayer.builds.push(build);
+      field.addObject(1, {name: build.desc[0], mtx:buildMap.get(build.desc[0])}, pos.x, pos.y);
     }
 
-    botPlayer.onUnit = ()=>{
-      field.addUnit(1, 'solder');
+    botPlayer.onUnit = () => {
+      const availableUnit = botPlayer.getAvailableUnits();
+      if (!availableUnit.length) {
+        return;
+      }
+      const unit = availableUnit[Math.floor(Math.random() * availableUnit.length)];
+      console.log(unit.name)
+      botPlayer.units.push(unit);
+      field.addUnit(1, unit.name);
     }
 
     //botPlayer.
@@ -329,13 +341,13 @@ export class GameField extends Control{
 //возможно, тут лучше передвать не нейм, а сам объект созданного солдата? 
   addUnit(player:number, name:string){
     //TODO check is empty,else, check neighbor
-  //  console.log(name);
+   console.log(name);
     let unit = new UnitObject();
     //console.log(unit)
     unit.player = player;
     unit.position = new Vector(20, 20); //for demo
     const spawn = tech.units.filter(item => item.name == name)[0].spawn[0];
-    
+    console.log(spawn, this.primaries[player])
     let barrac = Object.values(this.primaries[player]).find(it=>it.name == spawn);
     if (barrac){
       unit.position = Vector.fromIVector({x:barrac.position.x*this.sz, y: barrac.position.y*this.sz});
