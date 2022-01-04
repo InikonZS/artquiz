@@ -106,11 +106,11 @@ export class Game extends Control{
     const botPlayer = new BotPlayer(new Vector(20, 20));
 
     botPlayer.onBuild = (pos) => {
-      const availableBuild = botPlayer.getAvailableBuilds();
-      const build = availableBuild[Math.floor(Math.random() * availableBuild.length)];
-      console.log(build)
+      
+      let build = botPlayer.getBuild();
+      console.log(build.name)
       botPlayer.builds.push(build);
-      field.addObject(1, {name: build.name, mtx:buildMap.get(build.desc[0])}, pos.x, pos.y);
+      field.addObject(1, {name: build.desc[0], mtx:buildMap.get(build.desc[0])}, pos.x, pos.y);
     }
 
     botPlayer.onUnit = () => {
@@ -119,7 +119,7 @@ export class Game extends Control{
         return;
       }
       const unit = availableUnit[Math.floor(Math.random() * availableUnit.length)];
-      console.log(unit)
+      console.log(unit.name)
       botPlayer.units.push(unit);
       field.addUnit(1, unit.name);
     }
@@ -347,7 +347,7 @@ export class GameField extends Control{
     unit.player = player;
     unit.position = new Vector(20, 20); //for demo
     const spawn = tech.units.filter(item => item.name == name)[0].spawn[0];
-    console.log(spawn)
+    console.log(spawn, this.primaries[player])
     let barrac = Object.values(this.primaries[player]).find(it=>it.name == spawn);
     if (barrac){
       unit.position = Vector.fromIVector({x:barrac.position.x*this.sz, y: barrac.position.y*this.sz});
