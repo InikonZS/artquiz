@@ -5,13 +5,7 @@ const buildingCenter = {
   name: 'building center',
   energy: 0,
   cost: 2000,
-  time: 100,
-  mtx:[
-    '0000'.split(''),
-    '0110'.split(''),
-    '1111'.split(''),
-    '1111'.split(''),
-  ]
+  time: 100
 }
 
 //low
@@ -22,12 +16,6 @@ const energyPlant = {
   energy: -5,
   cost: 200,
   time: 10,
-  mtx: [
-    '0000'.split(''),
-    '1100'.split(''),
-    '1111'.split(''),
-    '1111'.split(''),
-  ]
 }
 
 //medium
@@ -37,13 +25,7 @@ const barracs = {
   name: 'barracs',
   energy: 3,
   cost: 400,
-  time: 10,
-  mtx: [
-    '0011'.split(''),
-    '0011'.split(''),
-    '1111'.split(''),
-    '0011'.split(''),
-  ]
+  time: 10
 }
 
 const dogHouse = {
@@ -52,13 +34,7 @@ const dogHouse = {
   name: 'dog house',
   energy: 2,
   cost: 200,
-  time: 10,
-  mtx: [
-    '0110'.split(''),
-    '0110'.split(''),
-    '0000'.split(''),
-    '0000'.split(''),
-  ]
+  time: 10
 }
 
 const oreFactory = {
@@ -67,13 +43,7 @@ const oreFactory = {
   name: 'ore factory',
   energy: 5,
   cost: 1000,
-  time: 50,
-  mtx: [
-    '0110'.split(''),
-    '0110'.split(''),
-    '1111'.split(''),
-    '1111'.split(''),
-  ]
+  time: 50
 }
 
 const oreBarrel = {
@@ -82,13 +52,7 @@ const oreBarrel = {
   name: 'ore factory',
   energy: 1,
   cost: 100,
-  time: 5,
-  mtx: [
-    '0110'.split(''),
-    '0110'.split(''),
-    '0000'.split(''),
-    '0000'.split(''),
-  ]
+  time: 5
 }
 
 const carFactory = {
@@ -97,13 +61,7 @@ const carFactory = {
   name: 'car factory',
   energy: 5,
   cost: 1500,
-  time: 50,
-  mtx: [
-    '0110'.split(''),
-    '0111'.split(''),
-    '1111'.split(''),
-    '0000'.split(''),
-  ]
+  time: 50
 }
 
 const bigEnergyPlant = {
@@ -112,13 +70,7 @@ const bigEnergyPlant = {
   name: 'energy center',
   energy: -12,
   cost: 400,
-  time: 20,
-  mtx: [
-    '0110'.split(''),
-    '0110'.split(''),
-    '0110'.split(''),
-    '0110'.split(''),
-  ]
+  time: 20
 }
 
 const defendTower = {
@@ -127,13 +79,7 @@ const defendTower = {
   name: 'defend tower',
   energy: 5,
   cost: 1000,
-  time: 30,
-  mtx: [
-    '0110'.split(''),
-    '0110'.split(''),
-    '0000'.split(''),
-    '0000'.split(''),
-  ]
+  time: 30
 }
 
 //high
@@ -143,13 +89,7 @@ const radar = {
   name: 'radar',
   energy: 10,
   cost: 1000,
-  time: 50,
-  mtx: [
-    '0111'.split(''),
-    '0111'.split(''),
-    '0000'.split(''),
-    '0000'.split(''),
-  ]
+  time: 50
 }
 
 const repairStation = {
@@ -158,13 +98,7 @@ const repairStation = {
   name: 'repair station',
   energy: 10,
   cost: 1500,
-  time: 50,
-  mtx: [
-    '0111'.split(''),
-    '0111'.split(''),
-    '0111'.split(''),
-    '0000'.split(''),
-  ]
+  time: 50
 }
 
 const techCenter = {
@@ -173,13 +107,7 @@ const techCenter = {
   name: 'tech center',
   energy: 10,
   cost: 1500,
-  time: 100,
-  mtx: [
-    '0110'.split(''),
-    '1111'.split(''),
-    '0110'.split(''),
-    '0000'.split(''),
-  ]
+  time: 100
 }
 
 //units
@@ -279,4 +207,3 @@ export const tech = {
     dog
   ]
 }
-

@@ -1,4 +1,4 @@
-import {Application} from "./application/application";
+/*import {Application} from "./application/application";
 import {Game} from "./ratalien/game";
 import {MainCanvas} from './ratalien/engine';
 import "./style.css";
@@ -22,7 +22,13 @@ resourceLoader.loadTextures(textureList, (loaded, count)=>{
 }).then(loaded=>{
   const app = new MainCanvas(document.body, loaded);
 })
-//new Application(document.body);
+//new Application(document.body);*/
+
+/*import {GameLauncher} from './ratalien2/gameLauncher';
+new GameLauncher(document.body);*/
+import "./style.css";
+import {Game} from "./ratalien/game";
+new Game(document.body);
 
 
 

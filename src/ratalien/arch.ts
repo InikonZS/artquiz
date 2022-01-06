@@ -10,6 +10,10 @@ export class GameLauncher{
     const loader = new ResourceLoader();
     loader.load().then(resources=>{
       const renderer = new CanvasRenderer(canvas.node.getContext('2d'));
+      const game = new Game(renderer);
+      for (let i = 0; i<2; i++){
+        game.registerPlayer(`player${i}`);
+      }
       renderer.start();
     });
   }

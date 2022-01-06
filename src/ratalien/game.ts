@@ -9,6 +9,8 @@ import { tech } from "./techTree";
 import {GamePlayer, IBuildInfo} from "./gamePlayer";
 import {TraceMap} from "./traceMap";
 
+import {consts} from "./globals";
+
 const view = [
   '00100'.split(''),
   '01110'.split(''),
@@ -17,7 +19,7 @@ const view = [
   '00100'.split(''),
 ]
 
-const obj = [
+/*const obj = [
   '0000'.split(''),
   '0110'.split(''),
   '1111'.split(''),
@@ -51,27 +53,21 @@ const buildMap = new Map<string, Array<Array<string>>>([
   ['radar', obj1],
   ['repairStation', obj2],
   ['techCenter', obj]
-])
+])*/
 
 const moves = [
-  {x:-1, y:-1},
-  {x:0, y:-1}, 
-  {x:1, y:-1},
+  Vector.fromIVector({x:-1, y:-1}),
+  Vector.fromIVector({x:0, y:-1}), 
+    Vector.fromIVector({x:1, y:-1}),
 
-  {x:-1, y:0}, 
+      Vector.fromIVector({x:-1, y:0}), 
   null,
-  {x:1, y:0},
+  Vector.fromIVector({x:1, y:0}),
 
-  {x:-1, y:1}, 
-  {x:0, y:1},
-  {x:1, y:1}, 
+    Vector.fromIVector({x:-1, y:1}), 
+      Vector.fromIVector({x:0, y:1}),
+        Vector.fromIVector({x:1, y:1}), 
 ];
-
-const colors = [
-  '#ff0a',
-  '#f0fa',
-  '#0ffa'
-]
 
 export class Game extends Control{
   player:GamePlayer;
@@ -81,20 +77,20 @@ export class Game extends Control{
     this.node.onmouseleave = (e)=>{
      // console.log(e.offsetX, e.offsetY);
       if (e.offsetX>this.node.clientWidth){
-        field.currentMove = moves[5]
+        field.map.currentMove = moves[5]
       }
       if (e.offsetX<0){
-        field.currentMove = moves[3]
+        field.map.currentMove = moves[3]
       }
       if (e.offsetY>this.node.clientHeight){
-        field.currentMove = moves[7]
+        field.map.currentMove = moves[7]
       }
       if (e.offsetY<0){
-        field.currentMove = moves[1]
+        field.map.currentMove = moves[1]
       }
     }
     this.node.onmouseenter = ()=>{
-      field.currentMove = null;
+      field.map.currentMove = null;
     }
     /*window.onmousemove = ()=>{
       console.log('mv');
@@ -105,7 +101,7 @@ export class Game extends Control{
     const player = new GamePlayer();
     const botPlayer = new BotPlayer(new Vector(20, 20));
     botPlayer.onBuild = (pos)=>{
-      field.addObject(1, {name: 'barracs', mtx:buildMap.get('barracs')}, pos.x, pos.y);
+      field.addObject(1, tech.builds.find(it=>it.name == 'barracs'), pos.x, pos.y);
     }
 
     botPlayer.onUnit = ()=>{
@@ -141,14 +137,88 @@ export class Game extends Control{
   }
 }
 
+class GameMap{
+  map: Array<Array<number>>;
+  currentMove: Vector;
+  position:Vector = Vector.fromIVector({x:0, y:0});
+  cellSize: number = 55;
+
+  constructor(sizeX:number, sizeY:number){
+    this.map = [];
+    for(let i = 0; i < sizeY; i++){
+      let row = [];
+      for(let j = 0; j < sizeX; j++){
+        row.push(1);
+        //mapMap.set(`${i}-${j}`, 1)
+      }
+      this.map.push(row);
+    }  
+  }
+
+  render(){
+    if (this.currentMove){
+      this.position.x -= this.currentMove.x*10;
+      this.position.y -= this.currentMove.y*10;
+    }
+    if (-this.position.x<-55*0) {
+      this.position.x = 55*0;
+    }
+    if (-this.position.y<-55*0) {
+      this.position.y = 55*0;
+    }
+    if (-this.position.x+800>this.map.length*this.cellSize) {
+      this.position.x = -this.map.length*this.cellSize+800;
+    }
+    if (-this.position.y+600>this.map[0].length*this.cellSize) {
+      this.position.y = -this.map[0].length*this.cellSize+600;
+    }
+  }
+
+  renderMap(ctx:CanvasRenderingContext2D, canvasSize:any, visibleTileRect:any, cursorTile:any){
+    this.render();
+    ctx.fillStyle="#090";
+    //const canvasSize = this.getCanvasSize();
+    ctx.fillRect(0, 0, canvasSize.width, canvasSize.height);
+    const obi:Array<string> = [
+      "#fff",
+      "#f00",
+      "#0f0"
+    ]
+    const sz = this.cellSize;
+    const {minx, maxx, miny, maxy} = visibleTileRect;//this.getVisibleTileRect();
+    for(let i = minx; i < maxx; i++){
+      for(let j = miny; j < maxy; j++){
+        if (this.map[i] && this.map[i][j]){
+          ctx.fillStyle = obi[this.map[i][j]];
+          //const cursorTile = this.getTileCursor();
+          if (i === cursorTile.x && j === cursorTile.y){
+            ctx.fillStyle = "#0ff9";
+          }
+          ctx.strokeStyle = "#0005";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          
+          ctx.rect(this.position.x+0 +i*sz, this.position.y+0+j*sz, sz, sz);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+          ctx.fillStyle = '#0006';
+          
+          ctx.fillText(i.toString() + ' / '+ j.toString(), this.position.x+0 +i*sz, this.position.y+0+j*sz)
+        }
+        //ctx.drawImage(this.tile, this.position.x+0 +i*sz, this.position.y+0+j*sz, sz, sz);
+      }
+    }
+  }
+}
 
 export class GameField extends Control{
-  currentMove: {x:number, y:number};
-  position: { x: number; y: number; } = {x:0, y:0};
+  //currentMove: {x:number, y:number};
+  //position: { x: number; y: number; } = {x:0, y:0};
   cursor: { x: number; y: number; } = {x:0, y:0};
   //cursorTile: { x: number; y: number; } = {x:0, y:0};
-  tile: HTMLImageElement;
-  map:Array<Array<number>>;
+  //tile: HTMLImageElement;
+  map:GameMap;
   sz:number = 55;
   canvas: Control<HTMLCanvasElement>;
   objects: MapObject[]=[];
@@ -170,8 +240,9 @@ export class GameField extends Control{
     const canvas = new Control<HTMLCanvasElement>(this.node, 'canvas');
     this.canvas = canvas;
     this.traceMap = new TraceMap()
-    const mapMap: Map<string, number> = new Map()
-    this.map = [];
+    const mapMap: Map<string, number> = new Map();
+    this.map = new GameMap(96, 96);
+    /*this.map = [];
     for(let i = 0; i < 96; i++){
       let row = [];
       for(let j = 0; j < 96; j++){
@@ -179,7 +250,7 @@ export class GameField extends Control{
         mapMap.set(`${i}-${j}`, 1)
       }
       this.map.push(row);
-    }
+    }*/
     this.traceMap.setMapData(mapMap)
     //const overlay = new Control(this.node, 'div', style['bounds']);
 
@@ -229,7 +300,7 @@ export class GameField extends Control{
     }
     
     canvas.node.onclick=e=>{
-      let sz=55;
+      //let sz=55;
       //console.log('d');
       //overlay.node.requestPointerLock();
       const cursorTile = this.getTileCursor();
@@ -286,12 +357,12 @@ export class GameField extends Control{
     this.autoSizeCanvas();
     const ctx = canvas.node.getContext('2d');
 
-    this.tile = new Image();
+    /*this.tile = new Image();
     this.startUnitsPosition=1
     this.tile.src = "./public/img/pictures/0.jpg";
-    this.tile.onload = ()=>{
-      render()
-    }
+    this.tile.onload = ()=>{*/
+      //render()
+    //}
 
     let lastTime:number =null;
     const render=()=>{
@@ -299,29 +370,14 @@ export class GameField extends Control{
         if (!lastTime){
           lastTime = timeStamp;
         }
-        if (this.currentMove){
-          this.position.x -= this.currentMove.x*10;
-          this.position.y -= this.currentMove.y*10;
-        }
-        if (-this.position.x<-55*0) {
-          this.position.x = 55*0;
-        }
-        if (-this.position.y<-55*0) {
-          this.position.y = 55*0;
-        }
-        if (-this.position.x+800>this.map.length*this.sz) {
-          this.position.x = -this.map.length*this.sz+800;
-        }
-        if (-this.position.y+600>this.map[0].length*this.sz) {
-          this.position.y = -this.map[0].length*this.sz+600;
-        }
-        
+
         this.render(ctx, timeStamp - lastTime);
         lastTime = timeStamp;
         render();
       })
+      
     }
-     
+    render();
     window.addEventListener('resize', ()=>{
       this.autoSizeCanvas();
     })
@@ -363,7 +419,7 @@ export class GameField extends Control{
     this.units.push(unit);
   }
 
-  addMtx(obj:Array<Array<string>>, x: number, y:number, pivot:Vector){
+  /*addMtx(obj:Array<Array<string>>, x: number, y:number, pivot:Vector){
     //console.log(x, y);
     for(let i = 0; i < obj.length; i++){
       for(let j = 0; j < obj[0].length; j++){
@@ -374,11 +430,12 @@ export class GameField extends Control{
         }
       }
     }
-  }
+  }*/
 
   setMode(mode:number, name:string, callback:()=>void){
     this.mode = mode;
-    this.currentBuilding = {name:name, mtx:buildMap.get(name)};
+    console.log(name);
+    this.currentBuilding = tech.builds.find(it=>it.desc[0] == name);//{name:name};
     this.modeCallback = callback;
   }
 
@@ -434,8 +491,14 @@ export class GameField extends Control{
 
   renderObjects(ctx:CanvasRenderingContext2D){
     this.objects.forEach(it=>{
-      this.drawObject(ctx, it.tiles, it.position, this.position, it.isHovered?"#9999":colors[it.player]);
-      const pos = this.toMapPixelVector(new Vector(it.position.x*this.sz, it.position.y*this.sz));
+      it.render(ctx, 
+        this.map.position, 
+        this.sz, 
+        it==this.selectedBuild,
+        Object.keys(this.primaries[0]).find(obj=>this.primaries[0][obj]==it)!=null
+      );
+      //this.drawObject(ctx, it.tiles, it.position, this.map.position, it.isHovered?"#9999":colors[it.player]);
+      /*const pos = this.toMapPixelVector(new Vector(it.position.x*this.sz, it.position.y*this.sz));
       ctx.strokeText(`health: ${it.health.toString()}/100` , pos.x, pos.y +10);
       ctx.strokeText(it.name, pos.x, pos.y +20);
       if (it==this.selectedBuild){
@@ -443,15 +506,15 @@ export class GameField extends Control{
       }
       if (Object.keys(this.primaries[0]).find(obj=>this.primaries[0][obj]==it)){
         ctx.strokeText('primary', pos.x, pos.y +40);
-      }
+      }*/
     });
   }
 
   renderUnits(ctx:CanvasRenderingContext2D, delta:number){
     this.units.forEach(it=>{
       it.step(delta,this.traceMap);
-      this.drawUnit(ctx, it.position, this.position, it.isHovered?"#9999":colors[it.player]);
-      this.addMtx(view,Math.floor(it.position.x/this.sz), Math.floor(it.position.y/this.sz), new Vector(2,2));
+      this.drawUnit(ctx, it.position, this.map.position, it.isHovered?"#9999": consts.colors[it.player]);
+      //this.addMtx(view,Math.floor(it.position.x/this.sz), Math.floor(it.position.y/this.sz), new Vector(2,2));
     });
   }
 
@@ -471,7 +534,7 @@ export class GameField extends Control{
         ctx.closePath();
         ctx.fill();
         ctx.stroke();*/
-        this.drawTile(ctx, new Vector(i, j), new Vector(px, py), '#ff09');
+        //this.drawTile(ctx, new Vector(i, j), new Vector(px, py), '#ff09');
         }
         //ctx.strokeText(i.toString() + ' / '+ j.toString(), this.position.x+0 +i*sz, this.position.y+0+j*sz)
         //ctx.drawImage(this.tile, this.position.x+0 +i*sz, this.position.y+0+j*sz, sz, sz);
@@ -511,7 +574,7 @@ export class GameField extends Control{
     ctx.stroke();
   }
 
-  renderMap(ctx: CanvasRenderingContext2D){
+  /*renderMap(ctx: CanvasRenderingContext2D){
     ctx.fillStyle="#000";
     const canvasSize = this.getCanvasSize();
     ctx.fillRect(0, 0, canvasSize.width, canvasSize.height);
@@ -543,36 +606,36 @@ export class GameField extends Control{
         //ctx.drawImage(this.tile, this.position.x+0 +i*sz, this.position.y+0+j*sz, sz, sz);
       }
     }
-  }
+  }*/
 
   getVisibleTileRect(){
     let sz = this.sz;
     let canvasSize = this.getCanvasSize();
-    const minx = Math.floor((-this.position.x+0)/sz);
-    const maxx = Math.floor((-this.position.x+canvasSize.width+sz)/sz);
-    const miny = Math.floor((-this.position.y+0)/sz);
-    const maxy = Math.floor((-this.position.y+canvasSize.height+sz)/sz);
+    const minx = Math.floor((-this.map.position.x+0)/sz);
+    const maxx = Math.floor((-this.map.position.x+canvasSize.width+sz)/sz);
+    const miny = Math.floor((-this.map.position.y+0)/sz);
+    const maxy = Math.floor((-this.map.position.y+canvasSize.height+sz)/sz);
     return {minx, maxx, miny, maxy};
   }
 
   getTileCursor(){
     return {
-      x: Math.floor((-this.position.x +this.cursor.x)/this.sz),
-      y: Math.floor((-this.position.y +this.cursor.y)/this.sz)
+      x: Math.floor((-this.map.position.x +this.cursor.x)/this.sz),
+      y: Math.floor((-this.map.position.y +this.cursor.y)/this.sz)
     }
   }
 
   getPixelCursor(){
     return {
-      x: -this.position.x + this.cursor.x,
-      y: -this.position.y + this.cursor.y
+      x: -this.map.position.x + this.cursor.x,
+      y: -this.map.position.y + this.cursor.y
     }
   }
   
   toMapPixelVector(vector:IVector):IVector{
     return {
-      x: this.position.x + vector.x,
-      y: this.position.y + vector.y,
+      x: this.map.position.x + vector.x,
+      y: this.map.position.y + vector.y,
     }
   }
 
@@ -588,15 +651,7 @@ export class GameField extends Control{
     this.canvas.node.height = this.node.clientHeight;
   }
 
-  render(ctx: CanvasRenderingContext2D, delta:number){
-    let sz = this.sz;
-    //this.cursorTile.x = ;
-    //this.cursorTile.y = Math.floor((-this.position.y +this.cursor.y)/sz);
-
-    this.renderMap(ctx);
-    this.renderObjects(ctx);
-    this.renderUnits(ctx, delta);
-
+  renderCursor(ctx:CanvasRenderingContext2D){
     ctx.fillStyle = "#00f";
     ctx.beginPath();
     let r =2;
@@ -620,21 +675,35 @@ export class GameField extends Control{
     } else if(this.mode ==2){
       mode = 'move'
    } 
+   ctx.fillText( mode , this.cursor.x, this.cursor.y -20);
+  }
 
-  /* if (this.multiStart){
-     mode = "multiselect"
-   }*/
-   
-    ctx.fillText( mode , this.cursor.x, this.cursor.y -20);
-    
-    
-    if (this.multiStart){
-      ctx.fillStyle = '#fff4';
-      ctx.fillRect(this.multiStart.x, this.multiStart.y, this.cursor.x -this.multiStart.x, this.cursor.y -this.multiStart.y);
-    }
+  renderMulti(ctx: CanvasRenderingContext2D){
+    ctx.fillStyle = '#fff4';
+    ctx.fillRect(this.multiStart.x, this.multiStart.y, this.cursor.x -this.multiStart.x, this.cursor.y -this.multiStart.y);
+  }
+
+  renderBuildPlanned(ctx: CanvasRenderingContext2D){
     const cursorTile = this.getTileCursor();
+    //this.currentBuilding.render();
+    this.drawObject(ctx, this.currentBuilding.mtx, cursorTile, this.map.position, "#ff06");
+  }
+
+  render(ctx: CanvasRenderingContext2D, delta:number){
+    //let sz = this.sz;
+    //this.cursorTile.x = ;
+    //this.cursorTile.y = Math.floor((-this.position.y +this.cursor.y)/sz);
+    //this.renderMap(ctx);
+    this.map.renderMap(ctx, this.getCanvasSize(), this.getVisibleTileRect(), this.getTileCursor());
+    this.renderObjects(ctx);
+    this.renderUnits(ctx, delta);
+    this.renderCursor(ctx);
+
+    if (this.multiStart){
+      this.renderMulti(ctx);
+    }
     if (this.mode==1){
-      this.drawObject(ctx, this.currentBuilding.mtx, cursorTile, this.position, "#ff06");
+      this.renderBuildPlanned(ctx);
     }
     //this.renderMtx(ctx, obj, this.position.x+0 +cursorTile.x*sz, this.position.y+0+cursorTile.y*sz);/*this.position.x % sz +Math.floor(this.cursor.x/sz)*sz, this.position.y % sz +Math.floor(this.cursor.y/sz)*sz*/
   }
