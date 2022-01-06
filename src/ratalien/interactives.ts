@@ -113,6 +113,7 @@ export class UnitObject extends InteractiveObject{
   time: number= 0;
   private _stepIndex: number;
   path: IPathPoint[]; 
+  health: number = 100;
 
   constructor(){
     super();
@@ -195,5 +196,20 @@ clearStepIndex(){
         this.target = Vector.fromIVector(this.attackTarget.position).scale(55);
       }
     }
+  }
+
+  render(ctx:CanvasRenderingContext2D, camera:IVector){
+    const sz = 10;
+    ctx.fillStyle = this.isHovered?"#9999":consts.colors[this.player];
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.ellipse(camera.x + this.position.x, camera.y+ this.position.y, sz, sz, 0, 0, Math.PI*2);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = "#000";
+    ctx.fillText(this.name, camera.x + this.position.x, camera.y+ this.position.y-10);
+    ctx.fillText(`health: ${this.health}`, camera.x + this.position.x, camera.y+ this.position.y-20);
   }
 }
