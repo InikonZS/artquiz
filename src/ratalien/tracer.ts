@@ -191,7 +191,7 @@ export function getMapFromImageData(data:ImageData){
   const map = generateEmptyMap(data.width, data.height);
   iterateImageData(data, (pos, color)=>{
     let mapColor = 0;
-    if (isEqualColor(color, {r:0, g:0, b:0, a:255})){
+    if (isEqualColor(color, {r:255, g:255, b:0, a:255})){
       mapColor = 1;
     } else if (isEqualColor(color, {r:255, g:0, b:0, a:255})){
       mapColor = 2;

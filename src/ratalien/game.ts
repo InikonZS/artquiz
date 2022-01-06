@@ -3,7 +3,7 @@ import style from "./style.css";
 import red from "./red.css";
 import {Vector, IVector} from "../common/vector";
 import {GameSide} from "./gameSidePanel";
-import {MapObject, UnitObject} from "./interactives";
+import {MapObject, UnitObject, ITechBuild} from "./interactives";
 import {BotPlayer} from "./botPlayer";
 import { tech } from "./techTree";
 import {GamePlayer, IBuildInfo} from "./gamePlayer";
@@ -132,9 +132,11 @@ class GameMap{
   currentMove: Vector;
   position:Vector = Vector.fromIVector({x:0, y:0});
   cellSize: number = 55;
+  res: Record<string, HTMLImageElement>;
 
-  constructor(sizeX:number, sizeY:number, map:HTMLImageElement){
+  constructor(sizeX:number, sizeY:number, map:HTMLImageElement, textures:Record<string, HTMLImageElement>){
     this.map = [];
+    this.res = textures;
     this.map = getMapFromImageData(getImageData(map));
     //console.log(this.map);
     /*for(let i = 0; i < sizeY; i++){
@@ -196,7 +198,15 @@ class GameMap{
           ctx.stroke();
           ctx.fillStyle = '#0006';
           
-          ctx.fillText(i.toString() + ' / '+ j.toString(), this.position.x+0 +i*sz, this.position.y+0+j*sz)
+          ctx.fillText(i.toString() + ' / '+ j.toString(), this.position.x+0 +i*sz, this.position.y+0+j*sz);
+
+          ctx.drawImage(this.res['grass'], this.position.x+0 +i*sz, this.position.y+0+j*sz, sz, sz);
+          if (this.map[i][j] == 2){
+            ctx.drawImage(this.res['rocks'], this.position.x+0 +i*sz, this.position.y+0+j*sz - sz *0.5, sz, sz*1.5);
+          }
+          if (this.map[i][j] == 1){
+            ctx.drawImage(this.res['gold'], this.position.x+0 +i*sz, this.position.y+0+j*sz - (this.res['gold'].naturalHeight - 128), sz, sz* this.res['gold'].naturalHeight / 128);
+          }
         }
         //ctx.drawImage(this.tile, this.position.x+0 +i*sz, this.position.y+0+j*sz, sz, sz);
       }
@@ -239,6 +249,9 @@ class InteractiveList{
       this.handleHover();
     }
     this.list.push(object);
+    this.list.sort((a,b)=>{
+     return (a.position.y - b.position.y)*1000 + a.position.x - b.position.x;
+    })
   }
 
   public handleMove(pos:Vector){
@@ -260,6 +273,7 @@ class InteractiveList{
   }
 }
 
+
 export class GameField extends Control{
   //currentMove: {x:number, y:number};
   //position: { x: number; y: number; } = {x:0, y:0};
@@ -272,7 +286,7 @@ export class GameField extends Control{
   objects: InteractiveList;//MapObject[]=[];
   units: UnitObject[]=[];
   mode: number = 0;
-  currentBuilding: {name:string, mtx:string[][]};
+  currentBuilding: ITechBuild;
   selectedUnit: UnitObject = null;
   modeCallback: () => void;
   //hoveredObject: {action:string, object:MapObject}[] =[];
@@ -283,9 +297,11 @@ export class GameField extends Control{
   private traceMap: TraceMap;
   private startUnitsPosition: number;
   action: string;
+  res: Record<string, HTMLImageElement>;
 
   constructor(parentNode: HTMLElement, res: Record<string, HTMLImageElement>){
     super(parentNode, 'div', red['game_field']);
+    this.res = res;
     this.objects = new InteractiveList();
      const getAction = (current:MapObject)=>{
         if ( this.selectedUnit && current && current.player!==0){
@@ -317,7 +333,7 @@ export class GameField extends Control{
     this.canvas = canvas;
     this.traceMap = new TraceMap()
     const mapMap: Map<string, number> = new Map();
-    this.map = new GameMap(96, 96, res['map']);
+    this.map = new GameMap(96, 96, res['map'], res);
     /*this.map = [];
     for(let i = 0; i < 96; i++){
       let row = [];
@@ -507,10 +523,8 @@ export class GameField extends Control{
     this.modeCallback = callback;
   }
 
-  addObject(player:number, obj:{name:string, mtx:Array<Array<string>>}, x:number, y:number){
-    let object = new MapObject();
-    object.tiles = obj.mtx.map(it=>it.map(jt=>parseInt(jt)));
-    object.name = obj.name;
+  addObject(player:number, obj:ITechBuild, x:number, y:number){
+    let object = new MapObject(obj, this.res);
     object.position = new Vector(x,y);
     object.player = player;
     if (this.primaries[player][object.name]==null){

@@ -2,6 +2,16 @@ import {Vector, IVector} from "../common/vector";
 import {TraceMap, IPathPoint} from "./traceMap";
 import {consts} from "./globals";
 
+export interface ITechBuild{
+  deps: string[];
+  desc: string[];
+  name: string;
+  energy: number;
+  cost: number;
+  time: number;
+  mtx:Array<Array<string>>;
+}
+
 export class InteractiveObject{
   isHovered: boolean;
   onMouseMove: any;
@@ -48,10 +58,14 @@ export class MapObject extends InteractiveObject{
   player:number;
 
   onDestroyed: ()=>void;
+  res: Record<string, HTMLImageElement>;
 
-  constructor(){
+  constructor(build:ITechBuild, res:Record<string, HTMLImageElement>){
     super();
     this.health = 100;
+    this.tiles = build.mtx.map(it=>it.map(jt=>parseInt(jt)));
+    this.name = build.name;
+    this.res = res;
   }
 
   inShape(tile:Vector){
@@ -86,6 +100,7 @@ export class MapObject extends InteractiveObject{
       if (primary){
         ctx.fillText('primary', pos.x, pos.y +40);
       }
+      ctx.drawImage(this.res['plant'], pos.x, pos.y, size * 4, size * 4 );
   }
 
   drawTile(ctx:CanvasRenderingContext2D, position:IVector, camera:IVector, color:string, size:number){
@@ -211,5 +226,6 @@ clearStepIndex(){
     ctx.fillStyle = "#000";
     ctx.fillText(this.name, camera.x + this.position.x, camera.y+ this.position.y-10);
     ctx.fillText(`health: ${this.health}`, camera.x + this.position.x, camera.y+ this.position.y-20);
+
   }
 }
