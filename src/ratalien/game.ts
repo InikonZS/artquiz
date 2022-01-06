@@ -8,6 +8,8 @@ import {BotPlayer} from "./botPlayer";
 import { tech } from "./techTree";
 import {GamePlayer, IBuildInfo} from "./gamePlayer";
 import {TraceMap} from "./traceMap";
+import {getMapFromImageData, getImageData, loadImage, findPath, indexateAsync, steps, tracePathes} from "./tracer";
+
 
 import {consts} from "./globals";
 
@@ -55,38 +57,26 @@ const buildMap = new Map<string, Array<Array<string>>>([
   ['techCenter', obj]
 ])*/
 
-const moves = [
-  Vector.fromIVector({x:-1, y:-1}),
-  Vector.fromIVector({x:0, y:-1}), 
-    Vector.fromIVector({x:1, y:-1}),
 
-      Vector.fromIVector({x:-1, y:0}), 
-  null,
-  Vector.fromIVector({x:1, y:0}),
-
-    Vector.fromIVector({x:-1, y:1}), 
-      Vector.fromIVector({x:0, y:1}),
-        Vector.fromIVector({x:1, y:1}), 
-];
 
 export class Game extends Control{
   player:GamePlayer;
   currentPlayer:number = 0;
-  constructor(parentNode: HTMLElement){
+  constructor(parentNode: HTMLElement, res: Record<string, HTMLImageElement>){
     super(parentNode, 'div', red['global_wrapper']);
     this.node.onmouseleave = (e)=>{
      // console.log(e.offsetX, e.offsetY);
       if (e.offsetX>this.node.clientWidth){
-        field.map.currentMove = moves[5]
+        field.map.currentMove = consts.moves[5]
       }
       if (e.offsetX<0){
-        field.map.currentMove = moves[3]
+        field.map.currentMove = consts.moves[3]
       }
       if (e.offsetY>this.node.clientHeight){
-        field.map.currentMove = moves[7]
+        field.map.currentMove = consts.moves[7]
       }
       if (e.offsetY<0){
-        field.map.currentMove = moves[1]
+        field.map.currentMove = consts.moves[1]
       }
     }
     this.node.onmouseenter = ()=>{
@@ -97,7 +87,7 @@ export class Game extends Control{
     }*/
     const head = new Control(this.node, 'div', red["global_header"]);
     const main = new Control(this.node, 'div', red["global_main"]);
-    const field = new GameField(main.node);
+    const field = new GameField(main.node, res);
     const player = new GamePlayer();
     const botPlayer = new BotPlayer(new Vector(20, 20));
     botPlayer.onBuild = (pos)=>{
@@ -143,16 +133,18 @@ class GameMap{
   position:Vector = Vector.fromIVector({x:0, y:0});
   cellSize: number = 55;
 
-  constructor(sizeX:number, sizeY:number){
+  constructor(sizeX:number, sizeY:number, map:HTMLImageElement){
     this.map = [];
-    for(let i = 0; i < sizeY; i++){
+    this.map = getMapFromImageData(getImageData(map));
+    //console.log(this.map);
+    /*for(let i = 0; i < sizeY; i++){
       let row = [];
       for(let j = 0; j < sizeX; j++){
         row.push(1);
         //mapMap.set(`${i}-${j}`, 1)
       }
       this.map.push(row);
-    }  
+    }  */
   }
 
   render(){
@@ -188,12 +180,12 @@ class GameMap{
     const {minx, maxx, miny, maxy} = visibleTileRect;//this.getVisibleTileRect();
     for(let i = minx; i < maxx; i++){
       for(let j = miny; j < maxy; j++){
-        if (this.map[i] && this.map[i][j]){
+        if (this.map[i] && this.map[i][j]!==null){
           ctx.fillStyle = obi[this.map[i][j]];
           //const cursorTile = this.getTileCursor();
-          if (i === cursorTile.x && j === cursorTile.y){
+          /*if (i === cursorTile.x && j === cursorTile.y){
             ctx.fillStyle = "#0ff9";
-          }
+          }*/
           ctx.strokeStyle = "#0005";
           ctx.lineWidth = 1;
           ctx.beginPath();
@@ -235,13 +227,13 @@ export class GameField extends Control{
   private traceMap: TraceMap;
   private startUnitsPosition: number;
 
-  constructor(parentNode: HTMLElement){
+  constructor(parentNode: HTMLElement, res: Record<string, HTMLImageElement>){
     super(parentNode, 'div', red['game_field']);
     const canvas = new Control<HTMLCanvasElement>(this.node, 'canvas');
     this.canvas = canvas;
     this.traceMap = new TraceMap()
     const mapMap: Map<string, number> = new Map();
-    this.map = new GameMap(96, 96);
+    this.map = new GameMap(96, 96, res['map']);
     /*this.map = [];
     for(let i = 0; i < 96; i++){
       let row = [];
@@ -574,40 +566,6 @@ export class GameField extends Control{
     ctx.stroke();
   }
 
-  /*renderMap(ctx: CanvasRenderingContext2D){
-    ctx.fillStyle="#000";
-    const canvasSize = this.getCanvasSize();
-    ctx.fillRect(0, 0, canvasSize.width, canvasSize.height);
-    const obi:Array<string> = [
-      "#fff",
-      "#f00",
-      "#0f0"
-    ]
-    const sz = this.sz;
-    const {minx, maxx, miny, maxy} = this.getVisibleTileRect();
-    for(let i = minx; i < maxx; i++){
-      for(let j = miny; j < maxy; j++){
-        if (this.map[i] && this.map[i][j]){
-          ctx.fillStyle = obi[this.map[i][j]];
-          const cursorTile = this.getTileCursor();
-          if (i === cursorTile.x && j === cursorTile.y){
-            ctx.fillStyle = "#0ff9";
-          }
-          ctx.strokeStyle = "#000";
-          ctx.lineWidth = 1;
-          ctx.beginPath();
-          
-          ctx.rect(this.position.x+0 +i*sz, this.position.y+0+j*sz, sz, sz);
-          ctx.closePath();
-          ctx.fill();
-          ctx.stroke();
-          ctx.strokeText(i.toString() + ' / '+ j.toString(), this.position.x+0 +i*sz, this.position.y+0+j*sz)
-        }
-        //ctx.drawImage(this.tile, this.position.x+0 +i*sz, this.position.y+0+j*sz, sz, sz);
-      }
-    }
-  }*/
-
   getVisibleTileRect(){
     let sz = this.sz;
     let canvasSize = this.getCanvasSize();
@@ -676,6 +634,7 @@ export class GameField extends Control{
       mode = 'move'
    } 
    ctx.fillText( mode , this.cursor.x, this.cursor.y -20);
+   this.drawTile(ctx, this.getTileCursor(), this.map.position, "#0ff7");
   }
 
   renderMulti(ctx: CanvasRenderingContext2D){
