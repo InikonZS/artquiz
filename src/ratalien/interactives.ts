@@ -226,7 +226,7 @@ clearStepIndex(){
     ctx.strokeStyle = "#000";
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.ellipse(camera.x + this.positionPx.x, camera.y+ this.positionPx.y, sz, sz, 0, 0, Math.PI*2);
+    ctx.ellipse(camera.x + this.positionPx.x /*+ (55-10)/2*/, camera.y+ this.positionPx.y /*+ (55-10)/2*/, sz, sz, 0, 0, Math.PI*2);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();

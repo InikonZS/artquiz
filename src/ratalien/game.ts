@@ -9,8 +9,8 @@ import { tech } from "./techTree";
 import {GamePlayer, IBuildInfo} from "./gamePlayer";
 import {TraceMap} from "./traceMap";
 import {getMapFromImageData, getImageData, loadImage, findPath, indexateAsync, steps, tracePathes, inBox} from "./tracer";
-
-
+import {InteractiveList} from "./interactiveList";
+import {GameMap} from "./gameMap";
 import {consts} from "./globals";
 
 const view = [
@@ -127,153 +127,6 @@ export class Game extends Control{
   }
 }
 
-class GameMap{
-  map: Array<Array<number>>;
-  currentMove: Vector;
-  position:Vector = Vector.fromIVector({x:0, y:0});
-  cellSize: number = 55;
-  res: Record<string, HTMLImageElement>;
-
-  constructor(sizeX:number, sizeY:number, map:HTMLImageElement, textures:Record<string, HTMLImageElement>){
-    this.map = [];
-    this.res = textures;
-    this.map = getMapFromImageData(getImageData(map));
-    //console.log(this.map);
-    /*for(let i = 0; i < sizeY; i++){
-      let row = [];
-      for(let j = 0; j < sizeX; j++){
-        row.push(1);
-        //mapMap.set(`${i}-${j}`, 1)
-      }
-      this.map.push(row);
-    }  */
-  }
-
-  render(){
-    if (this.currentMove){
-      this.position.x -= this.currentMove.x*10;
-      this.position.y -= this.currentMove.y*10;
-    }
-    if (-this.position.x<-55*0) {
-      this.position.x = 55*0;
-    }
-    if (-this.position.y<-55*0) {
-      this.position.y = 55*0;
-    }
-    if (-this.position.x+800>this.map.length*this.cellSize) {
-      this.position.x = -this.map.length*this.cellSize+800;
-    }
-    if (-this.position.y+600>this.map[0].length*this.cellSize) {
-      this.position.y = -this.map[0].length*this.cellSize+600;
-    }
-  }
-
-  renderMap(ctx:CanvasRenderingContext2D, canvasSize:any, visibleTileRect:any, cursorTile:any){
-    this.render();
-    ctx.fillStyle="#090";
-    //const canvasSize = this.getCanvasSize();
-    ctx.fillRect(0, 0, canvasSize.width, canvasSize.height);
-    const obi:Array<string> = [
-      "#fff",
-      "#f00",
-      "#0f0"
-    ]
-    const sz = this.cellSize;
-    const {minx, maxx, miny, maxy} = visibleTileRect;//this.getVisibleTileRect();
-    for(let i = minx; i < maxx; i++){
-      for(let j = miny; j < maxy; j++){
-        if (this.map[i] && this.map[i][j]!==null){
-          ctx.fillStyle = obi[this.map[i][j]];
-          //const cursorTile = this.getTileCursor();
-          /*if (i === cursorTile.x && j === cursorTile.y){
-            ctx.fillStyle = "#0ff9";
-          }*/
-          ctx.strokeStyle = "#0005";
-          ctx.lineWidth = 1;
-          ctx.beginPath();
-          
-          ctx.rect(this.position.x+0 +i*sz, this.position.y+0+j*sz, sz, sz);
-          ctx.closePath();
-          ctx.fill();
-          ctx.stroke();
-          ctx.fillStyle = '#0006';
-          
-          ctx.fillText(i.toString() + ' / '+ j.toString(), this.position.x+0 +i*sz, this.position.y+0+j*sz);
-
-          ctx.drawImage(this.res['grass'], this.position.x+0 +i*sz, this.position.y+0+j*sz, sz, sz);
-          if (this.map[i][j] == 2){
-            ctx.drawImage(this.res['rocks'], this.position.x+0 +i*sz, this.position.y+0+j*sz - sz *0.5, sz, sz*1.5);
-          }
-          if (this.map[i][j] == 1){
-            ctx.drawImage(this.res['gold'], this.position.x+0 +i*sz, this.position.y+0+j*sz - (this.res['gold'].naturalHeight - 128), sz, sz* this.res['gold'].naturalHeight / 128);
-          }
-        }
-        //ctx.drawImage(this.tile, this.position.x+0 +i*sz, this.position.y+0+j*sz, sz, sz);
-      }
-    }
-  }
-}
-
-class InteractiveList{
-  public list:InteractiveObject[];
-  hoveredObjects:InteractiveObject[];
-
-  _hovered:InteractiveObject;
-  set hovered(value:InteractiveObject){
-    let last = this._hovered;
-    this._hovered = value;
-    this.onChangeHovered?.(last, value);
-  }
-  get hovered(){
-    return this._hovered;
-  }
-  onChangeHovered: (lastTarget:InteractiveObject, currentTarget:InteractiveObject)=>void;
-  onClick: (target:InteractiveObject)=>void;
-  constructor(){
-    this.list = [];
-    this.hoveredObjects = [];
-  }
-
-  add(object:InteractiveObject){
-    object.onMouseEnter = ()=>{
-      this.hoveredObjects.push(object);
-      this.handleHover();
-    }
-    object.onMouseLeave = ()=>{
-      this.hoveredObjects = this.hoveredObjects.filter(it=>it!=object);
-      this.handleHover();
-    }
-    object.onDestroyed = ()=>{
-      this.list = this.list.filter(it=>it!=object);
-      this.hoveredObjects = this.hoveredObjects.filter(it=>it!=object);
-      this.handleHover();
-    }
-    this.list.push(object);
-    this.list.sort((a,b)=>{
-     return (a.position.y - b.position.y)*1000 + a.position.x - b.position.x;
-    })
-  }
-
-  public handleMove(tile:Vector, cursor:Vector){
-    this.list.forEach(it=>it.handleMove(tile, cursor));
-  }
-
-  public handleClick(tile:Vector, cursor:Vector){
-    this.handleMove(tile, cursor);
-    this.hovered.handleClick(tile, cursor);
-    this.onClick(this.hovered);
-    //this.list.forEach(it=>it.handleClick(pos));
-  }
-
-  private handleHover(){
-    let highObject = this.hoveredObjects[this.hoveredObjects.length-1] || null;
-    if (this.hovered != highObject){
-      this.hovered = highObject;
-    }
-  }
-}
-
-
 export class GameField extends Control{
   //currentMove: {x:number, y:number};
   //position: { x: number; y: number; } = {x:0, y:0};
@@ -329,7 +182,11 @@ export class GameField extends Control{
       } else {
         //if (current instanceof MapObject){
         this.selected = current;
-        this.mode =2;
+        if (current instanceof UnitObject){
+          this.mode =2;
+        } else {
+          this.mode = 0;
+        }
       }
       if (current instanceof MapObject){
         this.action = getAction(current);
@@ -422,7 +279,7 @@ export class GameField extends Control{
         this.mode = 0;
 
         let mp = this.map.map.map(it=>it.map(jt=>jt==0?Number.MAX_SAFE_INTEGER:-1));
-        let indexPoint = {x:Math.floor(e.offsetX/this.sz), y:Math.floor(e.offsetY/this.sz)};
+        let indexPoint = this.getTileCursor();//{x:Math.floor(e.offsetX/this.sz), y:Math.floor(e.offsetY/this.sz)};
         console.log(this.selected);
         const units:UnitObject[] = [this.selected as UnitObject];
         const destinations = units.map(unit=>{
