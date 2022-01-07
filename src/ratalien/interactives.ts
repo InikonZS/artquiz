@@ -21,6 +21,8 @@ export class InteractiveObject{
   onDestroyed: ()=>void;
   position: {x:number, y:number};
   player:number;
+  name:string;
+  type:string = 'interactive';
 
   constructor(){
 
@@ -62,6 +64,7 @@ export class MapObject extends InteractiveObject{
   health:number;
   name:string;
   player:number;
+  type:string = 'build';
 
   onDestroyed: ()=>void;
   res: Record<string, HTMLImageElement>;
@@ -136,6 +139,7 @@ export class UnitObject extends InteractiveObject{
   path: Vector[];//IPathPoint[]; 
   health: number = 100;
   tileChecker: (pos: Vector) => boolean;
+  type:string = 'unit';
 
   constructor(){
     super();

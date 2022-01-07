@@ -11,6 +11,7 @@ import {TraceMap} from "./traceMap";
 import {getMapFromImageData, getImageData, loadImage, findPath, indexateAsync, steps, tracePathes, inBox} from "./tracer";
 import {InteractiveList} from "./interactiveList";
 import {GameMap} from "./gameMap";
+import {GameCursorStatus} from "./gameCursor";
 import {consts} from "./globals";
 
 const view = [
@@ -119,7 +120,8 @@ export class Game extends Control{
     
     const side = new GameSide(main.node, player);
     side.onBuildSelect = (name, callback)=>{
-      field.setMode(1, name.desc[0], callback);
+      //field.setMode(1, name.desc[0], callback);
+      field.setPlanned(name.desc[0], callback);
     }
     side.onUnitReady = (name:string)=>{
       field.addUnit(0, name);
@@ -127,25 +129,27 @@ export class Game extends Control{
   }
 }
 
+
+
 export class GameField extends Control{
   //currentMove: {x:number, y:number};
   //position: { x: number; y: number; } = {x:0, y:0};
   cursor: { x: number; y: number; } = {x:0, y:0};
   //cursorTile: { x: number; y: number; } = {x:0, y:0};
   //tile: HTMLImageElement;
-  selected: InteractiveObject;
+//  selected: InteractiveObject;
   map:GameMap;
   sz:number = 55;
   canvas: Control<HTMLCanvasElement>;
   objects: InteractiveList;//MapObject[]=[];
   //units: UnitObject[]=[];
-  mode: number = 0;
-  currentBuilding: ITechBuild;
+ // mode: number = 0;
+ // currentBuilding: ITechBuild;
   //selectedUnit: UnitObject = null;
   modeCallback: () => void;
   //hoveredObject: {action:string, object:MapObject}[] =[];
   //hoveredUnit: UnitObject[] = [];
-  multiStart: Vector;
+ // multiStart: Vector;
   //selectedBuild: MapObject;
   primaries: Array<Record<string, MapObject>> =[{},{}];
   private traceMap: TraceMap;
@@ -153,11 +157,13 @@ export class GameField extends Control{
   action: string;
   res: Record<string, HTMLImageElement>;
 
+  cursorStatus:GameCursorStatus = new GameCursorStatus;
+
   constructor(parentNode: HTMLElement, res: Record<string, HTMLImageElement>){
     super(parentNode, 'div', red['game_field']);
     this.res = res;
     this.objects = new InteractiveList();
-     const getAction = (current:MapObject)=>{
+    /* const getAction = (current:MapObject)=>{
         if ( this.selected instanceof UnitObject && current && current.player!==0){
           return 'attack'
         } else if(current && current instanceof MapObject && this.selected == current && current.player==0){
@@ -165,16 +171,17 @@ export class GameField extends Control{
         } else {
           return 'select_object'
         }
-      }
+      }*/
     this.objects.onChangeHovered = ((last, current)=>{
       //console.log(last?.name, current?.name);
-      if (current instanceof MapObject){
+     /* if (current instanceof MapObject){
         this.action = getAction(current);
-      }
+      }*/
+      this.cursorStatus.hovered = current?[current]:[];
     });
 
     this.objects.onClick = (current=>{
-      if ( this.selected instanceof UnitObject && current.player!==0){
+      /*if ( this.selected instanceof UnitObject && current.player!==0){
         console.log(this.selected);
         //this.selectedUnit.attackTarget = current;
       } else if(current && this.selected instanceof MapObject && this.selected == current && current.player==0){
@@ -190,81 +197,65 @@ export class GameField extends Control{
       }
       if (current instanceof MapObject){
         this.action = getAction(current);
-      }
+      }*/
+
+      this.cursorStatus.selected = current?[current]:[];
     });
 
     const canvas = new Control<HTMLCanvasElement>(this.node, 'canvas');
     this.canvas = canvas;
     this.traceMap = new TraceMap()
-    const mapMap: Map<string, number> = new Map();
+//    const mapMap: Map<string, number> = new Map();
     this.map = new GameMap(96, 96, res['map'], res);
-    /*this.map = [];
-    for(let i = 0; i < 96; i++){
-      let row = [];
-      for(let j = 0; j < 96; j++){
-        row.push(1);
-        mapMap.set(`${i}-${j}`, 1)
-      }
-      this.map.push(row);
-    }*/
-    this.traceMap.setMapData(mapMap)
-    //const overlay = new Control(this.node, 'div', style['bounds']);
 
-    /*window.onmousemove =(e:MouseEvent)=>{
-      console.log(e.clientX);
-    }*/
-    /*const moves = [
-      {x:-1, y:-1},
-      {x:0, y:-1}, 
-      {x:1, y:-1},
-
-      {x:-1, y:0}, 
-      null,
-      {x:1, y:0},
-
-      {x:-1, y:1}, 
-      {x:0, y:1},
-      {x:1, y:1}, 
-    ];*/
+//    this.traceMap.setMapData(mapMap)
 
     canvas.node.onmousedown =e=>{
-      if (this.mode != 0) return;
-      this.multiStart = new Vector(e.clientX, e.clientY);
+      //if (this.mode != 0) return;
+      this.cursorStatus.multiStart = new Vector(e.clientX, e.clientY);
       let listener = ()=>{
-        this.multiStart = null;
+        this.cursorStatus.multiStart = null;
         window.removeEventListener('mouseup', listener);
       }
       window.addEventListener('mouseup', listener);
+
+      if (e.button == 2){
+        this.cursorStatus.planned = null;
+        this.cursorStatus.selected = [];
+      }
     }
 
     canvas.node.onmousemove=e=>{
       this.cursor.x = e.clientX;
       this.cursor.y = e.clientY;
-      
-      if (!this.multiStart){
-        const tile = this.getTileCursor()
-       // this.objects.forEach(it=>{
-          this.objects.handleMove(new Vector(tile.x, tile.y), this.getPixelCursor());
-       // });
+     // if (!this.cursorStatus.multiStart){
+        const tile = this.getTileCursor();
         const cursor = this.getPixelCursor();
-        //this.units.forEach(it=>{
-        //  it.handleMove(new Vector(cursor.x, cursor.y));
-        //});
-      }
-      //this.cursor.x+=e.movementX;
-      //this.cursor.y+=e.movementY;
+        this.objects.handleMove(tile, cursor);
+        this.cursorStatus.pixelPosition = Vector.fromIVector(this.cursor);
+        this.cursorStatus.tilePosition = tile;
+      //}
     }
     
     canvas.node.onclick=e=>{
-      //let sz=55;
-      //console.log('d');
-      //overlay.node.requestPointerLock();
       const cursorTile = this.getTileCursor();
       const cursor = this.getPixelCursor();
+      const action = this.cursorStatus.getAction();
+      if (action == 'select'){
+        this.objects.handleClick(cursorTile, cursor);
+      } else if (action == 'move'){
+        this.commandUnit();
+      } else if (action == 'build'){
+        this.modeCallback();
+        this.addObject(0, this.cursorStatus.planned, cursorTile.x, cursorTile.y); 
+        this.cursorStatus.planned = null;
+        
+       
+      }
       //this.addMtx(obj, cursorTile.x, cursorTile.y);
-      if (this.mode ==0){
+      /*if (this.mode ==0){
         //this.objects.forEach(it=>{
-          this.objects.handleClick(new Vector(cursorTile.x, cursorTile.y), this.getPixelCursor());
+          this.objects.handleClick(cursorTile, cursor);
         //});
         //this.units.forEach(it=>{
         //  it.handleClick(new Vector(cursor.x, cursor.y));
@@ -277,24 +268,7 @@ export class GameField extends Control{
       } else
       if (this.mode == 2 && this.selected instanceof UnitObject){
         this.mode = 0;
-
-        let mp = this.map.map.map(it=>it.map(jt=>jt==0?Number.MAX_SAFE_INTEGER:-1));
-        let indexPoint = this.getTileCursor();//{x:Math.floor(e.offsetX/this.sz), y:Math.floor(e.offsetY/this.sz)};
-        console.log(this.selected);
-        const units:UnitObject[] = [this.selected as UnitObject];
-        const destinations = units.map(unit=>{
-          return new Vector(Math.floor(unit.positionPx.x/this.sz), Math.floor(unit.positionPx.y/this.sz))
-        });
-        //[...this.mainSlot.list];
-        tracePathes(mp, indexPoint, destinations, (pathes)=>{
-          //this.pathes = pathes;
-          console.log(pathes);
-          pathes.forEach((path, i)=>{
-            const unit = units[i];
-            (unit as UnitObject).setPath(path, (pos)=>this.isEmptyTile(pos, unit));
-            //(unit as RoundNode).attackTarget = Vector.fromIVector(indexPoint).scale(10);
-          })
-        })
+        this.commandUnit();
         //this.traceMap.setPathFinishPoint({x: cursorTile.x, y: cursorTile.y})
 
         //this.selectedUnit.target= new Vector(cursor.x, cursor.y);
@@ -303,7 +277,7 @@ export class GameField extends Control{
            this.objects.handleClick(new Vector(cursorTile.x, cursorTile.y), this.getPixelCursor());
         // });
         this.selected = null;
-      }
+      }*/
     }
     document.body.onmouseleave = ()=>{
      // console.log('df');
@@ -347,6 +321,29 @@ export class GameField extends Control{
     window.addEventListener('resize', ()=>{
       this.autoSizeCanvas();
     })
+  }
+
+  commandUnit(){
+    let mp = this.map.map.map(it=>it.map(jt=>jt==0?Number.MAX_SAFE_INTEGER:-1));
+    let indexPoint = this.getTileCursor();//{x:Math.floor(e.offsetX/this.sz), y:Math.floor(e.offsetY/this.sz)};
+    //console.log(this.selected);
+    if (this.cursorStatus.selected.find(it=> !(it instanceof UnitObject)) != null){
+      return;
+    }
+    const units:UnitObject[] = this.cursorStatus.selected as UnitObject[];//[this.selected as UnitObject];
+    const destinations = units.map(unit=>{
+      return new Vector(Math.floor(unit.positionPx.x/this.sz), Math.floor(unit.positionPx.y/this.sz))
+    });
+    //[...this.mainSlot.list];
+    tracePathes(mp, indexPoint, destinations, (pathes)=>{
+      //this.pathes = pathes;
+      console.log(pathes);
+      pathes.forEach((path, i)=>{
+        const unit = units[i];
+        (unit as UnitObject).setPath(path, (pos)=>this.isEmptyTile(pos, unit));
+        //(unit as RoundNode).attackTarget = Vector.fromIVector(indexPoint).scale(10);
+      })
+    })  
   }
 //возможно, тут лучше передвать не нейм, а сам объект созданного солдата? 
   addUnit(player:number, name:string){
@@ -399,10 +396,11 @@ export class GameField extends Control{
     }
   }*/
 
-  setMode(mode:number, name:string, callback:()=>void){
-    this.mode = mode;
+  setPlanned(name:string, callback:()=>void){
+    //this.mode = mode;
     console.log(name);
-    this.currentBuilding = tech.builds.find(it=>it.desc[0] == name);//{name:name};
+    this.cursorStatus.planned = tech.builds.find(it=>it.desc[0] == name);//{name:name};
+    console.log(callback);
     this.modeCallback = callback;
   }
 
@@ -415,7 +413,7 @@ export class GameField extends Control{
     } 
 
     this.objects.add(object);
-    this.traceMap.addObjectData(object)
+    //this.traceMap.addObjectData(object)
   }
 
   renderObjects(ctx:CanvasRenderingContext2D){
@@ -424,7 +422,7 @@ export class GameField extends Control{
         it.render(ctx, 
           this.map.position, 
           this.sz, 
-          it==this.selected,
+          this.cursorStatus.selected.includes(it),
           Object.keys(this.primaries[0]).find(obj=>this.primaries[0][obj]==it)!=null
         );
       /*}
@@ -522,10 +520,10 @@ export class GameField extends Control{
   }
 
   getTileCursor(){
-    return {
+    return Vector.fromIVector({
       x: Math.floor((-this.map.position.x +this.cursor.x)/this.sz),
       y: Math.floor((-this.map.position.y +this.cursor.y)/this.sz)
-    }
+    });
   }
 
   getPixelCursor(){
@@ -554,43 +552,43 @@ export class GameField extends Control{
     this.canvas.node.height = this.node.clientHeight;
   }
 
-  renderCursor(ctx:CanvasRenderingContext2D){
-    ctx.fillStyle = "#00f";
-    ctx.beginPath();
-    let r =2;
-    ctx.ellipse(this.cursor.x -r, this.cursor.y-r, r*2, r*2, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke(); 
-    // 
-    let label = 'ground';
-   /* if (this.hoveredUnit[this.hoveredUnit.length-1]){
-       label = 'unit: '+this.hoveredUnit[this.hoveredUnit.length-1].name
-    } else if(this.objects.hovered){
-       label = 'build: '+this.objects.hovered?.name
-    }*/
-    ctx.fillText( label , this.cursor.x, this.cursor.y -10);
+  // renderCursor(ctx:CanvasRenderingContext2D){
+  //   ctx.fillStyle = "#00f";
+  //   ctx.beginPath();
+  //   let r =2;
+  //   ctx.ellipse(this.cursor.x -r, this.cursor.y-r, r*2, r*2, 0, 0, Math.PI * 2);
+  //   ctx.fill();
+  //   ctx.stroke(); 
+  //   // 
+  //   let label = 'ground';
+  //  /* if (this.hoveredUnit[this.hoveredUnit.length-1]){
+  //      label = 'unit: '+this.hoveredUnit[this.hoveredUnit.length-1].name
+  //   } else if(this.objects.hovered){
+  //      label = 'build: '+this.objects.hovered?.name
+  //   }*/
+  //   ctx.fillText( label , this.cursor.x, this.cursor.y -10);
 
-    let mode = 'select';
-    if (this.mode ==1){
-       mode = 'building'
-    } else if(/*this.mode ==2 && */this.objects.hovered){
-       mode = this.action //'atack'
-    } else if(this.mode ==2){
-      mode = 'move'
-   } 
-   ctx.fillText( mode , this.cursor.x, this.cursor.y -20);
-   this.drawTile(ctx, this.getTileCursor(), this.map.position, "#0ff7");
-  }
+  // //   let mode = 'select';
+  // //   if (this.mode ==1){
+  // //      mode = 'building'
+  // //   } else if(this.objects.hovered){
+  // //      mode = this.action //'atack'
+  // //   } else if(this.mode ==2){
+  // //     mode = 'move'
+  // //  } 
+  //  ctx.fillText( 'mode' , this.cursor.x, this.cursor.y -20);
+  //  this.drawTile(ctx, this.getTileCursor(), this.map.position, "#0ff7");
+  // }
 
-  renderMulti(ctx: CanvasRenderingContext2D){
-    ctx.fillStyle = '#fff4';
-    ctx.fillRect(this.multiStart.x, this.multiStart.y, this.cursor.x -this.multiStart.x, this.cursor.y -this.multiStart.y);
-  }
+  // renderMulti(ctx: CanvasRenderingContext2D){
+  //   ctx.fillStyle = '#fff4';
+  //   ctx.fillRect(this.cursorStatus.multiStart.x, this.cursorStatus.multiStart.y, this.cursor.x -this.cursorStatus.multiStart.x, this.cursor.y -this.cursorStatus.multiStart.y);
+  // }
 
   renderBuildPlanned(ctx: CanvasRenderingContext2D){
     const cursorTile = this.getTileCursor();
     //this.currentBuilding.render();
-    this.drawObject(ctx, this.currentBuilding.mtx, cursorTile, this.map.position, "#ff06");
+    this.drawObject(ctx, this.cursorStatus.planned.mtx, cursorTile, this.map.position, "#ff06");
   }
 
   render(ctx: CanvasRenderingContext2D, delta:number){
@@ -601,12 +599,12 @@ export class GameField extends Control{
     this.map.renderMap(ctx, this.getCanvasSize(), this.getVisibleTileRect(), this.getTileCursor());
     this.renderObjects(ctx);
     //this.renderUnits(ctx, delta);
-    this.renderCursor(ctx);
+    this.cursorStatus.renderCursor(ctx, this.map.position);
 
-    if (this.multiStart){
-      this.renderMulti(ctx);
+    if (this.cursorStatus.multiStart){
+      this.cursorStatus.renderMulti(ctx);
     }
-    if (this.mode==1){
+    if (this.cursorStatus.planned){
       this.renderBuildPlanned(ctx);
     }
     //this.renderMtx(ctx, obj, this.position.x+0 +cursorTile.x*sz, this.position.y+0+cursorTile.y*sz);/*this.position.x % sz +Math.floor(this.cursor.x/sz)*sz, this.position.y % sz +Math.floor(this.cursor.y/sz)*sz*/
