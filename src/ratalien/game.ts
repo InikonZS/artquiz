@@ -3,7 +3,7 @@ import style from "./style.css";
 import red from "./red.css";
 import {Vector, IVector} from "../common/vector";
 import {GameSide} from "./gameSidePanel";
-import {MapObject, UnitObject, ITechBuild} from "./interactives";
+import {MapObject, UnitObject, ITechBuild, InteractiveObject} from "./interactives";
 import {BotPlayer} from "./botPlayer";
 import { tech } from "./techTree";
 import {GamePlayer, IBuildInfo} from "./gamePlayer";
@@ -101,7 +101,7 @@ export class Game extends Control{
     //botPlayer.
 
     botPlayer.onAttack = ()=>{
-      let botUnits = field.units.filter(it=>it.player==1);
+      //let botUnits = field.units.filter(it=>it.player==1);
       let playerBuilds = field.objects.list.filter(it=>it.player==0);
       if (playerBuilds.length == 0) return;
       /*botUnits.forEach(it=>{
@@ -109,8 +109,8 @@ export class Game extends Control{
           it.attackTarget = null;
         }
       })*/
-      if (botUnits.length ==0) return;
-      botUnits[Math.floor(Math.random()* botUnits.length)].attackTarget = playerBuilds[Math.floor(Math.random()* playerBuilds.length)];
+      //if (botUnits.length ==0) return;
+      //botUnits[Math.floor(Math.random()* botUnits.length)].attackTarget = playerBuilds[Math.floor(Math.random()* playerBuilds.length)];
     }
     
 
@@ -215,11 +215,11 @@ class GameMap{
 }
 
 class InteractiveList{
-  public list:MapObject[];
-  hoveredObjects:MapObject[];
+  public list:InteractiveObject[];
+  hoveredObjects:InteractiveObject[];
 
-  _hovered:MapObject;
-  set hovered(value:MapObject){
+  _hovered:InteractiveObject;
+  set hovered(value:InteractiveObject){
     let last = this._hovered;
     this._hovered = value;
     this.onChangeHovered?.(last, value);
@@ -227,14 +227,14 @@ class InteractiveList{
   get hovered(){
     return this._hovered;
   }
-  onChangeHovered: (lastTarget:MapObject, currentTarget:MapObject)=>void;
-  onClick: (target:MapObject)=>void;
+  onChangeHovered: (lastTarget:InteractiveObject, currentTarget:InteractiveObject)=>void;
+  onClick: (target:InteractiveObject)=>void;
   constructor(){
     this.list = [];
     this.hoveredObjects = [];
   }
 
-  add(object:MapObject){
+  add(object:InteractiveObject){
     object.onMouseEnter = ()=>{
       this.hoveredObjects.push(object);
       this.handleHover();
@@ -254,13 +254,13 @@ class InteractiveList{
     })
   }
 
-  public handleMove(pos:Vector){
-    this.list.forEach(it=>it.handleMove(pos));
+  public handleMove(tile:Vector, cursor:Vector){
+    this.list.forEach(it=>it.handleMove(tile, cursor));
   }
 
-  public handleClick(pos:Vector){
-    this.handleMove(pos);
-    this.hovered.handleClick(pos);
+  public handleClick(tile:Vector, cursor:Vector){
+    this.handleMove(tile, cursor);
+    this.hovered.handleClick(tile, cursor);
     this.onClick(this.hovered);
     //this.list.forEach(it=>it.handleClick(pos));
   }
@@ -280,19 +280,20 @@ export class GameField extends Control{
   cursor: { x: number; y: number; } = {x:0, y:0};
   //cursorTile: { x: number; y: number; } = {x:0, y:0};
   //tile: HTMLImageElement;
+  selected: InteractiveObject;
   map:GameMap;
   sz:number = 55;
   canvas: Control<HTMLCanvasElement>;
   objects: InteractiveList;//MapObject[]=[];
-  units: UnitObject[]=[];
+  //units: UnitObject[]=[];
   mode: number = 0;
   currentBuilding: ITechBuild;
-  selectedUnit: UnitObject = null;
+  //selectedUnit: UnitObject = null;
   modeCallback: () => void;
   //hoveredObject: {action:string, object:MapObject}[] =[];
-  hoveredUnit: UnitObject[] = [];
+  //hoveredUnit: UnitObject[] = [];
   multiStart: Vector;
-  selectedBuild: MapObject;
+  //selectedBuild: MapObject;
   primaries: Array<Record<string, MapObject>> =[{},{}];
   private traceMap: TraceMap;
   private startUnitsPosition: number;
@@ -304,29 +305,35 @@ export class GameField extends Control{
     this.res = res;
     this.objects = new InteractiveList();
      const getAction = (current:MapObject)=>{
-        if ( this.selectedUnit && current && current.player!==0){
+        if ( this.selected instanceof UnitObject && current && current.player!==0){
           return 'attack'
-        } else if(current && this.selectedBuild == current && current.player==0){
-          return this.primaries[0][current.name] == this.selectedBuild? 'already_primary': 'set_primary';
+        } else if(current && current instanceof MapObject && this.selected == current && current.player==0){
+          return this.primaries[0][current.name] == this.selected? 'already_primary': 'set_primary';
         } else {
           return 'select_object'
         }
       }
     this.objects.onChangeHovered = ((last, current)=>{
-      console.log(last?.name, current?.name);
-      this.action = getAction(current);
+      //console.log(last?.name, current?.name);
+      if (current instanceof MapObject){
+        this.action = getAction(current);
+      }
     });
 
     this.objects.onClick = (current=>{
-      if ( this.selectedUnit && current.player!==0){
-        console.log(this.selectedUnit);
-        this.selectedUnit.attackTarget = current;
-      } else if(this.selectedBuild == current && current.player==0){
-        this.primaries[0][this.selectedBuild.name] = this.selectedBuild;
+      if ( this.selected instanceof UnitObject && current.player!==0){
+        console.log(this.selected);
+        //this.selectedUnit.attackTarget = current;
+      } else if(current && this.selected instanceof MapObject && this.selected == current && current.player==0){
+        this.primaries[0][this.selected.name] = this.selected;
       } else {
-        this.selectedBuild = current;
+        //if (current instanceof MapObject){
+        this.selected = current;
+        this.mode =2;
       }
-      this.action = getAction(current);
+      if (current instanceof MapObject){
+        this.action = getAction(current);
+      }
     });
 
     const canvas = new Control<HTMLCanvasElement>(this.node, 'canvas');
@@ -380,12 +387,12 @@ export class GameField extends Control{
       if (!this.multiStart){
         const tile = this.getTileCursor()
        // this.objects.forEach(it=>{
-          this.objects.handleMove(new Vector(tile.x, tile.y));
+          this.objects.handleMove(new Vector(tile.x, tile.y), this.getPixelCursor());
        // });
         const cursor = this.getPixelCursor();
-        this.units.forEach(it=>{
-          it.handleMove(new Vector(cursor.x, cursor.y));
-        });
+        //this.units.forEach(it=>{
+        //  it.handleMove(new Vector(cursor.x, cursor.y));
+        //});
       }
       //this.cursor.x+=e.movementX;
       //this.cursor.y+=e.movementY;
@@ -400,27 +407,45 @@ export class GameField extends Control{
       //this.addMtx(obj, cursorTile.x, cursorTile.y);
       if (this.mode ==0){
         //this.objects.forEach(it=>{
-          this.objects.handleClick(new Vector(cursorTile.x, cursorTile.y));
+          this.objects.handleClick(new Vector(cursorTile.x, cursorTile.y), this.getPixelCursor());
         //});
-        this.units.forEach(it=>{
-          it.handleClick(new Vector(cursor.x, cursor.y));
-        });
+        //this.units.forEach(it=>{
+        //  it.handleClick(new Vector(cursor.x, cursor.y));
+        //});
       } else
       if (this.mode == 1){
         this.addObject(0, this.currentBuilding, cursorTile.x, cursorTile.y);
         this.modeCallback();
         this.setMode(0, null, null);
       } else
-      if (this.mode == 2){
+      if (this.mode == 2 && this.selected instanceof UnitObject){
         this.mode = 0;
-        this.traceMap.setPathFinishPoint({x: cursorTile.x, y: cursorTile.y})
 
-        this.selectedUnit.target= new Vector(cursor.x, cursor.y);
-        this.selectedUnit.attackTarget = null;
+        let mp = this.map.map.map(it=>it.map(jt=>jt==0?Number.MAX_SAFE_INTEGER:-1));
+        let indexPoint = {x:Math.floor(e.offsetX/this.sz), y:Math.floor(e.offsetY/this.sz)};
+        console.log(this.selected);
+        const units:UnitObject[] = [this.selected as UnitObject];
+        const destinations = units.map(unit=>{
+          return new Vector(Math.floor(unit.positionPx.x/this.sz), Math.floor(unit.positionPx.y/this.sz))
+        });
+        //[...this.mainSlot.list];
+        tracePathes(mp, indexPoint, destinations, (pathes)=>{
+          //this.pathes = pathes;
+          console.log(pathes);
+          pathes.forEach((path, i)=>{
+            const unit = units[i];
+            (unit as UnitObject).setPath(path, (pos)=>this.isEmptyTile(pos, unit));
+            //(unit as RoundNode).attackTarget = Vector.fromIVector(indexPoint).scale(10);
+          })
+        })
+        //this.traceMap.setPathFinishPoint({x: cursorTile.x, y: cursorTile.y})
+
+        //this.selectedUnit.target= new Vector(cursor.x, cursor.y);
+        //this.selectedUnit.attackTarget = null;
         //this.objects.forEach(it=>{
-           this.objects.handleClick(new Vector(cursorTile.x, cursorTile.y));
+           this.objects.handleClick(new Vector(cursorTile.x, cursorTile.y), this.getPixelCursor());
         // });
-        this.selectedUnit = null;
+        this.selected = null;
       }
     }
     document.body.onmouseleave = ()=>{
@@ -478,12 +503,12 @@ export class GameField extends Control{
     
     let barrac = Object.values(this.primaries[player]).find(it=>it.name == spawn);
     if (barrac){
-      unit.position = Vector.fromIVector({x:barrac.position.x*this.sz, y: barrac.position.y*this.sz});
+      unit.positionPx = Vector.fromIVector({x:barrac.position.x*this.sz, y: barrac.position.y*this.sz});
     } 
     
     
     unit.name = name;
-    unit.onClick = ()=>{
+    /*unit.onClick = ()=>{
       const cursorTile = this.getTileCursor();
       unit.clearStepIndex()
       this.traceMap.clearData()
@@ -500,7 +525,8 @@ export class GameField extends Control{
       this.hoveredUnit = this.hoveredUnit.filter(it=>it!=unit);
     }
 
-    this.units.push(unit);
+    this.units.push(unit);*/
+    this.objects.add(unit);
   }
 
   /*addMtx(obj:Array<Array<string>>, x: number, y:number, pivot:Vector){
@@ -537,12 +563,19 @@ export class GameField extends Control{
 
   renderObjects(ctx:CanvasRenderingContext2D){
     this.objects.list.forEach(it=>{
-      it.render(ctx, 
-        this.map.position, 
-        this.sz, 
-        it==this.selectedBuild,
-        Object.keys(this.primaries[0]).find(obj=>this.primaries[0][obj]==it)!=null
-      );
+      //if (it instanceof MapObject){
+        it.render(ctx, 
+          this.map.position, 
+          this.sz, 
+          it==this.selected,
+          Object.keys(this.primaries[0]).find(obj=>this.primaries[0][obj]==it)!=null
+        );
+      /*}
+      if (it instanceof UnitObject){
+        it.render(ctx, 
+          this.map.position
+        );
+      }*/
       //this.drawObject(ctx, it.tiles, it.position, this.map.position, it.isHovered?"#9999":colors[it.player]);
       /*const pos = this.toMapPixelVector(new Vector(it.position.x*this.sz, it.position.y*this.sz));
       ctx.strokeText(`health: ${it.health.toString()}/100` , pos.x, pos.y +10);
@@ -556,14 +589,14 @@ export class GameField extends Control{
     });
   }
 
-  renderUnits(ctx:CanvasRenderingContext2D, delta:number){
+  /*renderUnits(ctx:CanvasRenderingContext2D, delta:number){
     this.units.forEach(it=>{
       it.step(delta,this.traceMap);
       it.render(ctx, this.map.position);
       //this.drawUnit(ctx, it.position, this.map.position, it.isHovered?"#9999": consts.colors[it.player]);
       //this.addMtx(view,Math.floor(it.position.x/this.sz), Math.floor(it.position.y/this.sz), new Vector(2,2));
     });
-  }
+  }*/
 
   renderMtx(ctx:CanvasRenderingContext2D, obj:Array<Array<string>>, px:number, py:number){
     let sz = this.sz;
@@ -639,10 +672,10 @@ export class GameField extends Control{
   }
 
   getPixelCursor(){
-    return {
+    return Vector.fromIVector({
       x: -this.map.position.x + this.cursor.x,
       y: -this.map.position.y + this.cursor.y
-    }
+    });
   }
   
   toMapPixelVector(vector:IVector):IVector{
@@ -673,11 +706,11 @@ export class GameField extends Control{
     ctx.stroke(); 
     // 
     let label = 'ground';
-    if (this.hoveredUnit[this.hoveredUnit.length-1]){
+   /* if (this.hoveredUnit[this.hoveredUnit.length-1]){
        label = 'unit: '+this.hoveredUnit[this.hoveredUnit.length-1].name
     } else if(this.objects.hovered){
        label = 'build: '+this.objects.hovered?.name
-    }
+    }*/
     ctx.fillText( label , this.cursor.x, this.cursor.y -10);
 
     let mode = 'select';
@@ -710,7 +743,7 @@ export class GameField extends Control{
     //this.renderMap(ctx);
     this.map.renderMap(ctx, this.getCanvasSize(), this.getVisibleTileRect(), this.getTileCursor());
     this.renderObjects(ctx);
-    this.renderUnits(ctx, delta);
+    //this.renderUnits(ctx, delta);
     this.renderCursor(ctx);
 
     if (this.multiStart){
@@ -724,8 +757,9 @@ export class GameField extends Control{
 
 
   isEmptyTile(pos:Vector, unit:any){
-    /*if (this.map.map[pos.y][pos.x]!=0) return false;
-    let result = this.renderList.list.find(it=>{
+    if (this.map.map[pos.y][pos.x]!=0) return false;
+    return true;
+    /*let result = this.renderList.list.find(it=>{
       if (unit == it) return false;
       const near = (it as RoundNode).getTilePosition().sub(pos).abs();
       //if (near< 20){
