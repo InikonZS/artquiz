@@ -1,5 +1,5 @@
-import { Vector } from "../common/vector";
-import { InteractiveObject, ITechBuild } from "./interactives";
+import { IVector, Vector } from "../common/vector";
+import { InteractiveObject, ITechBuild, MapObject, UnitObject } from "./interactives";
 
 export class GameCursorStatus{
   pixelPosition:Vector = new Vector(0, 0);
