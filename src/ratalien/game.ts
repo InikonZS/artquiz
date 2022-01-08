@@ -103,11 +103,20 @@ export class GameField extends Control{
   modeCallback: () => void;
   primaries: Array<Record<string, MapObject>> =[{},{}];
   res: Record<string, HTMLImageElement>;
-  cursorStatus:GameCursorStatus = new GameCursorStatus;
+  cursorStatus:GameCursorStatus 
+  pathes: Vector[][];
 
   constructor(parentNode: HTMLElement, res: Record<string, HTMLImageElement>){
     super(parentNode, 'div', red['game_field']);
-    this.res = res;
+    this.res = res;  
+    
+    const canvas = new Control<HTMLCanvasElement>(this.node, 'canvas');
+    this.canvas = canvas;
+    this.map = new GameMap(96, 96, res['map'], res);
+    
+    this.cursorStatus= new GameCursorStatus(()=>{
+      return this.primaries[0];
+    });
     this.objects = new InteractiveList();
     this.objects.onChangeHovered = ((last, current)=>{
       this.cursorStatus.hovered = current?[current]:[];
@@ -117,21 +126,16 @@ export class GameField extends Control{
       this.cursorStatus.selected = current?[current]:[];
     });
 
-    const canvas = new Control<HTMLCanvasElement>(this.node, 'canvas');
-    this.canvas = canvas;
-    this.map = new GameMap(96, 96, res['map'], res);
-
+    let preventSelect = false;
     canvas.node.onmousedown =e=>{
       if (e.button == 2){
         this.cursorStatus.planned = null;
         this.cursorStatus.selected = [];
       } else if (e.button == 0){
-        this.cursorStatus.multiStart = new Vector(e.clientX, e.clientY);
-        let listener = ()=>{
-          this.cursorStatus.multiStart = null;
-          window.removeEventListener('mouseup', listener);
-        }
-        window.addEventListener('mouseup', listener);
+        if (this.cursorStatus.getAction()!='select') return;
+        this.handleMultiselect(this.getPixelCursor(), ()=>{
+          preventSelect = true;
+        });
       }
     }
 
@@ -148,6 +152,10 @@ export class GameField extends Control{
     }
     
     canvas.node.onclick=e=>{
+      if (preventSelect){
+        preventSelect = false;
+        return;
+      }
       const cursorTile = this.getTileCursor();
       const cursor = this.getPixelCursor();
       const action = this.cursorStatus.getAction();
@@ -159,6 +167,8 @@ export class GameField extends Control{
         this.modeCallback();
         this.addObject(0, this.cursorStatus.planned, cursorTile.x, cursorTile.y); 
         this.cursorStatus.planned = null; 
+      } else if (action == 'primary'){
+        this.primaries[0][this.cursorStatus.hovered[0].name] = this.cursorStatus.hovered[0] as MapObject;
       }
     }
 
@@ -184,6 +194,27 @@ export class GameField extends Control{
     })
   }
 
+  handleMultiselect(start:Vector, onSelect:()=>void){
+    this.cursorStatus.multiStart = start; //new Vector(e.clientX, e.clientY);
+    let listener = ()=>{
+      
+      let selection = this.objects.list.filter(it=>{
+        if ((it instanceof UnitObject) == false){
+          return false;
+        }
+        return it.player == 0 && inBox((it as UnitObject).positionPx, this.cursorStatus.multiStart,  this.getPixelCursor());
+      });
+      
+      this.cursorStatus.multiStart = null;
+      window.removeEventListener('mouseup', listener);
+      if (selection.length){
+        this.cursorStatus.selected = selection;
+        onSelect();
+      }
+    }
+    window.addEventListener('mouseup', listener);
+  }
+
   commandUnit(){
     let mp = this.map.map.map(it=>it.map(jt=>jt==0?Number.MAX_SAFE_INTEGER:-1));
     let indexPoint = this.getTileCursor();//{x:Math.floor(e.offsetX/this.sz), y:Math.floor(e.offsetY/this.sz)};
@@ -197,7 +228,7 @@ export class GameField extends Control{
     });
     //[...this.mainSlot.list];
     tracePathes(mp, indexPoint, destinations, (pathes)=>{
-      //this.pathes = pathes;
+      this.pathes = pathes;
       console.log(pathes);
       pathes.forEach((path, i)=>{
         const unit = units[i];
@@ -352,6 +383,14 @@ export class GameField extends Control{
     this.map.renderMap(ctx, this.getCanvasSize(), this.getVisibleTileRect(), this.getTileCursor());
     this.renderObjects(ctx);
     this.cursorStatus.render(ctx, this.map.position);
+
+    if (this.pathes){
+      this.pathes.forEach(it=>{
+        it.forEach(jt=>{
+          this.drawTile(ctx, jt, this.map.position, '#0006');
+        });
+      })
+    }
 
     //this.renderMtx(ctx, obj, this.position.x+0 +cursorTile.x*sz, this.position.y+0+cursorTile.y*sz);/*this.position.x % sz +Math.floor(this.cursor.x/sz)*sz, this.position.y % sz +Math.floor(this.cursor.y/sz)*sz*/
   }

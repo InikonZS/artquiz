@@ -47,7 +47,7 @@ export class InteractiveList{
 
   public handleClick(tile:Vector, cursor:Vector){
     this.handleMove(tile, cursor);
-    this.hovered.handleClick(tile, cursor);
+    this.hovered?.handleClick(tile, cursor);
     this.onClick(this.hovered);
     //this.list.forEach(it=>it.handleClick(pos));
   }

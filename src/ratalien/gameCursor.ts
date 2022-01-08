@@ -8,9 +8,10 @@ export class GameCursorStatus{
   selected:Array<InteractiveObject> = [];
   hovered:Array<InteractiveObject> = [];
   planned: ITechBuild;
+  getPrimaries: () => Record<string, MapObject>;
 
-  constructor(){
-
+  constructor(getPrimaries:()=>Record<string, MapObject>){
+    this.getPrimaries = getPrimaries;
   }
 
   getAction(){
@@ -30,7 +31,11 @@ export class GameCursorStatus{
       }
     } else if ((this.selected[0] instanceof MapObject)) {
       if (this.hovered[0] == this.selected[0]){
-        //primary
+        if (this.getPrimaries()[this.hovered[0].name] ==this.hovered[0]){
+          action = 'no'
+        } else {
+          action = 'primary'
+        }
       }
     }
     return action;
@@ -39,7 +44,7 @@ export class GameCursorStatus{
   render(ctx:CanvasRenderingContext2D, camera:Vector){
     this.renderCursor(ctx, camera)
     if (this.multiStart){
-      this.renderMulti(ctx);
+      this.renderMulti(ctx, camera);
     }
     if (this.planned){
       this.renderBuildPlanned(ctx, camera);
@@ -64,9 +69,9 @@ export class GameCursorStatus{
     this.drawTile(ctx, this.tilePosition, camera, "#0ff7", 55);
   }
 
-  renderMulti(ctx: CanvasRenderingContext2D){
+  renderMulti(ctx: CanvasRenderingContext2D, camera:Vector){
     ctx.fillStyle = '#fff4';
-    ctx.fillRect(this.multiStart.x, this.multiStart.y, this.pixelPosition.x -this.multiStart.x, this.pixelPosition.y -this.multiStart.y);
+    ctx.fillRect(this.multiStart.x+camera.x, this.multiStart.y+camera.y, this.pixelPosition.x -this.multiStart.x-camera.x, this.pixelPosition.y -this.multiStart.y-camera.y);
   }
 
   renderBuildPlanned(ctx: CanvasRenderingContext2D, camera:Vector){

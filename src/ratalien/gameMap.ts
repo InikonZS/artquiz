@@ -54,8 +54,8 @@ export class GameMap{
     ]
     const sz = this.cellSize;
     const {minx, maxx, miny, maxy} = visibleTileRect;//this.getVisibleTileRect();
-    for(let i = minx; i < maxx; i++){
-      for(let j = miny; j < maxy; j++){
+    for(let j = minx; j < maxx; j++){
+      for(let i = miny; i < maxy; i++){
         if (this.map[i] && this.map[i][j]!==null){
           ctx.fillStyle = obi[this.map[i][j]];
           //const cursorTile = this.getTileCursor();
@@ -66,20 +66,20 @@ export class GameMap{
           ctx.lineWidth = 1;
           ctx.beginPath();
           
-          ctx.rect(this.position.x+0 +i*sz, this.position.y+0+j*sz, sz, sz);
+          ctx.rect(this.position.x+0 +j*sz, this.position.y+0+i*sz, sz, sz);
           ctx.closePath();
           ctx.fill();
           ctx.stroke();
           ctx.fillStyle = '#0006';
           
-          ctx.fillText(i.toString() + ' / '+ j.toString(), this.position.x+0 +i*sz, this.position.y+0+j*sz);
+          ctx.fillText(i.toString() + ' / '+ j.toString(), this.position.x+0 +j*sz, this.position.y+0+i*sz);
 
-          ctx.drawImage(this.res['grass'], this.position.x+0 +i*sz, this.position.y+0+j*sz, sz, sz);
+          ctx.drawImage(this.res['grass'], this.position.x+0 +j*sz, this.position.y+0+i*sz, sz, sz);
           if (this.map[i][j] == 2){
-            ctx.drawImage(this.res['rocks'], this.position.x+0 +i*sz, this.position.y+0+j*sz - sz *0.5, sz, sz*1.5);
+            ctx.drawImage(this.res['rocks'], this.position.x+0 +j*sz, this.position.y+0+i*sz - sz *0.5, sz, sz*1.5);
           }
           if (this.map[i][j] == 1){
-            ctx.drawImage(this.res['gold'], this.position.x+0 +i*sz, this.position.y+0+j*sz - (this.res['gold'].naturalHeight - 128), sz, sz* this.res['gold'].naturalHeight / 128);
+            ctx.drawImage(this.res['gold'], this.position.x+0 +j*sz, this.position.y+0+i*sz - (this.res['gold'].naturalHeight - 128), sz, sz* this.res['gold'].naturalHeight / 128);
           }
         }
         //ctx.drawImage(this.tile, this.position.x+0 +i*sz, this.position.y+0+j*sz, sz, sz);
