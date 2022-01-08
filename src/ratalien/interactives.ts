@@ -132,7 +132,7 @@ export class UnitObject extends InteractiveObject{
   speed: number = 1;
   attackRadius: number = 200;
   name:string;
-  attackTarget: {damage:(amount:number)=>void, position:IVector} = null;
+  attackTarget: Vector;//{damage:(amount:number)=>void, position:IVector} = null;
   player:number;
   time: number= 0;
   private _stepIndex: number;
@@ -140,6 +140,8 @@ export class UnitObject extends InteractiveObject{
   health: number = 100;
   tileChecker: (pos: Vector) => boolean;
   type:string = 'unit';
+  bullet: Vector;
+  reloadTime: number = 0;
 
   constructor(){
     super();
@@ -208,7 +210,7 @@ clearStepIndex(){
   this._stepIndex=1;
   this.path = null;
 }
-  attack(delta:number){
+ /* attack(delta:number){
     //fix logic atack and move
     if (this.attackTarget){
      // console.log('atack');
@@ -222,9 +224,9 @@ clearStepIndex(){
         this.target = Vector.fromIVector(this.attackTarget.position).scale(55);
       }
     }
-  }
+  }*/
 
-  render(ctx:CanvasRenderingContext2D, camera:IVector, size:number, selected:boolean){
+  render(ctx:CanvasRenderingContext2D, camera:Vector, size:number, selected:boolean){
     const sz = 10;
     ctx.fillStyle = this.isHovered?"#9999":consts.colors[this.player];
     ctx.strokeStyle = "#000";
@@ -239,6 +241,15 @@ clearStepIndex(){
     ctx.fillText(`health: ${this.health}`, camera.x + this.positionPx.x, camera.y+ this.positionPx.y-20);
     if (selected){
       ctx.fillText(`selected`, camera.x + this.positionPx.x, camera.y+ this.positionPx.y-30);  
+    }
+
+    if (this.bullet){
+      this.bullet.sub(this.bullet.clone().sub(this.attackTarget).normalize());
+      if (this.bullet.clone().sub(this.attackTarget).abs()<1){
+        this.bullet = null;
+        return;
+      }
+      this.renderBullet(ctx, camera);
     }
     this.step();
   }
@@ -302,5 +313,24 @@ clearStepIndex(){
     this.path = [...path].reverse();
     this.target = this.path.pop().clone().scale(sz);
     this.tileChecker = tileChecker;
+  }
+
+  renderBullet(ctx:CanvasRenderingContext2D, camera:Vector){
+    const sz = 2;
+    ctx.fillStyle = "#0ff";
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.ellipse(camera.x+5 + this.bullet.x, camera.y+ this.bullet.y+5, sz, sz, 0, 0, Math.PI*2);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+  }
+
+  shot(){
+    if (this.reloadTime<=0){
+      this.bullet = this.positionPx.clone();
+      this.reloadTime = 300;
+    }
   }
 }

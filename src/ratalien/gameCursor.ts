@@ -41,6 +41,10 @@ export class GameCursorStatus{
     return action;
   }
 
+  isOnlyUnitsSelected(){
+    return this.selected.find(it=> !(it instanceof UnitObject)) == null
+  }
+
   render(ctx:CanvasRenderingContext2D, camera:Vector){
     this.renderCursor(ctx, camera)
     if (this.multiStart){

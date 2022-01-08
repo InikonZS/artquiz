@@ -215,11 +215,16 @@ export class GameField extends Control{
     window.addEventListener('mouseup', listener);
   }
 
+  getTraceMap(){
+    //add builds on map;
+    return this.map.map.map(it=>it.map(jt=>jt==0?Number.MAX_SAFE_INTEGER:-1));
+  }
+
   commandUnit(){
-    let mp = this.map.map.map(it=>it.map(jt=>jt==0?Number.MAX_SAFE_INTEGER:-1));
+    let traceMap = this.getTraceMap();
     let indexPoint = this.getTileCursor();//{x:Math.floor(e.offsetX/this.sz), y:Math.floor(e.offsetY/this.sz)};
     //console.log(this.selected);
-    if (this.cursorStatus.selected.find(it=> !(it instanceof UnitObject)) != null){
+    if (!this.cursorStatus.isOnlyUnitsSelected()){
       return;
     }
     const units:UnitObject[] = this.cursorStatus.selected as UnitObject[];//[this.selected as UnitObject];
@@ -227,7 +232,7 @@ export class GameField extends Control{
       return new Vector(Math.floor(unit.positionPx.x/this.sz), Math.floor(unit.positionPx.y/this.sz))
     });
     //[...this.mainSlot.list];
-    tracePathes(mp, indexPoint, destinations, (pathes)=>{
+    tracePathes(traceMap, indexPoint, destinations, (pathes)=>{
       this.pathes = pathes;
       console.log(pathes);
       pathes.forEach((path, i)=>{
@@ -237,6 +242,11 @@ export class GameField extends Control{
       })
     })  
   }
+
+  getPrimary(player:number, name:string){
+    return Object.values(this.primaries[player]).find(it=>it.name == name) || null;
+  }
+  
 //возможно, тут лучше передвать не нейм, а сам объект созданного солдата? 
   addUnit(player:number, name:string){
     //TODO check is empty,else, check neighbor
@@ -246,7 +256,7 @@ export class GameField extends Control{
     unit.position = new Vector(20, 20); //for demo
     const spawn = tech.units.filter(item => item.name == name)[0].spawn[0];
     
-    let barrac = Object.values(this.primaries[player]).find(it=>it.name == spawn);
+    let barrac = this.getPrimary(player, spawn);//Object.values(this.primaries[player]).find(it=>it.name == spawn);
     if (barrac){
       unit.positionPx = Vector.fromIVector({x:barrac.position.x*this.sz, y: barrac.position.y*this.sz});
     } 
