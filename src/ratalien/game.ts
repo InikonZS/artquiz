@@ -13,6 +13,7 @@ import {InteractiveList} from "./interactiveList";
 import {GameMap} from "./gameMap";
 import {GameCursorStatus} from "./gameCursor";
 import {consts} from "./globals";
+import {makeCircleMap} from "./distance";
 
 const view = [
   '00100'.split(''),
@@ -246,14 +247,14 @@ export class GameField extends Control{
   getPrimary(player:number, name:string){
     return Object.values(this.primaries[player]).find(it=>it.name == name) || null;
   }
-  
+
 //возможно, тут лучше передвать не нейм, а сам объект созданного солдата? 
   addUnit(player:number, name:string){
     //TODO check is empty,else, check neighbor
   //  console.log(name);
     let unit = new UnitObject();
     unit.player = player;
-    unit.position = new Vector(20, 20); //for demo
+    //unit.position = new Vector(20, 20); //for demo
     const spawn = tech.units.filter(item => item.name == name)[0].spawn[0];
     
     let barrac = this.getPrimary(player, spawn);//Object.values(this.primaries[player]).find(it=>it.name == spawn);
@@ -401,6 +402,16 @@ export class GameField extends Control{
         });
       })
     }
+
+    //no optimal
+    this.objects.list.forEach(it=>{
+      if (it.player != 0 ) return;
+      if (it instanceof UnitObject){
+        this.map.renderMtx(makeCircleMap(3), it.position.x, it.position.y);
+      } else {
+        this.map.renderMtx(makeCircleMap(5), it.position.x, it.position.y);  
+      }
+    })
 
     //this.renderMtx(ctx, obj, this.position.x+0 +cursorTile.x*sz, this.position.y+0+cursorTile.y*sz);/*this.position.x % sz +Math.floor(this.cursor.x/sz)*sz, this.position.y % sz +Math.floor(this.cursor.y/sz)*sz*/
   }

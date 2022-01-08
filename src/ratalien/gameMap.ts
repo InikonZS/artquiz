@@ -1,8 +1,9 @@
 import { Vector } from "../common/vector";
-import { getImageData, getMapFromImageData } from "./tracer";
+import { getImageData, getMapFromImageData, generateEmptyMap } from "./tracer";
 
 export class GameMap{
   map: Array<Array<number>>;
+  opened: Array<Array<number>>;
   currentMove: Vector;
   position:Vector = Vector.fromIVector({x:0, y:0});
   cellSize: number = 55;
@@ -12,6 +13,7 @@ export class GameMap{
     this.map = [];
     this.res = textures;
     this.map = getMapFromImageData(getImageData(map));
+    this.opened = generateEmptyMap(96,96, 0);
     //console.log(this.map);
     /*for(let i = 0; i < sizeY; i++){
       let row = [];
@@ -73,16 +75,35 @@ export class GameMap{
           ctx.fillStyle = '#0006';
           
           ctx.fillText(i.toString() + ' / '+ j.toString(), this.position.x+0 +j*sz, this.position.y+0+i*sz);
+          if (this.opened[i][j]){
+            ctx.drawImage(this.res['grass'], this.position.x+0 +j*sz, this.position.y+0+i*sz, sz, sz);
+            if (this.map[i][j] == 2){
+              ctx.drawImage(this.res['rocks'], this.position.x+0 +j*sz, this.position.y+0+i*sz - sz *0.5, sz, sz*1.5);
+            }
+            if (this.map[i][j] == 1){
+              ctx.drawImage(this.res['gold'], this.position.x+0 +j*sz, this.position.y+0+i*sz - (this.res['gold'].naturalHeight - 128), sz, sz* this.res['gold'].naturalHeight / 128);
+            }
+            
 
-          ctx.drawImage(this.res['grass'], this.position.x+0 +j*sz, this.position.y+0+i*sz, sz, sz);
-          if (this.map[i][j] == 2){
-            ctx.drawImage(this.res['rocks'], this.position.x+0 +j*sz, this.position.y+0+i*sz - sz *0.5, sz, sz*1.5);
-          }
-          if (this.map[i][j] == 1){
-            ctx.drawImage(this.res['gold'], this.position.x+0 +j*sz, this.position.y+0+i*sz - (this.res['gold'].naturalHeight - 128), sz, sz* this.res['gold'].naturalHeight / 128);
           }
         }
         //ctx.drawImage(this.tile, this.position.x+0 +i*sz, this.position.y+0+j*sz, sz, sz);
+      }
+    }
+  }
+
+  renderMtx(obj:Array<Array<string>>, px:number, py:number){
+    //let sz = this.sz;
+    //this.cursorTile.x = Math.floor((this.position.x % sz +Math.floor(this.cursor.x/sz)*sz)/sz);
+    //this.cursorTile.y = Math.floor((this.position.y % sz +Math.floor(this.cursor.y/sz)*sz)/sz);
+    for(let i = 0; i < obj.length; i++){
+      for(let j = 0; j < obj[0].length; j++){
+        if (obj[j][i] == '1'){
+          if (this.opened[py+j-Math.floor(obj.length/2)]){
+            this.opened[py+j-Math.floor(obj.length/2)][px+i - Math.floor(obj[0].length/2)]=1;
+          }
+          
+        }
       }
     }
   }

@@ -12,12 +12,12 @@ function generate(){
   return map;
 }
 
-function generateEmptyMap(width:number, height:number){
+export function generateEmptyMap(width:number, height:number, val:number){
   const map = [];
   for (let i=0; i<height; i++){
     const row = [];
     for (let j=0; j<width; j++){
-      row.push(Number.MAX_SAFE_INTEGER);
+      row.push(val);
     }
     map.push(row);
   }
@@ -188,7 +188,7 @@ export function isEqualColor(a:{r:number, g:number, b:number, a:number}, b:{r:nu
 }
 
 export function getMapFromImageData(data:ImageData){
-  const map = generateEmptyMap(data.width, data.height);
+  const map = generateEmptyMap(data.width, data.height, Number.MAX_SAFE_INTEGER);
   iterateImageData(data, (pos, color)=>{
     let mapColor = 0;
     if (isEqualColor(color, {r:255, g:255, b:0, a:255})){

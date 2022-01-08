@@ -19,10 +19,16 @@ export class InteractiveObject{
   onMouseLeave: any;
   onClick: any;
   onDestroyed: ()=>void;
-  position: {x:number, y:number};
+  //position: {x:number, y:number};
   player:number;
   name:string;
   type:string = 'interactive';
+  get position(){
+    return new Vector(0,0);
+  }
+  set position(val:Vector){
+    
+  }
 
   constructor(){
 
@@ -58,13 +64,19 @@ export class InteractiveObject{
 }
 
 export class MapObject extends InteractiveObject{
-  position: {x:number, y:number};
+  _position: Vector;
   tiles: Array<Array<number>>;
   sprite: HTMLImageElement;
   health:number;
   name:string;
   player:number;
   type:string = 'build';
+  get position(){
+    return this._position;
+  }
+  set position(val:Vector){
+    this._position = val;
+  }
 
   onDestroyed: ()=>void;
   res: Record<string, HTMLImageElement>;
@@ -142,6 +154,10 @@ export class UnitObject extends InteractiveObject{
   type:string = 'unit';
   bullet: Vector;
   reloadTime: number = 0;
+
+  get position(){
+    return new Vector(Math.floor(this.positionPx.x/55), Math.floor(this.positionPx.y / 55));
+  }
 
   constructor(){
     super();
