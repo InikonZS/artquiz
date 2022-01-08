@@ -1,6 +1,7 @@
 import { Vector } from "../common/vector";
+import { GamePlayer } from "./gamePlayer";
 
-export class BotPlayer{
+export class BotPlayer extends GamePlayer{
   startPoint: Vector;
   radius: number = 0;
   //onMove:(pos:Vector)=>void;
@@ -9,6 +10,7 @@ export class BotPlayer{
   onAttack:()=>void;
 
   constructor(startPoint:Vector){
+    super();
     this.startPoint = startPoint;
     this.randomMove();
   }

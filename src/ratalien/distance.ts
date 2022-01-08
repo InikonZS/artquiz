@@ -53,6 +53,6 @@ export function makeCircleMap(radius:number){
       map[Math.round(radius+Math.sin(j)*(i))][Math.round(radius+Math.cos(j)*(i))] = 1;
     }
   }
-  console.log(map.map(it=>it.join('')).join('\n'))
+ // console.log(map.map(it=>it.join('')).join('\n'))
   return map;
 }

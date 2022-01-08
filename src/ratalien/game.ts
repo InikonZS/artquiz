@@ -52,9 +52,10 @@ export class Game extends Control{
     }*/
     const head = new Control(this.node, 'div', red["global_header"]);
     const main = new Control(this.node, 'div', red["global_main"]);
-    const field = new GameField(main.node, res);
     const player = new GamePlayer();
-    const botPlayer = new BotPlayer(new Vector(20, 20));
+    const botPlayer = new BotPlayer(new Vector(20, 20)); 
+
+    const field = new GameField(main.node, res, [player, botPlayer]);
     botPlayer.onBuild = (pos)=>{
       field.addObject(1, tech.builds.find(it=>it.name == 'barracs'), pos.x, pos.y);
     }
@@ -102,21 +103,23 @@ export class GameField extends Control{
   canvas: Control<HTMLCanvasElement>;
   objects: InteractiveList;//MapObject[]=[];
   modeCallback: () => void;
-  primaries: Array<Record<string, MapObject>> =[{},{}];
+  //primaries: Array<Record<string, MapObject>> =[{},{}];
   res: Record<string, HTMLImageElement>;
   cursorStatus:GameCursorStatus 
   pathes: Vector[][];
+  players: GamePlayer[];
 
-  constructor(parentNode: HTMLElement, res: Record<string, HTMLImageElement>){
+  constructor(parentNode: HTMLElement, res: Record<string, HTMLImageElement>, players:GamePlayer[]){
     super(parentNode, 'div', red['game_field']);
     this.res = res;  
+    this.players = players;
     
     const canvas = new Control<HTMLCanvasElement>(this.node, 'canvas');
     this.canvas = canvas;
     this.map = new GameMap(96, 96, res['map'], res);
     
     this.cursorStatus= new GameCursorStatus(()=>{
-      return this.primaries[0];
+      return this.players[0].primaries;
     });
     this.objects = new InteractiveList();
     this.objects.onChangeHovered = ((last, current)=>{
@@ -169,7 +172,7 @@ export class GameField extends Control{
         this.addObject(0, this.cursorStatus.planned, cursorTile.x, cursorTile.y); 
         this.cursorStatus.planned = null; 
       } else if (action == 'primary'){
-        this.primaries[0][this.cursorStatus.hovered[0].name] = this.cursorStatus.hovered[0] as MapObject;
+        this.players[0].primaries[this.cursorStatus.hovered[0].name] = this.cursorStatus.hovered[0] as MapObject;
       }
     }
 
@@ -245,7 +248,11 @@ export class GameField extends Control{
   }
 
   getPrimary(player:number, name:string){
-    return Object.values(this.primaries[player]).find(it=>it.name == name) || null;
+    return Object.values(this.players[player].primaries).find(it=>it.name == name) || null;
+  }
+
+  isPrimary(player:number, build:InteractiveObject){
+    return Object.values(this.players[player].primaries).find(it=>it == build) != null;
   }
 
 //возможно, тут лучше передвать не нейм, а сам объект созданного солдата? 
@@ -291,8 +298,8 @@ export class GameField extends Control{
     let object = new MapObject(obj, this.res);
     object.position = new Vector(x,y);
     object.player = player;
-    if (this.primaries[player][object.name]==null){
-      this.primaries[player][object.name] = object;
+    if (this.players[player].primaries[object.name]==null){
+      this.players[player].primaries[object.name] = object;
     } 
 
     this.objects.add(object);
@@ -305,7 +312,7 @@ export class GameField extends Control{
         this.map.position, 
         this.sz, 
         this.cursorStatus.selected.includes(it),
-        Object.keys(this.primaries[0]).find(obj=>this.primaries[0][obj]==it)!=null
+        this.isPrimary(0, it)//Object.keys(this.primaries[0]).find(obj=>this.primaries[0][obj]==it)!=null
       );
     });
   }
