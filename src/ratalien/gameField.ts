@@ -9,6 +9,7 @@ import {InteractiveList} from "./interactiveList";
 import {GameMap} from "./gameMap";
 import {GameCursorStatus} from "./gameCursor";
 import {makeCircleMap} from "./distance";
+import {generateEmptyMap} from "./tracer";
 
 export class GameField extends Control{
   cursor: { x: number; y: number; } = {x:0, y:0};
@@ -22,6 +23,7 @@ export class GameField extends Control{
   cursorStatus:GameCursorStatus 
   pathes: Vector[][];
   players: GamePlayer[];
+  fps: number;
 
   constructor(parentNode: HTMLElement, res: Record<string, HTMLImageElement>, players:GamePlayer[]){
     super(parentNode, 'div', red['game_field']);
@@ -34,6 +36,9 @@ export class GameField extends Control{
     
     this.cursorStatus= new GameCursorStatus(()=>{
       return this.players[0].primaries;
+    },
+    ()=>{
+      return this.getBuildMap();
     });
     this.objects = new InteractiveList();
     this.objects.onChangeHovered = ((last, current)=>{
@@ -94,13 +99,20 @@ export class GameField extends Control{
     const ctx = canvas.node.getContext('2d');
 
     let lastTime:number =null;
+    this.fps = 60;
     const render=()=>{
       requestAnimationFrame((timeStamp)=>{
         if (!lastTime){
           lastTime = timeStamp;
         }
 
-        this.render(ctx, timeStamp - lastTime);
+        const delta = timeStamp - lastTime;
+        const dv =  16;
+        if (this.fps>60){
+          this.fps = 60
+        }
+        this.fps = ((this.fps * (dv-1)) + (1 / delta * 1000))/dv;
+        this.render(ctx, delta);
         lastTime = timeStamp;
         render();
       })
@@ -135,7 +147,28 @@ export class GameField extends Control{
 
   getTraceMap(){
     //add builds on map;
-    return this.map.map.map(it=>it.map(jt=>jt==0?Number.MAX_SAFE_INTEGER:-1));
+    //generateEmptyMap(96, 96, 0);
+    let map = this.map.map.map(it=>it.map(jt=>jt));
+    this.objects.list.forEach(it=>{
+      if (it instanceof MapObject){
+        //console.log(it.tiles);
+        this.map.renderMtx(map, it.tiles.map(ii=>ii.map(jj=>jj.toString())), it.position.x, it.position.y, 'corner');
+      }
+    })
+    return map.map(it=>it.map(jt=>jt==0?Number.MAX_SAFE_INTEGER:-1));
+  }
+
+  getBuildMap(){
+    //add builds on map;
+    //generateEmptyMap(96, 96, 0);
+    let map = this.map.map.map(it=>it.map(jt=>jt));
+    this.objects.list.forEach(it=>{
+      if (it instanceof MapObject){
+       // console.log(it.tiles);
+        this.map.renderMtx(map, it.tiles.map(ii=>ii.map(jj=>jj.toString())), it.position.x, it.position.y, 'corner');
+      }
+    })
+    return map.map(it=>it.map(jt=>jt==0?0:1));
   }
 
   commandUnit(){
@@ -274,7 +307,10 @@ export class GameField extends Control{
   }
 
   render(ctx: CanvasRenderingContext2D, delta:number){
-    this.map.renderMap(ctx, this.getCanvasSize(), this.getVisibleTileRect(), this.getTileCursor());
+    ctx.fillStyle="#090";
+    const canvasSize = this.getCanvasSize();
+    ctx.fillRect(0, 0, canvasSize.width, canvasSize.height);
+    this.map.renderMap(ctx, this.getCanvasSize(), this.getVisibleTileRect(), this.getTileCursor(), this.map.position);
     this.renderObjects(ctx);
     this.cursorStatus.render(ctx, this.map.position);
 
@@ -290,11 +326,14 @@ export class GameField extends Control{
     this.objects.list.forEach(it=>{
       if (it.player != 0 ) return;
       if (it instanceof UnitObject){
-        this.map.renderMtx(makeCircleMap(3), it.position.x, it.position.y);
+        this.map.renderMtx(this.map.opened, makeCircleMap(3) /*['1111'.split(''),'1000'.split(''),'1000'.split(''),'0000'.split('')]*/, it.position.x, it.position.y, 'center');
       } else {
-        this.map.renderMtx(makeCircleMap(5), it.position.x, it.position.y);  
+        this.map.renderMtx(this.map.opened, makeCircleMap(5), it.position.x, it.position.y, "center");  
       }
     })
+
+    ctx.fillStyle = "#000";
+    ctx.fillText('fps: '+this.fps.toFixed(2), 0, 30);
 
     //this.renderMtx(ctx, obj, this.position.x+0 +cursorTile.x*sz, this.position.y+0+cursorTile.y*sz);/*this.position.x % sz +Math.floor(this.cursor.x/sz)*sz, this.position.y % sz +Math.floor(this.cursor.y/sz)*sz*/
   }

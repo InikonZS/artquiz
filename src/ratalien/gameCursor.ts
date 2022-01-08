@@ -1,5 +1,6 @@
 import { IVector, Vector } from "../common/vector";
 import { InteractiveObject, ITechBuild, MapObject, UnitObject } from "./interactives";
+import {checkMap} from "./distance";
 
 export class GameCursorStatus{
   pixelPosition:Vector = new Vector(0, 0);
@@ -9,15 +10,23 @@ export class GameCursorStatus{
   hovered:Array<InteractiveObject> = [];
   planned: ITechBuild;
   getPrimaries: () => Record<string, MapObject>;
+  getMap: () => Array<Array<number>>;
 
-  constructor(getPrimaries:()=>Record<string, MapObject>){
+  constructor(getPrimaries:()=>Record<string, MapObject>, getMap:()=>Array<Array<number>>){
     this.getPrimaries = getPrimaries;
+    this.getMap = getMap;
   }
 
   getAction(){
     let action:string = 'select';
     if (this.planned){
-      action = 'build';
+      const mask = checkMap(this.getMap(), this.planned.mtx.map(it=>it.map(jt=>Number.parseInt(jt))), this.tilePosition);
+      
+      if (mask.flat(1).find(it=>it!=0) == null){
+        action = 'build';
+      } else {
+        action = 'no_build';
+      }
     } else if (this.selected.length == 0){
       //no selected
       action = 'select';
@@ -81,7 +90,9 @@ export class GameCursorStatus{
   renderBuildPlanned(ctx: CanvasRenderingContext2D, camera:Vector){
     //const cursorTile = this.getTileCursor();
     //this.currentBuilding.render();
+    const mask = checkMap(this.getMap(), this.planned.mtx.map(it=>it.map(jt=>Number.parseInt(jt))), this.tilePosition);
     this.drawObject(ctx, this.planned.mtx, this.tilePosition, camera, "#ff06", 55);
+    this.drawObject(ctx, /*this.planned.mtx*/mask.map(it=>it.map(jt=>jt.toString())), this.tilePosition, camera, "#f00", 55);
   }
 
   drawObject(ctx:CanvasRenderingContext2D, object:Array<Array<any>>, position:IVector, camera:IVector, color:string, sz:number){

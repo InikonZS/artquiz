@@ -9,14 +9,6 @@ import {GamePlayer, IBuildInfo} from "./gamePlayer";
 import {consts} from "./globals";
 import {GameField} from "./gameField";
 
-const view = [
-  '00100'.split(''),
-  '01110'.split(''),
-  '11111'.split(''),
-  '01110'.split(''),
-  '00100'.split(''),
-]
-
 export class Game extends Control{
   player:GamePlayer;
   currentPlayer:number = 0;

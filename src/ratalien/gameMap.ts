@@ -8,12 +8,17 @@ export class GameMap{
   position:Vector = Vector.fromIVector({x:0, y:0});
   cellSize: number = 55;
   res: Record<string, HTMLImageElement>;
+  canvas: HTMLCanvasElement;
+  ctx: CanvasRenderingContext2D;
+  cached:boolean = false;
 
   constructor(sizeX:number, sizeY:number, map:HTMLImageElement, textures:Record<string, HTMLImageElement>){
     this.map = [];
     this.res = textures;
     this.map = getMapFromImageData(getImageData(map));
     this.opened = generateEmptyMap(96,96, 0);
+    this.canvas = document.createElement('canvas');
+    this.ctx = this.canvas.getContext('2d');
     //console.log(this.map);
     /*for(let i = 0; i < sizeY; i++){
       let row = [];
@@ -44,11 +49,20 @@ export class GameMap{
     }
   }
 
-  renderMap(ctx:CanvasRenderingContext2D, canvasSize:any, visibleTileRect:any, cursorTile:any){
+  renderMap(ctx:CanvasRenderingContext2D, canvasSize:any, visibleTileRect:any, cursorTile:any, pos:Vector){
     this.render();
-    ctx.fillStyle="#090";
-    //const canvasSize = this.getCanvasSize();
-    ctx.fillRect(0, 0, canvasSize.width, canvasSize.height);
+   /* if (!this.cached){
+      this.cached = true;
+      this.canvas.width = 96*55;
+      this.canvas.height = 96*55;
+      this._renderMap(this.ctx, canvasSize, {minx:0,maxx:96,miny:0,maxy:96}, cursorTile);
+    }
+    //console.log(visibleTileRect.maxx);
+    ctx.drawImage(this.canvas,pos.x, pos.y);*/
+    this._renderMap(ctx, canvasSize, visibleTileRect, cursorTile);
+  }
+
+  _renderMap(ctx:CanvasRenderingContext2D, canvasSize:any, visibleTileRect:any, cursorTile:any){
     const obi:Array<string> = [
       "#fff",
       "#f00",
@@ -92,19 +106,26 @@ export class GameMap{
     }
   }
 
-  renderMtx(obj:Array<Array<string>>, px:number, py:number){
+  renderMtx(map:Array<Array<number>>, obj:Array<Array<string>>, px:number, py:number, align:'center'|'corner'){
     //let sz = this.sz;
     //this.cursorTile.x = Math.floor((this.position.x % sz +Math.floor(this.cursor.x/sz)*sz)/sz);
     //this.cursorTile.y = Math.floor((this.position.y % sz +Math.floor(this.cursor.y/sz)*sz)/sz);
     for(let i = 0; i < obj.length; i++){
       for(let j = 0; j < obj[0].length; j++){
-        if (obj[j][i] == '1'){
-          if (this.opened[py+j-Math.floor(obj.length/2)]){
-            this.opened[py+j-Math.floor(obj.length/2)][px+i - Math.floor(obj[0].length/2)]=1;
+        if (obj[j][i] != '0'){
+          if (align == 'center'){
+            if (map[py+j-Math.floor(obj.length/2)]){
+              map[py+j-Math.floor(obj.length/2)][px+i - Math.floor(obj[0].length/2)]=1;
+            }
+          }else {
+            if (map[py+j]){
+              map[py+j][px+i]=1;
+            }
           }
           
         }
       }
     }
+    return map;
   }
 }
