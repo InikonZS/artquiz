@@ -11,10 +11,12 @@ export class GameCursorStatus{
   planned: ITechBuild;
   getPrimaries: () => Record<string, MapObject>;
   getMap: () => Array<Array<number>>;
+  getRealMap: () => Array<Array<number>>;
 
-  constructor(getPrimaries:()=>Record<string, MapObject>, getMap:()=>Array<Array<number>>){
+  constructor(getPrimaries:()=>Record<string, MapObject>, getMap:()=>Array<Array<number>>, getRealMap:()=>Array<Array<number>>){
     this.getPrimaries = getPrimaries;
     this.getMap = getMap;
+    this.getRealMap = getRealMap;
   }
 
   getAction(){
@@ -33,10 +35,18 @@ export class GameCursorStatus{
     } else if (this.selected.find(it=>!(it instanceof UnitObject))== null){
       //selected only units
       action = 'move';
-      if (this.hovered[0] && this.hovered[0].player!=0){
-        action = 'attack';
+      if (this.selected.find(it=>it.name =='solder')){
+        if (this.getRealMap()[this.tilePosition.y][this.tilePosition.x] == 1){
+          action = 'gold';
+        } else if (this.hovered[0] instanceof MapObject && this.hovered[0].name == 'barracs'){
+          action = 'cash_in'
+        }
       } else {
-        action = 'move';
+        if (this.hovered[0] && this.hovered[0].player!=0){
+          action = 'attack';
+        } else {
+          action = 'move';
+        }
       }
     } else if ((this.selected[0] instanceof MapObject)) {
       if (this.hovered[0] == this.selected[0]){
@@ -72,7 +82,8 @@ export class GameCursorStatus{
     ctx.fill();
     ctx.stroke(); 
     // 
-    let label = 'ground';
+    let num = this.getRealMap()[this.tilePosition.y][this.tilePosition.x];
+    let label = 'ground '+num;
     if (this.hovered[0]){
        label = this.hovered[0].type +': '+this.hovered[0].name;
     }

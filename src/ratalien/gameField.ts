@@ -39,7 +39,8 @@ export class GameField extends Control{
     },
     ()=>{
       return this.getBuildMap();
-    });
+    },
+    ()=>this.map.map);
     this.objects = new InteractiveList();
     this.objects.onChangeHovered = ((last, current)=>{
       this.cursorStatus.hovered = current?[current]:[];
@@ -93,6 +94,10 @@ export class GameField extends Control{
       } else if (action == 'primary'){
         this.players[0].primaries[this.cursorStatus.hovered[0].name] = this.cursorStatus.hovered[0] as MapObject;
       } else if (action == 'attack'){
+        this.commandUnit(cursor.clone());
+      } else if (action == 'gold'){
+        this.commandUnit(cursor.clone());
+      } else if (action == 'cash_in'){
         this.commandUnit(cursor.clone());
       }
     }
@@ -210,10 +215,21 @@ export class GameField extends Control{
   //  console.log(name);
     let unit = new UnitObject();
     unit.onDamageTile = ()=>{
-      let {distance, unit:build} = findClosestBuild(new Vector(Math.floor(unit.attackTarget.x / 55), Math.floor(unit.attackTarget.y / 55)), this.objects.list.filter(it=>it instanceof MapObject) as MapObject[]);
-      console.log(distance, build);
-      if (distance==0){
-        build.damage(10);
+      const damaged = new Vector(Math.floor(unit.attackTarget.x / 55), Math.floor(unit.attackTarget.y / 55));
+      if (this.map.map[damaged.y][damaged.x] == 1){
+        this.map.map[damaged.y][damaged.x] = 0;
+        unit.gold = 1000;
+      } else {
+        let {distance, unit:build} = findClosestBuild(damaged, this.objects.list.filter(it=>it instanceof MapObject) as MapObject[]);
+        console.log(distance, build);
+        if (distance==0){
+          if (build.player !=0){
+            build.damage(10);
+          } else {
+            this.players[0].money += unit.gold;
+            unit.gold = 0;
+          }
+        }
       }
     }
     unit.player = player;

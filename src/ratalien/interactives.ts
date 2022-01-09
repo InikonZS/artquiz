@@ -155,6 +155,7 @@ export class UnitObject extends InteractiveObject{
   bullet: Vector;
   reloadTime: number = 0;
   onDamageTile:()=>void;
+  gold: number = 0;
 
   get position(){
     return new Vector(Math.floor(this.positionPx.x/55), Math.floor(this.positionPx.y / 55));
