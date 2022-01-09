@@ -35,7 +35,7 @@ export class GameCursorStatus{
     } else if (this.selected.find(it=>!(it instanceof UnitObject))== null){
       //selected only units
       action = 'move';
-      if (this.selected.find(it=>it.name =='solder')){
+      if (this.selected.find(it=>it.name =='solder') && (this.getRealMap()[this.tilePosition.y][this.tilePosition.x] == 1)|| (this.hovered[0] instanceof MapObject && this.hovered[0]?.player == 0)){
         if (this.getRealMap()[this.tilePosition.y][this.tilePosition.x] == 1){
           action = 'gold';
         } else if (this.hovered[0] instanceof MapObject && this.hovered[0].name == 'barracs'){
