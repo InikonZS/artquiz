@@ -1,7 +1,7 @@
 import Control from "../common/control";
 import red from "./red.css";
 import {Vector, IVector} from "../common/vector";
-import {MapObject, UnitObject, ITechBuild, InteractiveObject} from "./interactives";
+import {MapObject, UnitObject, ITechBuild, InteractiveObject, Tower} from "./interactives";
 import { tech } from "./techTree";
 import {GamePlayer, IBuildInfo} from "./gamePlayer";
 import {getMapFromImageData, getImageData, loadImage, findPath, indexateAsync, steps, tracePathes, inBox} from "./tracer";
@@ -254,7 +254,10 @@ export class GameField extends Control{
   }
 
   addObject(player:number, obj:ITechBuild, x:number, y:number){
-    let object = new MapObject(obj, this.res);
+    let object = new Tower(obj, this.res);//MapObject(obj, this.res);
+    object.getUnits = ()=>{
+      return this.objects.list.filter(it=> it instanceof UnitObject && it.player!= player) as UnitObject[];
+    }
     object.position = new Vector(x,y);
     object.player = player;
     if (this.players[player].primaries[object.name]==null){

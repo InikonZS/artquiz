@@ -1,6 +1,7 @@
 import {Vector, IVector} from "../common/vector";
 import {TraceMap, IPathPoint} from "./traceMap";
 import {consts} from "./globals";
+import {makeCircleMap, findClosestBuild, findClosestUnit} from "./distance";
 
 export interface ITechBuild{
   deps: string[];
@@ -136,6 +137,129 @@ export class MapObject extends InteractiveObject{
     ctx.stroke();
   }
 
+}
+
+function onLine(v:Vector, vs:Vector, ve:Vector){
+  const dline = vs.clone().sub(ve).abs();
+  const dve = v.clone().sub(ve).abs();
+  const dvs = v.clone().sub(vs).abs();
+  return (dve + dvs) <= dline + 0.00001;
+}
+
+class Bullet{
+  target: Vector;
+  position: Vector;
+  speed:number = 1;
+  onTarget:()=>void;
+  isDestroyed: boolean = false;
+
+  constructor(target:Vector, position:Vector){
+    this.target = target;
+    this.position = position;
+  }
+
+  step(delta:number){
+    if (this.isDestroyed) return;
+
+    const next = this.position.clone().add(this.position.clone().sub(this.target).normalize().scale(-this.speed*delta));
+    if (onLine(this.target, this.position, next)){
+      this.onTarget?.();
+      this.isDestroyed = true;
+    } else {
+      this.position = next;
+    }
+  }
+
+  render(ctx:CanvasRenderingContext2D, camera:Vector){
+    if (this.isDestroyed) return;
+
+    const sz = 5;
+    ctx.fillStyle = "#0ff";
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.ellipse(camera.x + this.position.x + sz/2, camera.y + this.position.y + sz/2, sz, sz, 0, 0, Math.PI*2);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+  }
+}
+
+class Weapon{
+  attackRadius: number = 300;
+  bullets: Array<Bullet> = [];
+  reloadTime: number = 400;
+  private loading: number = 0;
+  position:Vector;
+  onBulletTarget:(point:Vector)=>void;
+
+  constructor(){
+
+  }
+
+  step(delta:number){
+    this.loading -= delta;
+    this.bullets.forEach(it=>it.step(delta));
+  }
+
+  render(ctx:CanvasRenderingContext2D, camera:Vector){
+    this.bullets.forEach(it=>it.render(ctx, camera));
+  }
+
+  tryShot(target:Vector){
+    if (!this.position) {console.log('no pos'); return;}
+    if (this.loading<=0){
+      
+    }
+    if (this.loading<=0 && target.clone().sub(this.position.clone().scale(55)).abs()<this.attackRadius){
+      //console.log('radiused');
+      this.shot(target);
+    }
+  }
+
+  private shot(target:Vector){
+    const bullet = new Bullet(target, this.position.clone().scale(55));
+    this.loading = this.reloadTime;
+    bullet.onTarget = ()=>{
+      this.bullets = this.bullets.filter(it=>it!=bullet);
+      this.onBulletTarget?.(target.clone());
+    }
+    this.bullets.push(bullet);
+  }
+}
+
+export class Tower extends MapObject{
+  weapon: Weapon = new Weapon();
+  getUnits: ()=>UnitObject[];
+  
+  constructor(build:ITechBuild, res:Record<string, HTMLImageElement>){
+    super(build, res);
+    this.weapon = new Weapon();
+    
+  }
+
+  render(ctx:CanvasRenderingContext2D, camera:Vector, size?:number, selected?:boolean, primary?:boolean){
+    this.weapon.position = this.position;
+    super.render(ctx, camera, size, selected, primary);
+    this.step(1000/60);
+    this.weapon.render(ctx, camera);
+    this.logic(this.getUnits());
+  }
+
+  step(delta:number){
+    this.weapon.step(delta);
+  }
+
+  logic(enemies:UnitObject[]){
+    const near = findClosestUnit(this.position.clone().scale(55), enemies);
+    if (near.unit){
+      this.attack(near.unit.positionPx);
+    }
+  }
+
+  attack(target:Vector){
+    this.weapon.tryShot(target);
+  }
 }
 
 export class UnitObject extends InteractiveObject{
