@@ -8,7 +8,7 @@ import {getMapFromImageData, getImageData, loadImage, findPath, indexateAsync, s
 import {InteractiveList} from "./interactiveList";
 import {GameMap} from "./gameMap";
 import {GameCursorStatus} from "./gameCursor";
-import {makeCircleMap} from "./distance";
+import {makeCircleMap, findClosestBuild} from "./distance";
 import {generateEmptyMap} from "./tracer";
 
 export class GameField extends Control{
@@ -92,6 +92,8 @@ export class GameField extends Control{
         this.cursorStatus.planned = null; 
       } else if (action == 'primary'){
         this.players[0].primaries[this.cursorStatus.hovered[0].name] = this.cursorStatus.hovered[0] as MapObject;
+      } else if (action == 'attack'){
+        this.commandUnit(cursor.clone());
       }
     }
 
@@ -171,7 +173,7 @@ export class GameField extends Control{
     return map.map(it=>it.map(jt=>jt==0?0:1));
   }
 
-  commandUnit(){
+  commandUnit(attackPoint:Vector = null){
     let traceMap = this.getTraceMap();
     let indexPoint = this.getTileCursor();//{x:Math.floor(e.offsetX/this.sz), y:Math.floor(e.offsetY/this.sz)};
     //console.log(this.selected);
@@ -188,7 +190,7 @@ export class GameField extends Control{
       console.log(pathes);
       pathes.forEach((path, i)=>{
         const unit = units[i];
-        (unit as UnitObject).setPath(path, (pos)=>this.isEmptyTile(pos, unit));
+        (unit as UnitObject).setPath(path, (pos)=>this.isEmptyTile(pos, unit), attackPoint);
         //(unit as RoundNode).attackTarget = Vector.fromIVector(indexPoint).scale(10);
       })
     })  
@@ -207,6 +209,13 @@ export class GameField extends Control{
     //TODO check is empty,else, check neighbor
   //  console.log(name);
     let unit = new UnitObject();
+    unit.onDamageTile = ()=>{
+      let {distance, unit:build} = findClosestBuild(new Vector(Math.floor(unit.attackTarget.x / 55), Math.floor(unit.attackTarget.y / 55)), this.objects.list.filter(it=>it instanceof MapObject) as MapObject[]);
+      console.log(distance, build);
+      if (distance==0){
+        build.damage(10);
+      }
+    }
     unit.player = player;
     //unit.position = new Vector(20, 20); //for demo
     const spawn = tech.units.filter(item => item.name == name)[0].spawn[0];
@@ -340,16 +349,16 @@ export class GameField extends Control{
 
 
   isEmptyTile(pos:Vector, unit:any){
-    if (this.map.map[pos.y][pos.x]!=0) return false;
-    return true;
-    /*let result = this.renderList.list.find(it=>{
+    if (this.getBuildMap()[pos.y][pos.x]!=0) return false;
+    //return true;
+    let result = this.objects.list.find(it=>{
       if (unit == it) return false;
-      const near = (it as RoundNode).getTilePosition().sub(pos).abs();
+      const near = (it as UnitObject).position.clone().sub(pos).abs();
       //if (near< 20){
        // console.log(near);
       //}
       return near<1;
     });
-    return result == null;*/
+    return result == null;
   }
 }

@@ -19,16 +19,16 @@ export class BotPlayer extends GamePlayer{
     setTimeout(()=>{
       this.radius += this.radius< 10?1:0.5;
       let rnd = Math.random();
-      if (rnd<0.3){
+      if (rnd<0.5){
         this.onBuild(this.startPoint.clone().add(new Vector(Math.floor(Math.random()*(4 +this.radius*2)-this.radius), Math.floor(Math.random()*(4+this.radius*2)-this.radius))));
       } else if(rnd<0.6){
-        this.onUnit();
+        //this.onUnit();
       } else {
-        this.onAttack();
+        //this.onAttack();
       }
       //this.onMove(this.startPoint.clone().add(new Vector(Math.floor(Math.random()*(4 +this.radius*2)-this.radius), Math.floor(Math.random()*(4+this.radius*2)-this.radius))));
       this.randomMove();
-    }, 6000);
+    }, 1000);
   }
 
 }

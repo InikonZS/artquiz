@@ -47,7 +47,7 @@ export class Game extends Control{
     }
 
     botPlayer.onUnit = ()=>{
-      field.addUnit(1, 'csu');
+      //field.addUnit(1, 'sol');
     }
 
     //botPlayer.

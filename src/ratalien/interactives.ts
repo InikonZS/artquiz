@@ -98,7 +98,7 @@ export class MapObject extends InteractiveObject{
   }
 
   damage(amount:number){
-    this.health -=1;
+    this.health -=amount;
     if (this.health<=0){
       this.onDestroyed();
     }
@@ -142,7 +142,7 @@ export class UnitObject extends InteractiveObject{
   positionPx: Vector;//{x:number, y:number};
   target: Vector = null;
   speed: number = 1;
-  attackRadius: number = 200;
+  attackRadius: number = 300;
   name:string;
   attackTarget: Vector;//{damage:(amount:number)=>void, position:IVector} = null;
   player:number;
@@ -154,6 +154,7 @@ export class UnitObject extends InteractiveObject{
   type:string = 'unit';
   bullet: Vector;
   reloadTime: number = 0;
+  onDamageTile:()=>void;
 
   get position(){
     return new Vector(Math.floor(this.positionPx.x/55), Math.floor(this.positionPx.y / 55));
@@ -259,10 +260,11 @@ clearStepIndex(){
       ctx.fillText(`selected`, camera.x + this.positionPx.x, camera.y+ this.positionPx.y-30);  
     }
 
-    if (this.bullet){
-      this.bullet.sub(this.bullet.clone().sub(this.attackTarget).normalize());
-      if (this.bullet.clone().sub(this.attackTarget).abs()<1){
+    if (this.bullet && this.attackTarget){
+      this.bullet.sub(this.bullet.clone().sub(this.attackTarget).normalize().scale(6));
+      if (this.bullet.clone().sub(this.attackTarget).abs()<20){
         this.bullet = null;
+        this.onDamageTile?.();
         return;
       }
       this.renderBullet(ctx, camera);
@@ -271,7 +273,7 @@ clearStepIndex(){
   }
 
   step(){
-    //this.reloadTime--;
+    this.reloadTime--;
     const sz = 55;
     if (this.target && this.tileChecker && !this.tileChecker(new Vector(Math.floor(this.target.x / sz), Math.floor(this.target.y / sz)))){
       //this.target = this.getTilePosition().scale(10);
@@ -313,17 +315,18 @@ clearStepIndex(){
       }
     }
 
-    /*if (this.attackTarget){
-      let dist = this.attackTarget.clone().sub(this.position).abs();
-      if (dist < 100){
+    if (this.attackTarget){
+      let dist = this.attackTarget.clone().sub(this.positionPx).abs();
+      if (dist < this.attackRadius){
         this.target = null;
         this.path = null;
         this.shot();
       }
-    }*/
+    }
   } 
 
-  setPath(path:Array<Vector>, tileChecker:(pos:Vector)=>boolean){
+  setPath(path:Array<Vector>, tileChecker:(pos:Vector)=>boolean, attackPoint:Vector = null){
+    this.attackTarget = attackPoint
     const sz =55;
     console.log('sp ', path);
     this.path = [...path].reverse();
@@ -346,7 +349,7 @@ clearStepIndex(){
   shot(){
     if (this.reloadTime<=0){
       this.bullet = this.positionPx.clone();
-      this.reloadTime = 300;
+      this.reloadTime = 50;
     }
   }
 }
