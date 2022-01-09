@@ -31,6 +31,7 @@ export class GamePlayer{
   openedMap: Array<Array<any>>;
   onUpdateBuild: Signal<void> = new Signal();
   primaries: Record<string, MapObject> ={};
+  //onUpdate:()=>void;
 
   constructor(){
 
@@ -74,5 +75,6 @@ export class GamePlayer{
 
   setMoney(value:number){
     this.money = value;
+    this.onUpdateBuild.emit();
   }
 }

@@ -21,6 +21,7 @@ export class GameSide extends Control{
     this.updateBuildHandler = () => {
       this.createBuild();
       this.createUnits();
+      this.updateMoney(player.money);
     }
     player.onUpdateBuild.add(this.updateBuildHandler);
 

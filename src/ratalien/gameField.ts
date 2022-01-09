@@ -226,7 +226,7 @@ export class GameField extends Control{
           if (build.player !=0){
             build.damage(10);
           } else {
-            this.players[0].money += unit.gold;
+            this.players[0].setMoney(this.players[0].money + unit.gold);
             unit.gold = 0;
           }
         }
