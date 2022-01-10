@@ -26,6 +26,8 @@ resourceLoader.loadTextures(textureList, (loaded, count)=>{
 
 /*import {GameLauncher} from './ratalien2/gameLauncher';
 new GameLauncher(document.body);*/
+
+/*
 import grass from './ratalien/sprites/grass.png';
 import rocks from './ratalien/sprites/tree2.png';
 import gold from './ratalien/sprites/gold_full.png';
@@ -44,6 +46,8 @@ loader.loadTextures({
   new Game(document.body, res);
 })
 
-
+*/
+import {Application} from './app/application';
+let app = new Application(document.body);
 
 

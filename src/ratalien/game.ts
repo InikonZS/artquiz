@@ -62,6 +62,7 @@ const buildMap = new Map<string, Array<Array<string>>>([
 export class Game extends Control{
   player:GamePlayer;
   currentPlayer:number = 0;
+  onExit: () => void;
   constructor(parentNode: HTMLElement, res: Record<string, HTMLImageElement>){
     super(parentNode, 'div', red['global_wrapper']);
     this.node.onmouseleave = (e)=>{
@@ -87,6 +88,12 @@ export class Game extends Control{
     }*/
     const head = new Control(this.node, 'div', red["global_header"]);
     const main = new Control(this.node, 'div', red["global_main"]);
+   //
+    const buttonExit = new Control(main.node, 'button', red["exit_button"], 'Exit')
+    buttonExit.node.onclick = () => {
+      this.onExit();
+    }
+   //
     const field = new GameField(main.node, res);
     const player = new GamePlayer();
     const botPlayer = new BotPlayer(new Vector(20, 20));
