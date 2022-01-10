@@ -128,4 +128,16 @@ export class GameMap{
     }
     return map;
   }
+
+  toTileVector(point:Vector){
+    return new Vector(Math.floor(point.x / this.cellSize), Math.floor(point.y / this.cellSize))
+  }
+
+  getTileValue(pos:Vector){
+    return this.map[pos.y][pos.x];
+  }
+
+  setTileValue(pos:Vector, value:number){
+    this.map[pos.y][pos.x] = value;
+  }
 }

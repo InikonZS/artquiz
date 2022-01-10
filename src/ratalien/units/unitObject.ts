@@ -116,7 +116,7 @@ export class UnitObject extends InteractiveObject{
     }
   }*/
 
-  render(ctx:CanvasRenderingContext2D, camera:Vector, size:number, selected:boolean){
+  render(ctx:CanvasRenderingContext2D, camera:Vector,delta:number, size:number, selected:boolean){
     const sz = 10;
     ctx.fillStyle = this.isHovered?"#9999":consts.colors[this.player];
     ctx.strokeStyle = "#000";
@@ -147,7 +147,7 @@ export class UnitObject extends InteractiveObject{
       this.renderBullet(ctx, camera);
     }*/
     this.weapon.render(ctx, camera);
-    this.step();
+    this.step(delta);
   }
 
   addGold(amount:number){
@@ -173,7 +173,7 @@ export class UnitObject extends InteractiveObject{
     return true;
   }
 
-  step(){
+  step(delta:number){
     //this.reloadTime--;
     const sz = 55;
     if (this.target && this.tileChecker && !this.tileChecker(new Vector(Math.floor(this.target.x / sz), Math.floor(this.target.y / sz)))){
@@ -213,7 +213,7 @@ export class UnitObject extends InteractiveObject{
         this.path = null;
       };
     }
-    this.weapon.step(1000/60);
+    this.weapon.step(delta);
     this.weapon.position = this.position.clone();
   } 
 

@@ -1,3 +1,5 @@
+import {IUnitConstructor} from './IUnitConstructor';
+
 export interface ITechBuild{
   deps: string[];
   desc: string[];
@@ -6,4 +8,5 @@ export interface ITechBuild{
   cost: number;
   time: number;
   mtx:Array<Array<string>>;
+  //UnitConstructor:IUnitConstructor;
 }

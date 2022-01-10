@@ -10,6 +10,9 @@ import {GameMap} from "./gameMap";
 import {GameCursorStatus} from "./gameCursor";
 import {makeCircleMap, findClosestBuild} from "./distance";
 import {generateEmptyMap} from "./tracer";
+import {SolderUnit} from "./units/SolderUnit";
+import {TruckUnit} from "./units/TruckUnit";
+import { IUnitConstructor } from "./units/IUnitConstructor";
 
 export class GameField extends Control{
   cursor: { x: number; y: number; } = {x:0, y:0};
@@ -213,12 +216,14 @@ export class GameField extends Control{
   addUnit(player:number, name:string){
     //TODO check is empty,else, check neighbor
   //  console.log(name);
-    let unit = new UnitObject();
+    let unitMap:Record<string, IUnitConstructor> = {'solder':SolderUnit, 'truck':TruckUnit};
+    let UnitConstructor = unitMap[name] || UnitObject;
+    let unit = new UnitConstructor();//UnitObject();
     unit.onDamageTile = (point)=>{
-      const damaged = new Vector(Math.floor(point.x / 55), Math.floor(point.y / 55));
-      if (this.map.map[damaged.y][damaged.x] == 1){
+      const damaged = this.map.toTileVector(point);//new Vector(Math.floor(point.x / 55), Math.floor(point.y / 55));
+      if (this.map.getTileValue(damaged)){//this.map.map[damaged.y][damaged.x] == 1){
         if(unit.addGold(1000)){
-          this.map.map[damaged.y][damaged.x] = 0;
+          this.map.setTileValue(damaged, 0);///.map[damaged.y][damaged.x] = 0;
         }
       } else {
         let {distance, unit:build} = findClosestBuild(damaged, this.objects.list.filter(it=>it instanceof MapObject) as MapObject[]);
@@ -269,10 +274,11 @@ export class GameField extends Control{
     //this.traceMap.addObjectData(object)
   }
 
-  renderObjects(ctx:CanvasRenderingContext2D){
+  renderObjects(ctx:CanvasRenderingContext2D, delta:number){
     this.objects.list.forEach(it=>{
       it.render(ctx, 
-        this.map.position, 
+        this.map.position,
+        delta,
         this.sz, 
         this.cursorStatus.selected.includes(it),
         this.isPrimary(0, it)//Object.keys(this.primaries[0]).find(obj=>this.primaries[0][obj]==it)!=null
@@ -340,7 +346,7 @@ export class GameField extends Control{
     const canvasSize = this.getCanvasSize();
     ctx.fillRect(0, 0, canvasSize.width, canvasSize.height);
     this.map.renderMap(ctx, this.getCanvasSize(), this.getVisibleTileRect(), this.getTileCursor(), this.map.position);
-    this.renderObjects(ctx);
+    this.renderObjects(ctx, delta);
     this.cursorStatus.render(ctx, this.map.position);
 
     if (this.pathes){

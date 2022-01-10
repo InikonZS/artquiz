@@ -44,7 +44,7 @@ export class MapObject extends InteractiveObject{
     }
   }
 
-  render(ctx:CanvasRenderingContext2D, camera:Vector, size?:number, selected?:boolean, primary?:boolean){
+  render(ctx:CanvasRenderingContext2D, camera:Vector, delta:number, size?:number, selected?:boolean, primary?:boolean){
     this.tiles.forEach((row, i)=>row.forEach((cell, j)=>{
       if (this.tiles[i][j]!=0){
         this.drawTile(ctx, new Vector(j+this.position.x, i+this.position.y), camera, this.isHovered?"#9999":consts.colors[this.player], size);
