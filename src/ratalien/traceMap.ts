@@ -1,4 +1,4 @@
-import {MapObject, UnitObject} from "./interactives";
+import {MapObject, UnitObject} from "./_interactives";
 
 export interface IPathPoint {
   x: number,
