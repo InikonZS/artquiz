@@ -22,6 +22,7 @@ export class GameSidePanel extends Control{
       this.createBuild();
       this.createUnits();
     }
+
     player.onUpdateBuild.add(this.updateBuildHandler);
 
     const radar = new Control(this.node, 'div', red["game_radar"])
