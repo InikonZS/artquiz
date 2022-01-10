@@ -30,7 +30,9 @@ export class Weapon{
     if (this.loading<=0 && target.clone().sub(this.position.clone().scale(55)).abs()<this.attackRadius){
       //console.log('radiused');
       this.shot(target);
+      return true;
     }
+    return false;
   }
 
   private shot(target:Vector){

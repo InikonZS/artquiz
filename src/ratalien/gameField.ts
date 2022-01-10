@@ -214,11 +214,12 @@ export class GameField extends Control{
     //TODO check is empty,else, check neighbor
   //  console.log(name);
     let unit = new UnitObject();
-    unit.onDamageTile = ()=>{
-      const damaged = new Vector(Math.floor(unit.attackTarget.x / 55), Math.floor(unit.attackTarget.y / 55));
+    unit.onDamageTile = (point)=>{
+      const damaged = new Vector(Math.floor(point.x / 55), Math.floor(point.y / 55));
       if (this.map.map[damaged.y][damaged.x] == 1){
-        this.map.map[damaged.y][damaged.x] = 0;
-        unit.gold = 1000;
+        if(unit.addGold(1000)){
+          this.map.map[damaged.y][damaged.x] = 0;
+        }
       } else {
         let {distance, unit:build} = findClosestBuild(damaged, this.objects.list.filter(it=>it instanceof MapObject) as MapObject[]);
         console.log(distance, build);
@@ -226,8 +227,8 @@ export class GameField extends Control{
           if (build.player !=0){
             build.damage(10);
           } else {
-            this.players[0].setMoney(this.players[0].money + unit.gold);
-            unit.gold = 0;
+            this.players[0].setMoney(this.players[0].money + unit.getGold());
+            unit.clearGold();//unit.gold = 0;
           }
         }
       }

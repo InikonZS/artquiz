@@ -1,25 +1,28 @@
 import {Vector, IVector} from "../../common/vector";
 import { InteractiveObject } from "./interactiveObject";
 import {consts} from "../globals";
+import {Weapon} from "./weapon";
 
 export class UnitObject extends InteractiveObject{
   positionPx: Vector;//{x:number, y:number};
   target: Vector = null;
-  speed: number = 1;
-  attackRadius: number = 300;
+  speed: number = 8.5;
+  //attackRadius: number = 300;
   name:string;
   attackTarget: Vector;//{damage:(amount:number)=>void, position:IVector} = null;
   player:number;
   time: number= 0;
-  private _stepIndex: number;
+  //private _stepIndex: number;
   path: Vector[];//IPathPoint[]; 
   health: number = 100;
   tileChecker: (pos: Vector) => boolean;
   type:string = 'unit';
-  bullet: Vector;
-  reloadTime: number = 0;
-  onDamageTile:()=>void;
-  gold: number = 0;
+  //bullet: Vector;
+  //reloadTime: number = 0;
+  onDamageTile:(point:Vector)=>void;
+  private gold: number = 0;
+  maxGold: number = 3000;
+  weapon: Weapon;
 
   get position(){
     return new Vector(Math.floor(this.positionPx.x/55), Math.floor(this.positionPx.y / 55));
@@ -27,8 +30,13 @@ export class UnitObject extends InteractiveObject{
 
   constructor(){
     super();
-    this._stepIndex = 1
-
+    //this._stepIndex = 1
+    this.weapon = new Weapon();
+    this.weapon.reloadTime = 140;
+    this.weapon.onBulletTarget = (point)=>{
+      this.onDamageTile?.(point);
+    }
+    //this.weapon.position = this.position.clone();
   }
 
   inShape(tile:Vector, cursor:Vector){
@@ -87,11 +95,11 @@ export class UnitObject extends InteractiveObject{
   //     this.attack(delta);
   //   }
   // }
-clearStepIndex(){
+/*clearStepIndex(){
     console.log("index",this._stepIndex)
   this._stepIndex=1;
   this.path = null;
-}
+}*/
  /* attack(delta:number){
     //fix logic atack and move
     if (this.attackTarget){
@@ -125,7 +133,11 @@ clearStepIndex(){
       ctx.fillText(`selected`, camera.x + this.positionPx.x, camera.y+ this.positionPx.y-30);  
     }
 
-    if (this.bullet && this.attackTarget){
+    if (this.gold){
+      ctx.fillText(`gold: ${this.gold} / ${this.maxGold}`, camera.x + this.positionPx.x, camera.y+ this.positionPx.y-40);  
+    }
+
+    /*if (this.bullet && this.attackTarget){
       this.bullet.sub(this.bullet.clone().sub(this.attackTarget).normalize().scale(6));
       if (this.bullet.clone().sub(this.attackTarget).abs()<20){
         this.bullet = null;
@@ -133,40 +145,42 @@ clearStepIndex(){
         return;
       }
       this.renderBullet(ctx, camera);
-    }
+    }*/
+    this.weapon.render(ctx, camera);
     this.step();
   }
 
+  addGold(amount:number){
+    if (this.gold == this.maxGold){
+      return false;
+    }
+    this.gold += amount;
+    if(this.gold>this.maxGold){
+      this.gold = this.maxGold;
+    }
+    return true;
+  }
+
+  getGold(){
+    return this.gold;
+  }
+
+  clearGold(){
+    if (this.gold == 0){
+      return false;
+    }
+    this.gold = 0;
+    return true;
+  }
+
   step(){
-    this.reloadTime--;
+    //this.reloadTime--;
     const sz = 55;
     if (this.target && this.tileChecker && !this.tileChecker(new Vector(Math.floor(this.target.x / sz), Math.floor(this.target.y / sz)))){
-      //this.target = this.getTilePosition().scale(10);
-      //this.position = this.getTilePosition().scale(10);
-      /*if (!this.path[this.path.length-1]) return;
-      let stp:Array<Vector> = [];
-      steps.forEach(step=>{
-        if (this.tileChecker(new Vector(Math.floor(this.getTilePosition().x + step.x), Math.floor(this.getTilePosition().y + step.y)))){ 
-          let ep = new Vector(Math.floor(this.getTilePosition().x + step.x), Math.floor(this.getTilePosition().y + step.y)).scale(10);
-          stp.push(ep);
-          //return true;
-        }
-        //return false;
-      })
-      let mv = null;
-      let ml = Number.MAX_SAFE_INTEGER;
-      stp.forEach(it=>{
-        let len = it.clone().sub(this.path[this.path.length-1]).abs();
-        if (len< ml){
-          ml = len;
-          mv = it;
-        }
-      });
-      this.target = mv;*/
       return;
     }
     if (this.target){
-      const speed = 8.5;
+      const speed = this.speed;
       this.positionPx = this.positionPx.clone().add(this.target.clone().sub(this.positionPx).normalize().scale(speed));
       if (this.positionPx.clone().sub(this.target).abs()<=speed){
         this.positionPx = this.target.clone();
@@ -180,14 +194,27 @@ clearStepIndex(){
       }
     }
 
-    if (this.attackTarget){
+    /*if (this.attackTarget){
       let dist = this.attackTarget.clone().sub(this.positionPx).abs();
       if (dist < this.attackRadius){
         this.target = null;
         this.path = null;
         this.shot();
       }
+    }*/
+    if (this.attackTarget){
+     /* let dist = this.attackTarget.clone().sub(this.positionPx).abs();
+      if (dist < this.weapon.attackRadius){
+        this.target = null;
+        this.path = null;
+      }*/
+      if (this.shot()){
+        this.target = null;
+        this.path = null;
+      };
     }
+    this.weapon.step(1000/60);
+    this.weapon.position = this.position.clone();
   } 
 
   setPath(path:Array<Vector>, tileChecker:(pos:Vector)=>boolean, attackPoint:Vector = null){
@@ -199,7 +226,7 @@ clearStepIndex(){
     this.tileChecker = tileChecker;
   }
 
-  renderBullet(ctx:CanvasRenderingContext2D, camera:Vector){
+  /*renderBullet(ctx:CanvasRenderingContext2D, camera:Vector){
     const sz = 2;
     ctx.fillStyle = "#0ff";
     ctx.strokeStyle = "#000";
@@ -209,12 +236,13 @@ clearStepIndex(){
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
-  }
+  }*/
 
   shot(){
-    if (this.reloadTime<=0){
+    return this.weapon.tryShot(this.attackTarget);
+    /*if (this.reloadTime<=0){
       this.bullet = this.positionPx.clone();
       this.reloadTime = 50;
-    }
+    }*/
   }
 }
