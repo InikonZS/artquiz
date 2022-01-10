@@ -9,6 +9,12 @@ export class GameSide extends Control{
   updateBuildHandler: () => void;
   model: GamePlayer;
   buildings: Control<HTMLElement>;
+  buildingsFirstColumnFooter: Control<HTMLElement>;
+  buttonFirstColumnUp: Control<HTMLButtonElement>;
+  buttonFirstColumnDown: Control<HTMLButtonElement>;
+  buildingsSecondColumnFooter: Control<HTMLElement>;
+  buttonSecondColumnUp: Control<HTMLButtonElement>;
+  buttonSecondColumnDown: Control<HTMLButtonElement>;
   dataBuild: Control<HTMLElement>[]=[];
   money: Control<HTMLElement>;
   isReadingBuild: boolean = false;
@@ -21,21 +27,31 @@ export class GameSide extends Control{
     this.updateBuildHandler = () => {
       this.createBuild();
       this.createUnits();
+      this.updateMoney(player.money);
     }
+    console.log('red', red)
     player.onUpdateBuild.add(this.updateBuildHandler);
 
     const radar = new Control(this.node, 'div', red["game_radar"])
-    this.money = new Control(radar.node, 'div');
+    this.money = new Control(radar.node, 'div', red["aside-top-panel"]);
     const builds = new Control(this.node, 'div', red["game_builds"]);
     const buildTools = new Control(builds.node, 'div', red["builds_tool"]);
     const buildItems = new Control(builds.node, 'div', red["builds_items"]);
     const buildingsW = new Control(buildItems.node, 'div', red["builds_column"]);
     this.buildings = new Control(buildingsW.node, 'div', red["column_items"]);
+    this.buildingsFirstColumnFooter = new Control(buildingsW.node, 'div', red["column_footer"]);
+    this.buttonFirstColumnUp = new Control(this.buildingsFirstColumnFooter.node, 'div', red["button"] + ' ' + red["button_up"]);
+    this.buttonFirstColumnUp = new Control(this.buildingsFirstColumnFooter.node, 'div', red["button"] + ' ' + red["button_down"]);
+
     this.createBuild();
     this.updateMoney(player.money);
     
     const unitsW = new Control(buildItems.node, 'div', red["builds_column"]);
     this.units = new Control(unitsW.node, 'div', red["column_items"]);
+    this.buildingsSecondColumnFooter = new Control(unitsW.node, 'div', red["column_footer"]);
+    this.buttonSecondColumnUp = new Control(this.buildingsSecondColumnFooter.node, 'div', red["button"] + ' ' + red["button_up"]);
+    this.buttonSecondColumnUp = new Control(this.buildingsSecondColumnFooter.node, 'div', red["button"] + ' ' + red["button_down"]);
+
     this.createUnits();
   } 
   

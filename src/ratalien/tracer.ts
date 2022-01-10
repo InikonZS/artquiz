@@ -12,12 +12,12 @@ function generate(){
   return map;
 }
 
-function generateEmptyMap(width:number, height:number){
+export function generateEmptyMap(width:number, height:number, val:number){
   const map = [];
   for (let i=0; i<height; i++){
     const row = [];
     for (let j=0; j<width; j++){
-      row.push(Number.MAX_SAFE_INTEGER);
+      row.push(val);
     }
     map.push(row);
   }
@@ -188,10 +188,10 @@ export function isEqualColor(a:{r:number, g:number, b:number, a:number}, b:{r:nu
 }
 
 export function getMapFromImageData(data:ImageData){
-  const map = generateEmptyMap(data.width, data.height);
+  const map = generateEmptyMap(data.width, data.height, Number.MAX_SAFE_INTEGER);
   iterateImageData(data, (pos, color)=>{
     let mapColor = 0;
-    if (isEqualColor(color, {r:0, g:0, b:0, a:255})){
+    if (isEqualColor(color, {r:255, g:255, b:0, a:255})){
       mapColor = 1;
     } else if (isEqualColor(color, {r:255, g:0, b:0, a:255})){
       mapColor = 2;
@@ -225,4 +225,10 @@ export function iterateImageData(image:ImageData, iterator:(point:{x:number, y:n
         break;
     }
   });
+}
+
+export function inBox(point:Vector, _start:Vector, _end:Vector){
+  const start = new Vector(Math.min(_start.x, _end.x), Math.min(_start.y, _end.y));
+  const end = new Vector(Math.max(_start.x, _end.x), Math.max(_start.y, _end.y));
+  return point.x>start.x && point.y>start.y && point.x<end.x && point.y<end.y;
 }

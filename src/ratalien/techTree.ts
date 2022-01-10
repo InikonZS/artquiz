@@ -221,7 +221,7 @@ const tank = {
 
 const truck = {
   deps: ["carFactory"],
-  spawn: ["carFactory"],
+  spawn: ["car factory"],
   name: 'truck',
   cost: 1000,
   time: 30,

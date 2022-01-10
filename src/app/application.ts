@@ -5,6 +5,7 @@ import grass from '../ratalien/sprites/grass.png';
 import rocks from '../ratalien/sprites/tree2.png';
 import gold from '../ratalien/sprites/gold_full.png';
 import map from '../ratalien/map96.png';
+import plant from '../ratalien/sprites/plant.png';
 import { Game } from "../ratalien/game";
 import { FinishPage } from './finishPage'
 
@@ -66,7 +67,9 @@ export class Application extends Control {
       this.loader.loadTextures({
         map: map,
         grass: grass,
-        rocks: rocks
+        rocks: rocks, 
+        gold: gold,
+        plant: plant
       }).then(res => {
         const game = new Game(this.main.node, res);
         game.onExit = () => {
