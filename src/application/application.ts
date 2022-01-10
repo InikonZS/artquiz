@@ -63,6 +63,7 @@ export class Application extends Control{
       gameField.destroy();
       this.mainCycle();
     }
+    
     gameField.onBack = ()=>{
       gameField.destroy();
       this.categoryCycle(gameName);
