@@ -1,7 +1,7 @@
 import {Vector, IVector} from "../../common/vector";
 import { InteractiveObject } from "./interactiveObject";
 import {consts} from "../globals";
-import {Weapon} from "./weapon";
+import AbstractWeapon from "./abstractWeapon";
 
 export class AbstractUnit extends InteractiveObject{
   positionPx: Vector;
@@ -16,9 +16,9 @@ export class AbstractUnit extends InteractiveObject{
   tileChecker: (pos: Vector) => boolean;
   type:string = 'unit';
   onDamageTile:(point:Vector)=>void;
-  private gold: number = 0;
+  protected gold: number = 0;
   maxGold: number = 3000;
-  weapon: Weapon;
+  weapon: AbstractWeapon;
 
   get position(){
     return new Vector(Math.floor(this.positionPx.x/55), Math.floor(this.positionPx.y / 55));
@@ -26,10 +26,10 @@ export class AbstractUnit extends InteractiveObject{
 
   constructor(){
     super();
-    this.weapon = new Weapon();
-    this.weapon.onBulletTarget = (point)=>{
-      this.onDamageTile?.(point);
-    }
+    // this.weapon = new Weapon();
+    // this.weapon.onBulletTarget = (point)=>{
+    //   this.onDamageTile?.(point);
+    // }
   }
 
   inShape(tile:Vector, cursor:Vector){

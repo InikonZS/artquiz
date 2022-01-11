@@ -1,6 +1,7 @@
 import { IVector, Vector } from "../common/vector";
-import { InteractiveObject, ITechBuild, MapObject, UnitObject } from "./interactives";
-import {checkMap} from "./distance";
+import { InteractiveObject, ITechBuild, MapObject } from "./interactives";
+import { checkMap } from "./distance";
+import {AbstractUnit} from './units/abstractUnit'
 
 export class GameCursorStatus{
   pixelPosition:Vector = new Vector(0, 0);
@@ -32,7 +33,7 @@ export class GameCursorStatus{
     } else if (this.selected.length == 0){
       //no selected
       action = 'select';
-    } else if (this.selected.find(it => !(it instanceof UnitObject)) == null) {
+    } else if (this.selected.find(it => !(it instanceof AbstractUnit)) == null) {
       action = this.selected[0].getAction(this.hovered[0],this.getRealMap()[this.tilePosition.y][this.tilePosition.x] )
       //selected only units
       // action = 'move';
@@ -62,7 +63,7 @@ export class GameCursorStatus{
   }
 
   isOnlyUnitsSelected(){
-    return this.selected.find(it=> !(it instanceof UnitObject)) == null
+    return this.selected.find(it=> !(it instanceof AbstractUnit)) == null
   }
 
   render(ctx:CanvasRenderingContext2D, camera:Vector){

@@ -2,16 +2,16 @@ import {Vector, IVector} from "../../common/vector";
 import { findClosestUnit } from "../distance";
 import { ITechBuild } from "./iTechBuild";
 import { MapObject } from "./mapObject";
-import { UnitObject } from "./unitObject";
-import { Weapon } from "./weapon";
+import { AbstractUnit } from "./abstractUnit";
+import { WeaponSolder } from "./weaponSolder";
 
 export class Tower extends MapObject{
-  weapon: Weapon = new Weapon();
-  getUnits: ()=>UnitObject[];
+  weapon: WeaponSolder = new WeaponSolder();
+  getUnits: ()=>AbstractUnit[];
   
   constructor(build:ITechBuild, res:Record<string, HTMLImageElement>){
     super(build, res);
-    this.weapon = new Weapon();
+    this.weapon = new WeaponSolder();
     
   }
 
@@ -27,7 +27,7 @@ export class Tower extends MapObject{
     this.weapon.step(delta);
   }
 
-  logic(enemies:UnitObject[]){
+  logic(enemies:AbstractUnit[]){
     const near = findClosestUnit(this.position.clone().scale(55), enemies);
     if (near.unit){
       this.attack(near.unit.positionPx);

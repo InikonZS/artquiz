@@ -1,7 +1,8 @@
 import Control from "../common/control";
 import red from "./red.css";
 import {Vector, IVector} from "../common/vector";
-import {MapObject, UnitObject, ITechBuild, InteractiveObject, Tower} from "./interactives";
+import { MapObject, ITechBuild, InteractiveObject, Tower } from "./interactives";
+import {AbstractUnit} from './units/abstractUnit';
 import { tech } from "./techTree";
 import {GamePlayer, IBuildInfo} from "./gamePlayer";
 import {getMapFromImageData, getImageData, loadImage, findPath, indexateAsync, steps, tracePathes, inBox} from "./tracer";
@@ -139,10 +140,10 @@ export class GameField extends Control{
     let listener = ()=>{
       
       let selection = this.objects.list.filter(it=>{
-        if ((it instanceof UnitObject) == false){
+        if ((it instanceof AbstractUnit) == false){
           return false;
         }
-        return it.player == 0 && inBox((it as UnitObject).positionPx, this.cursorStatus.multiStart,  this.getPixelCursor());
+        return it.player == 0 && inBox((it as AbstractUnit).positionPx, this.cursorStatus.multiStart,  this.getPixelCursor());
       });
       
       this.cursorStatus.multiStart = null;
@@ -188,7 +189,7 @@ export class GameField extends Control{
     if (!this.cursorStatus.isOnlyUnitsSelected()){
       return;
     }
-    const units:UnitObject[] = this.cursorStatus.selected as UnitObject[];//[this.selected as UnitObject];
+    const units:AbstractUnit[] = this.cursorStatus.selected as AbstractUnit[];//[this.selected as UnitObject];
     const destinations = units.map(unit=>{
       return new Vector(Math.floor(unit.positionPx.x/this.sz), Math.floor(unit.positionPx.y/this.sz))
     });
@@ -198,7 +199,7 @@ export class GameField extends Control{
       console.log(pathes);
       pathes.forEach((path, i)=>{
         const unit = units[i];
-        (unit as UnitObject).setPath(path, (pos)=>this.isEmptyTile(pos, unit), attackPoint);
+        (unit as AbstractUnit).setPath(path, (pos)=>this.isEmptyTile(pos, unit), attackPoint);
         //(unit as RoundNode).attackTarget = Vector.fromIVector(indexPoint).scale(10);
       })
     })  
@@ -217,7 +218,7 @@ export class GameField extends Control{
     //TODO check is empty,else, check neighbor
   //  console.log(name);
     let unitMap:Record<string, IUnitConstructor> = {'solder':SolderUnit, 'truck':TruckUnit};
-    let UnitConstructor = unitMap[name] || UnitObject;
+    let UnitConstructor = unitMap[name] || AbstractUnit;
     let unit = new UnitConstructor();//UnitObject();
     unit.onDamageTile = (point)=>{
       const damaged = this.map.toTileVector(point);//new Vector(Math.floor(point.x / 55), Math.floor(point.y / 55));
@@ -262,7 +263,7 @@ export class GameField extends Control{
   addObject(player:number, obj:ITechBuild, x:number, y:number){
     let object = new Tower(obj, this.res);//MapObject(obj, this.res);
     object.getUnits = ()=>{
-      return this.objects.list.filter(it=> it instanceof UnitObject && it.player!= player) as UnitObject[];
+      return this.objects.list.filter(it=> it instanceof AbstractUnit && it.player!= player) as AbstractUnit[];
     }
     object.position = new Vector(x,y);
     object.player = player;
@@ -360,7 +361,7 @@ export class GameField extends Control{
     //no optimal
     this.objects.list.forEach(it=>{
       if (it.player != 0 ) return;
-      if (it instanceof UnitObject){
+      if (it instanceof AbstractUnit){
         this.map.renderMtx(this.map.opened, makeCircleMap(3) /*['1111'.split(''),'1000'.split(''),'1000'.split(''),'0000'.split('')]*/, it.position.x, it.position.y, 'center');
       } else {
         this.map.renderMtx(this.map.opened, makeCircleMap(5), it.position.x, it.position.y, "center");  
@@ -379,7 +380,7 @@ export class GameField extends Control{
     //return true;
     let result = this.objects.list.find(it=>{
       if (unit == it) return false;
-      const near = (it as UnitObject).position.clone().sub(pos).abs();
+      const near = (it as AbstractUnit).position.clone().sub(pos).abs();
       //if (near< 20){
        // console.log(near);
       //}

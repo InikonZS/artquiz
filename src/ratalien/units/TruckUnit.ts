@@ -1,10 +1,16 @@
 import { InteractiveObject } from './interactiveObject';
 import { MapObject } from './mapObject';
-import {UnitObject} from './unitObject';
+import { AbstractUnit } from './abstractUnit';
+import {WeaponTrack} from './weaponTrack';
 
-export class TruckUnit extends UnitObject{
+export class TruckUnit extends AbstractUnit{
+  weapon: WeaponTrack;
   constructor(){
     super();
+    this.weapon = new WeaponTrack();
+    this.weapon.onBulletTarget = (point)=>{
+      this.onDamageTile?.(point);
+    }
   }
 
  getAction(hovered: InteractiveObject, mapTile?:number) {

@@ -1,9 +1,10 @@
 import {Vector, IVector} from "../../common/vector";
-import { InteractiveObject } from "./interactiveObject";
+import { AbstractUnit } from "./abstractUnit";
+import { InteractiveObject } from './interactiveObject';
 import {consts} from "../globals";
-import {Weapon} from "./weapon";
+import {WeaponSolder} from "./weaponSolder";
 
-export class UnitObject extends InteractiveObject{
+export class UnitObject1 extends AbstractUnit{
   positionPx: Vector;//{x:number, y:number};
   target: Vector = null;
   speed: number = 8.5;
@@ -20,9 +21,9 @@ export class UnitObject extends InteractiveObject{
   //bullet: Vector;
   //reloadTime: number = 0;
   onDamageTile:(point:Vector)=>void;
-  private gold: number = 0;
+  //protected gold: number = 0;
   maxGold: number = 3000;
-  weapon: Weapon;
+  weapon: WeaponSolder;
 
   get position(){
     return new Vector(Math.floor(this.positionPx.x/55), Math.floor(this.positionPx.y / 55));
@@ -31,7 +32,7 @@ export class UnitObject extends InteractiveObject{
   constructor(){
     super();
     //this._stepIndex = 1
-    this.weapon = new Weapon();
+    this.weapon = new WeaponSolder();
     //this.weapon.reloadTime = 140;
     this.weapon.onBulletTarget = (point)=>{
       this.onDamageTile?.(point);
