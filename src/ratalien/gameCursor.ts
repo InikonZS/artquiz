@@ -32,22 +32,23 @@ export class GameCursorStatus{
     } else if (this.selected.length == 0){
       //no selected
       action = 'select';
-    } else if (this.selected.find(it=>!(it instanceof UnitObject))== null){
+    } else if (this.selected.find(it => !(it instanceof UnitObject)) == null) {
+      action = this.selected[0].getAction(this.hovered[0],this.getRealMap()[this.tilePosition.y][this.tilePosition.x] )
       //selected only units
-      action = 'move';
-      if (this.selected.find(it=>it.name =='solder') && (this.getRealMap()[this.tilePosition.y][this.tilePosition.x] == 1)|| (this.hovered[0] instanceof MapObject && this.hovered[0]?.player == 0)){
-        if (this.getRealMap()[this.tilePosition.y][this.tilePosition.x] == 1){
-          action = 'gold';
-        } else if (this.hovered[0] instanceof MapObject && this.hovered[0].name == 'barracs'){
-          action = 'cash_in'
-        }
-      } else {
-        if (this.hovered[0] && this.hovered[0].player!=0){
-          action = 'attack';
-        } else {
-          action = 'move';
-        }
-      }
+      // action = 'move';
+      // if (this.selected.find(it=>it.name =='solder') && (this.getRealMap()[this.tilePosition.y][this.tilePosition.x] == 1)|| (this.hovered[0] instanceof MapObject && this.hovered[0]?.player == 0)){
+      //   if (this.getRealMap()[this.tilePosition.y][this.tilePosition.x] == 1){
+      //     action = 'gold';
+      //   } else if (this.hovered[0] instanceof MapObject && this.hovered[0].name == 'barracs'){
+      //     action = 'cash_in'
+      //   }
+      // } else {
+      //   if (this.hovered[0] && this.hovered[0].player!=0){
+      //     action = 'attack';
+      //   } else {
+      //     action = 'move';
+      //   }
+      // }
     } else if ((this.selected[0] instanceof MapObject)) {
       if (this.hovered[0] == this.selected[0]){
         if (this.getPrimaries()[this.hovered[0].name] ==this.hovered[0]){

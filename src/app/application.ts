@@ -4,7 +4,7 @@ import { StartPage } from "./startPage";
 import grass from '../ratalien/sprites/grass.png';
 import rocks from '../ratalien/sprites/tree2.png';
 import gold from '../ratalien/sprites/gold_full.png';
-import map from '../ratalien/map96.png';
+import map from '../ratalien/map96g.png';
 import plant from '../ratalien/sprites/plant.png';
 import { Game } from "../ratalien/game";
 import { FinishPage } from './finishPage'

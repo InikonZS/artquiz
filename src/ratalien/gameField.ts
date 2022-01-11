@@ -230,7 +230,7 @@ export class GameField extends Control{
         console.log(distance, build);
         if (distance==0){
           if (build.player !=0){
-            build.damage(10);
+            build.damage(unit.getDamage(build));
           } else {
             this.players[0].setMoney(this.players[0].money + unit.getGold());
             unit.clearGold();//unit.gold = 0;

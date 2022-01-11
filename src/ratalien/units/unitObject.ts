@@ -32,7 +32,7 @@ export class UnitObject extends InteractiveObject{
     super();
     //this._stepIndex = 1
     this.weapon = new Weapon();
-    this.weapon.reloadTime = 140;
+    //this.weapon.reloadTime = 140;
     this.weapon.onBulletTarget = (point)=>{
       this.onDamageTile?.(point);
     }
@@ -244,5 +244,23 @@ export class UnitObject extends InteractiveObject{
       this.bullet = this.positionPx.clone();
       this.reloadTime = 50;
     }*/
+  }
+
+  getAction(hovered: InteractiveObject, mapTile?:number) {
+     let action = 'move';
+      // if (this.selected.find(it=>it.name =='solder') && (this.getRealMap()[this.tilePosition.y][this.tilePosition.x] == 1)|| (this.hovered instanceof MapObject && this.hovered?.player == 0)){
+      //   if (this.getRealMap()[this.tilePosition.y][this.tilePosition.x] == 1){
+      //     action = 'gold';
+      //   } else if (hovered instanceof MapObject && hovered.name == 'barracs'){
+      //     action = 'cash_in'
+      //   }
+      // } else {
+        if (hovered && hovered.player!=0){
+          action = 'attack';
+        } else {
+          action = 'move';
+        }
+      //}
+    return action;
   }
 }
