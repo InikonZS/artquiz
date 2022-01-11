@@ -140,4 +140,8 @@ export class AbstractUnit extends InteractiveObject{
     }
     return action;
   }
+
+  logic() {
+    
+  }
 }

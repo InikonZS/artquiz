@@ -13,6 +13,11 @@ export class TruckUnit extends AbstractUnit{
     }
   }
 
+  step(delta: number) {
+    super.step(delta);
+    this.logic();
+  }
+
  getAction(hovered: InteractiveObject, mapTile?:number) {
      let action = 'move';
       
@@ -28,4 +33,8 @@ export class TruckUnit extends AbstractUnit{
   getDamage(target: InteractiveObject) {
     return 0;    
   }
+
+  // logic() {
+  //     this.setPath()
+  // }
 }

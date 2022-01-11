@@ -11,7 +11,7 @@ export default class AbstractWeapon{
   private loading: number = 0;
   private BulletConstructor: IBulletConstructor;
   position:Vector;
-  onBulletTarget:(point:Vector)=>void;
+  onBulletTarget: (point: Vector) => void;
 
   constructor(BulletConstructor:IBulletConstructor, attackRadius: number, reloadTime: number){
     this.BulletConstructor = BulletConstructor;

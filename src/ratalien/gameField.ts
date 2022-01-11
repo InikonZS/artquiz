@@ -5,7 +5,7 @@ import { MapObject, ITechBuild, InteractiveObject, Tower } from "./interactives"
 import {AbstractUnit} from './units/abstractUnit';
 import { tech } from "./techTree";
 import {GamePlayer, IBuildInfo} from "./gamePlayer";
-import {getMapFromImageData, getImageData, loadImage, findPath, indexateAsync, steps, tracePathes, inBox} from "./tracer";
+import {getMapFromImageData, getImageData, loadImage, findPath, indexateAsync, steps, tracePathes, inBox, parseData} from "./tracer";
 import {InteractiveList} from "./interactiveList";
 import {GameMap} from "./gameMap";
 import {GameCursorStatus} from "./gameCursor";
@@ -46,6 +46,8 @@ export class GameField extends Control{
     },
     ()=>this.map.map);
     this.objects = new InteractiveList();
+    const golds = parseData(this.map.imageData);
+    golds.map(gold => this.objects.add(gold));
     this.objects.onChangeHovered = ((last, current)=>{
       this.cursorStatus.hovered = current?[current]:[];
     });
@@ -274,6 +276,9 @@ export class GameField extends Control{
     this.objects.add(object);
     //this.traceMap.addObjectData(object)
   }
+
+  
+
 
   renderObjects(ctx:CanvasRenderingContext2D, delta:number){
     this.objects.list.forEach(it=>{
