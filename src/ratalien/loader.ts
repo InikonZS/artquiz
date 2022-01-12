@@ -1,6 +1,12 @@
 export class ResourceLoader{
+  public textures: Record<string, HTMLImageElement>;
   constructor(){
 
+  }
+
+  load(list:Record<string, string>, onProgress?:(loaded:number, count:number)=>void){
+    return this.loadTextures(list, onProgress).then(res => {this.textures = res; return this;});
+    
   }
 
   loadTexture(src:string):Promise<HTMLImageElement>{
@@ -16,7 +22,7 @@ export class ResourceLoader{
     });
   }
 
-  loadTextures(list:Record<string, string>, onProgress?:(loaded:number, count:number)=>void):Promise<Record<string, HTMLImageElement>>{
+  private loadTextures(list:Record<string, string>, onProgress?:(loaded:number, count:number)=>void):Promise<Record<string, HTMLImageElement>>{
     const textures: Record<string, HTMLImageElement> = {};
     const textureList = Object.keys(list);
     let loaded = 0;

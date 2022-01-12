@@ -1,8 +1,10 @@
+import { Vector } from "../common/vector";
+
 const options = [
   {
     name: 'explosion',
-    keyCode: 'boom',  //????
-    src: './ratalien/sprites/explosion.png',
+    keyCode: 'boom',  
+    src: './ratalien/sprites/explosion_1.png',
     width: 851,
     height: 158,
     numberOfFrames: 6,
@@ -25,7 +27,7 @@ const options = [
   },*/
 ]
 
-class AnimationBoom {
+export default class Animation {
   spritesheet: HTMLImageElement;
   width: number;
   height: number;
@@ -33,12 +35,13 @@ class AnimationBoom {
   frameIndex: number;
   isStarted: boolean;
   scale: number;
-  constructor(imageURL, width, height, numberOfFrames, scale = 1) {
-    let spritesheet = new Image();
-    spritesheet.src = imageURL;
-    this.spritesheet = spritesheet;
-    this.width = width;
-    this.height = height;
+  onFinish: () => void;
+  constructor(image: HTMLImageElement, numberOfFrames:number, scale:number = 1) {
+   /* let spritesheet = new Image();
+    spritesheet.src = imageURL;*/
+    this.spritesheet = image;
+    this.width = image.naturalWidth;
+    this.height = image.naturalHeight;
     this.numberOfFrames = numberOfFrames || 1;
     this.frameIndex = 0;
     this.isStarted = false;
@@ -56,14 +59,17 @@ class AnimationBoom {
     this.isStarted = false;
   }
 
-  update(deltaTime) {  
-    this.frameIndex += deltaTime * 3;  //?????
+  update(deltaTime:number) {  
+    this.frameIndex += deltaTime/100;  
     if (this.frameIndex >= this.numberOfFrames) {
+      this.onFinish?.();
       this.frameIndex = 0;
     }
   }
 
-  drawFrame(context, frame, x, y) {  //frame - номер кадра
+  
+
+  drawFrame(context:CanvasRenderingContext2D, frame:number, x:number, y:number) {  //frame - номер кадра
     context.drawImage(this.spritesheet,
                       frame * this.width / this.numberOfFrames,
                       0,
@@ -75,22 +81,22 @@ class AnimationBoom {
                       this.height / this.scale)
   }
 
-  drawCurrentFrame(context, x, y){
+  drawCurrentFrame(context:CanvasRenderingContext2D, x:number, y:number){
     this.drawFrame(context, Math.trunc(this.frameIndex), x, y)
   }
 
-  render(context, deltaTime, position){
+  render(context:CanvasRenderingContext2D, deltaTime:number, position:Vector){
     if (this.isStarted) {
       this.update(deltaTime);
     }
     this.drawCurrentFrame(context, position.x, position.y);
   }
 
-  setOptions(keyCode) {
+  /*setOptions(keyCode) {
     const currentOptions = options.filter(it => it.keyCode === keyCode)[0];
     this.spritesheet.src = currentOptions.src;
     this.width = currentOptions.width;
     this.height = currentOptions.height;
     this.numberOfFrames = currentOptions.numberOfFrames;
-  }
+  }*/
 } 
