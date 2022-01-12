@@ -6,8 +6,16 @@ import goldLow from './sprites/gold_low.png';
 import goldMed from './sprites/gold_med.png';
 import goldMin from './sprites/gold_min.png';
 
-import map from './map96g.png';
 import plant from './sprites/plant.png';
+import carFactory from './sprites/carFactory.png';
+import buildingCenter from './sprites/buildingCenter.png';
+
+import barac from './sprites/barac.png';
+import radar from './sprites/radar.png';
+import energy from './sprites/energy.png';
+import defendedTower from './sprites/defendedTower.png'
+import map from './map96g.png';
+
 
 export const resourceLoader = new ResourceLoader();
 
@@ -19,5 +27,11 @@ export const resources = {
   goldLow: goldLow,
   goldMed: goldMed,
   goldMin: goldMin,
-  plant: plant
+  plant: plant,
+  energy:energy,
+  radar:radar,
+  carFactory:carFactory,
+  barac:barac,
+  defendedTower:defendedTower,
+  buildingCenter:buildingCenter
 }

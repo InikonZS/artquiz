@@ -37,7 +37,7 @@ export class GameField extends Control{
     super(parentNode, 'div', red['game_field']);
     this.res = res;  
     this.players = players;
-    
+
     const canvas = new Control<HTMLCanvasElement>(this.node, 'canvas');
     this.canvas = canvas;
     this.map = new GameMap(96, 96, res['map'], res);
@@ -98,7 +98,9 @@ export class GameField extends Control{
         this.commandUnit();
       } else if (action == 'build'){
         this.modeCallback();
-        this.addObject(0, this.cursorStatus.planned, cursorTile.x, cursorTile.y); 
+       
+        this.addObject(0, this.cursorStatus.planned, cursorTile.x, cursorTile.y);
+  
         this.cursorStatus.planned = null; 
       } else if (action == 'primary'){
         this.players[0].primaries[this.cursorStatus.hovered[0].name] = this.cursorStatus.hovered[0] as MapObject;
@@ -244,7 +246,7 @@ export class GameField extends Control{
 
   setPlanned(name:string, callback:()=>void){
     //this.mode = mode;
-    console.log(name);
+    console.log(name,'***');
     this.cursorStatus.planned = tech.builds.find(it=>it.desc[0] == name);//{name:name};
     console.log(callback);
     this.modeCallback = callback;

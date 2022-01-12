@@ -2,6 +2,7 @@ import Control from "../common/control";
 import { SettingsModel, SettingsPage } from "./settingsPage";
 import { StartPage } from "./startPage";
 import { resources, resourceLoader } from '../ratalien/resources';
+
 import { Game } from "../ratalien/game";
 import { FinishPage } from './finishPage'
 
