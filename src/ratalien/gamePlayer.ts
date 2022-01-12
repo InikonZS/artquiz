@@ -10,7 +10,7 @@ export interface IBuildInfo{
   cost:number
 }
 
-interface IUnitInfo{
+export interface IUnitInfo{
   spawn:Array<string>,
   deps: Array<string>,
   name: string,
