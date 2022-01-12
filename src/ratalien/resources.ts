@@ -16,6 +16,9 @@ import energy from './sprites/energy.png';
 import defendedTower from './sprites/defendedTower.png'
 import map from './map96g.png';
 
+import explosion from './sprites/explosion_1.png'
+
+
 
 export const resourceLoader = new ResourceLoader();
 
@@ -33,5 +36,6 @@ export const resources = {
   carFactory:carFactory,
   barac:barac,
   defendedTower:defendedTower,
-  buildingCenter:buildingCenter
+  buildingCenter:buildingCenter,
+  explosion: explosion
 }

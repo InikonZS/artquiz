@@ -17,6 +17,7 @@ import { OreFactory } from './units/oreFactory';
 import { IUnitConstructor } from "./units/IUnitConstructor";
 import { IBuildConstructor } from './units/IBuildConstructor';
 import { buildMap } from './units/buildMap';
+import {Explosion} from './units/explosion';
 
 
 export class GameField extends Control{
@@ -50,6 +51,7 @@ export class GameField extends Control{
     },
     ()=>this.map.map);
     this.objects = new InteractiveList();
+   
     this.addGold();
     this.objects.onChangeHovered = ((last, current)=>{
       this.cursorStatus.hovered = current?[current]:[];
@@ -228,6 +230,8 @@ export class GameField extends Control{
     let UnitConstructor = unitMap[name] || AbstractUnit;
     let unit = new UnitConstructor();//UnitObject();
     unit.onDamageTile = (point)=>{
+      const ex = new Explosion(point);
+      this.objects.add(ex);
       const tile = this.map.toTileVector(point);//new Vector(Math.floor(point.x / 55), Math.floor(point.y / 55));
       this.objects.list.map(object => object.damage(point, tile, unit));
     }
