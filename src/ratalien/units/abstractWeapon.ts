@@ -1,16 +1,22 @@
 import {Vector, IVector} from "../../common/vector";
 import {Bullet} from "./bullet";
+interface IBulletConstructor{
+  new(target: Vector, position: Vector): Bullet;
+}
 
-export class Weapon{
-  attackRadius: number = 300;
+export default class AbstractWeapon{
+  attackRadius: number;
   bullets: Array<Bullet> = [];
-  reloadTime: number = 400;
+  reloadTime: number;
   private loading: number = 0;
+  private BulletConstructor: IBulletConstructor;
   position:Vector;
-  onBulletTarget:(point:Vector)=>void;
+  onBulletTarget: (point: Vector) => void;
 
-  constructor(){
-
+  constructor(BulletConstructor:IBulletConstructor, attackRadius: number, reloadTime: number){
+    this.BulletConstructor = BulletConstructor;
+    this.attackRadius = attackRadius; 
+    this.reloadTime = reloadTime;
   }
 
   step(delta:number){
@@ -24,9 +30,7 @@ export class Weapon{
 
   tryShot(target:Vector){
     if (!this.position) {console.log('no pos'); return;}
-    if (this.loading<=0){
-      
-    }
+    
     if (this.loading<=0 && target.clone().sub(this.position.clone().scale(55)).abs()<this.attackRadius){
       //console.log('radiused');
       this.shot(target);
@@ -36,7 +40,7 @@ export class Weapon{
   }
 
   private shot(target:Vector){
-    const bullet = new Bullet(target, this.position.clone().scale(55));
+    const bullet = new this.BulletConstructor(target, this.position.clone().scale(55));
     this.loading = this.reloadTime;
     bullet.onTarget = ()=>{
       this.bullets = this.bullets.filter(it=>it!=bullet);

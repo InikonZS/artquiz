@@ -74,6 +74,7 @@
 }
 .column_items{
   width: 100%;
+  margin-top: 0;
 }
 
 .column_footer{

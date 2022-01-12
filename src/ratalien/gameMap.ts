@@ -1,5 +1,5 @@
 import { Vector } from "../common/vector";
-import { getImageData, getMapFromImageData, generateEmptyMap } from "./tracer";
+import { getImageData, getMapFromImageData, generateEmptyMap, parseData } from "./tracer";
 
 export class GameMap{
   map: Array<Array<number>>;
@@ -11,14 +11,17 @@ export class GameMap{
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
   cached:boolean = false;
+  imageData: ImageData;
 
   constructor(sizeX:number, sizeY:number, map:HTMLImageElement, textures:Record<string, HTMLImageElement>){
     this.map = [];
+    this.imageData = getImageData(map);
     this.res = textures;
-    this.map = getMapFromImageData(getImageData(map));
+    this.map = getMapFromImageData(this.imageData);
     this.opened = generateEmptyMap(96,96, 0);
     this.canvas = document.createElement('canvas');
     this.ctx = this.canvas.getContext('2d');
+    
     //console.log(this.map);
     /*for(let i = 0; i < sizeY; i++){
       let row = [];
@@ -89,13 +92,13 @@ export class GameMap{
           ctx.fillStyle = '#0006';
           
           ctx.fillText(i.toString() + ' / '+ j.toString(), this.position.x+0 +j*sz, this.position.y+0+i*sz);
-          if (this.opened[i][j]){
+          if (this.opened[i][j]) {
             ctx.drawImage(this.res['grass'], this.position.x+0 +j*sz, this.position.y+0+i*sz, sz, sz);
             if (this.map[i][j] == 2){
               ctx.drawImage(this.res['rocks'], this.position.x+0 +j*sz, this.position.y+0+i*sz - sz *0.5, sz, sz*1.5);
             }
-            if (this.map[i][j] == 1){
-              ctx.drawImage(this.res['gold'], this.position.x+0 +j*sz, this.position.y+0+i*sz - (this.res['gold'].naturalHeight - 128), sz, sz* this.res['gold'].naturalHeight / 128);
+            if (this.map[i][j] == 1) {    
+              //ctx.drawImage(this.res['goldFull'], this.position.x+0 +j*sz, this.position.y+0+i*sz - (this.res['goldFull'].naturalHeight - 128), sz, sz* this.res['goldFull'].naturalHeight / 128);
             }
             
 

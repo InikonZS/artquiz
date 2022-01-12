@@ -49,4 +49,16 @@ export class InteractiveObject{
 
   render(ctx:CanvasRenderingContext2D, camera:Vector, ...props:any){
   }
+
+  getAction(hovered:InteractiveObject, mapTile?:number) {
+    return "select";
+  }
+
+  getDamage(target: InteractiveObject) {
+    return 10;    
+  }
+  
+  damage(point: Vector, tile: Vector, unit: InteractiveObject) {
+    
+  }
 }

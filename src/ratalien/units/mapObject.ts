@@ -2,6 +2,8 @@ import {Vector, IVector} from "../../common/vector";
 import { InteractiveObject } from "./interactiveObject";
 import { ITechBuild } from "./iTechBuild";
 import {consts} from "../globals";
+import { AbstractUnit } from "./abstractUnit";
+import { getTilingDistance } from "../distance";
 
 export class MapObject extends InteractiveObject{
   _position: Vector;
@@ -18,7 +20,8 @@ export class MapObject extends InteractiveObject{
     this._position = val;
   }
 
-  onDestroyed: ()=>void;
+  onDestroyed: () => void;
+   getUnits: ()=>AbstractUnit[];
   res: Record<string, HTMLImageElement>;
 
   constructor(build:ITechBuild, res:Record<string, HTMLImageElement>){
@@ -27,6 +30,7 @@ export class MapObject extends InteractiveObject{
     this.tiles = build.mtx.map(it=>it.map(jt=>parseInt(jt)));
     this.name = build.name;
     this.res = res;
+   // console.log(this.name,'%$%$')
   }
 
   inShape(tile:Vector, cursor:Vector){
@@ -37,11 +41,16 @@ export class MapObject extends InteractiveObject{
     return false;
   }
 
-  damage(amount:number){
-    this.health -=amount;
-    if (this.health<=0){
-      this.onDestroyed();
-    }
+  damage(point: Vector, tile: Vector, unit: InteractiveObject) {
+ //(unit as AbstractUnit).weapon.getDamage()
+    const amount = 10;
+    const distance = getTilingDistance(tile, this.position, this.tiles);
+    if (distance === 0) {
+      this.health -=amount;
+      if (this.health<=0){
+        this.onDestroyed();
+      }
+    }    
   }
 
   render(ctx:CanvasRenderingContext2D, camera:Vector, delta:number, size?:number, selected?:boolean, primary?:boolean){
@@ -61,7 +70,34 @@ export class MapObject extends InteractiveObject{
       if (primary){
         ctx.fillText('primary', pos.x, pos.y +40);
       }
-      ctx.drawImage(this.res['plant'], pos.x, pos.y, size * 4, size * 4 );
+      //**
+   // console.log(this.name)
+
+      if(this.name==='energyPlant'){
+
+        ctx.drawImage(this.res['energy'], pos.x, pos.y, size * 4, size * 4 );
+      }else if (this.name==='barracs'){
+        ctx.drawImage(this.res['barac'], pos.x, pos.y, size * 4, size * 4 );
+      }else if (this.name==='carFactory'){
+        ctx.drawImage(this.res['carFactory'], pos.x, pos.y, size * 4, size * 4 );
+      }else if (this.name==='radar'){
+        ctx.drawImage(this.res['radar'], pos.x, pos.y, size * 4, size * 4 );
+      }else if(this.name==='buildingCenter'){
+        ctx.drawImage(this.res['buildingCenter'], pos.x, pos.y, size * 4, size * 4 );
+
+      }
+      // else if (this.name==='repairStation'){
+      //
+      // }else if (this.name==='oreFactoryBig'){
+      //
+      // }
+      else if (this.name==='defendTower'){
+        ctx.drawImage(this.res['defendedTower'], pos.x, pos.y, size * 4, size * 4 );
+      }
+
+      else{
+        ctx.drawImage(this.res['plant'], pos.x, pos.y, size * 4, size * 4 );
+      }
   }
 
   drawTile(ctx:CanvasRenderingContext2D, position:IVector, camera:IVector, color:string, size:number){

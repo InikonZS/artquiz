@@ -1,18 +1,23 @@
 import Control from "../common/control";
 import red from "./red.css";
 import {Vector, IVector} from "../common/vector";
-import {MapObject, UnitObject, ITechBuild, InteractiveObject, Tower} from "./interactives";
+import { MapObject, ITechBuild, InteractiveObject, Tower } from "./interactives";
+import {AbstractUnit} from './units/abstractUnit';
 import { tech } from "./techTree";
 import {GamePlayer, IBuildInfo} from "./gamePlayer";
-import {getMapFromImageData, getImageData, loadImage, findPath, indexateAsync, steps, tracePathes, inBox} from "./tracer";
+import {getMapFromImageData, getImageData, loadImage, findPath, indexateAsync, steps, tracePathes, inBox, parseData} from "./tracer";
 import {InteractiveList} from "./interactiveList";
 import {GameMap} from "./gameMap";
 import {GameCursorStatus} from "./gameCursor";
 import {makeCircleMap, findClosestBuild} from "./distance";
 import {generateEmptyMap} from "./tracer";
 import {SolderUnit} from "./units/SolderUnit";
-import {TruckUnit} from "./units/TruckUnit";
+import { TruckUnit } from "./units/TruckUnit";
+import { OreFactory } from './units/oreFactory';
 import { IUnitConstructor } from "./units/IUnitConstructor";
+import { IBuildConstructor } from './units/IBuildConstructor';
+import { buildMap } from './units/buildMap';
+
 
 export class GameField extends Control{
   cursor: { x: number; y: number; } = {x:0, y:0};
@@ -32,7 +37,7 @@ export class GameField extends Control{
     super(parentNode, 'div', red['game_field']);
     this.res = res;  
     this.players = players;
-    
+
     const canvas = new Control<HTMLCanvasElement>(this.node, 'canvas');
     this.canvas = canvas;
     this.map = new GameMap(96, 96, res['map'], res);
@@ -45,6 +50,7 @@ export class GameField extends Control{
     },
     ()=>this.map.map);
     this.objects = new InteractiveList();
+    this.addGold();
     this.objects.onChangeHovered = ((last, current)=>{
       this.cursorStatus.hovered = current?[current]:[];
     });
@@ -52,7 +58,7 @@ export class GameField extends Control{
     this.objects.onClick = (current=>{
       this.cursorStatus.selected = current?[current]:[];
     });
-
+    
     let preventSelect = false;
     canvas.node.onmousedown =e=>{
       if (e.button == 2){
@@ -92,7 +98,9 @@ export class GameField extends Control{
         this.commandUnit();
       } else if (action == 'build'){
         this.modeCallback();
-        this.addObject(0, this.cursorStatus.planned, cursorTile.x, cursorTile.y); 
+       
+        this.addObject(0, this.cursorStatus.planned, cursorTile.x, cursorTile.y);
+  
         this.cursorStatus.planned = null; 
       } else if (action == 'primary'){
         this.players[0].primaries[this.cursorStatus.hovered[0].name] = this.cursorStatus.hovered[0] as MapObject;
@@ -139,10 +147,10 @@ export class GameField extends Control{
     let listener = ()=>{
       
       let selection = this.objects.list.filter(it=>{
-        if ((it instanceof UnitObject) == false){
+        if ((it instanceof AbstractUnit) == false){
           return false;
         }
-        return it.player == 0 && inBox((it as UnitObject).positionPx, this.cursorStatus.multiStart,  this.getPixelCursor());
+        return it.player == 0 && inBox((it as AbstractUnit).positionPx, this.cursorStatus.multiStart,  this.getPixelCursor());
       });
       
       this.cursorStatus.multiStart = null;
@@ -188,7 +196,7 @@ export class GameField extends Control{
     if (!this.cursorStatus.isOnlyUnitsSelected()){
       return;
     }
-    const units:UnitObject[] = this.cursorStatus.selected as UnitObject[];//[this.selected as UnitObject];
+    const units:AbstractUnit[] = this.cursorStatus.selected as AbstractUnit[];//[this.selected as UnitObject];
     const destinations = units.map(unit=>{
       return new Vector(Math.floor(unit.positionPx.x/this.sz), Math.floor(unit.positionPx.y/this.sz))
     });
@@ -198,7 +206,7 @@ export class GameField extends Control{
       console.log(pathes);
       pathes.forEach((path, i)=>{
         const unit = units[i];
-        (unit as UnitObject).setPath(path, (pos)=>this.isEmptyTile(pos, unit), attackPoint);
+        (unit as AbstractUnit).setPath(path, (pos)=>this.isEmptyTile(pos, unit), attackPoint);
         //(unit as RoundNode).attackTarget = Vector.fromIVector(indexPoint).scale(10);
       })
     })  
@@ -217,26 +225,11 @@ export class GameField extends Control{
     //TODO check is empty,else, check neighbor
   //  console.log(name);
     let unitMap:Record<string, IUnitConstructor> = {'solder':SolderUnit, 'truck':TruckUnit};
-    let UnitConstructor = unitMap[name] || UnitObject;
+    let UnitConstructor = unitMap[name] || AbstractUnit;
     let unit = new UnitConstructor();//UnitObject();
     unit.onDamageTile = (point)=>{
-      const damaged = this.map.toTileVector(point);//new Vector(Math.floor(point.x / 55), Math.floor(point.y / 55));
-      if (this.map.getTileValue(damaged)){//this.map.map[damaged.y][damaged.x] == 1){
-        if(unit.addGold(1000)){
-          this.map.setTileValue(damaged, 0);///.map[damaged.y][damaged.x] = 0;
-        }
-      } else {
-        let {distance, unit:build} = findClosestBuild(damaged, this.objects.list.filter(it=>it instanceof MapObject) as MapObject[]);
-        console.log(distance, build);
-        if (distance==0){
-          if (build.player !=0){
-            build.damage(10);
-          } else {
-            this.players[0].setMoney(this.players[0].money + unit.getGold());
-            unit.clearGold();//unit.gold = 0;
-          }
-        }
-      }
+      const tile = this.map.toTileVector(point);//new Vector(Math.floor(point.x / 55), Math.floor(point.y / 55));
+      this.objects.list.map(object => object.damage(point, tile, unit));
     }
     unit.player = player;
     //unit.position = new Vector(20, 20); //for demo
@@ -253,16 +246,27 @@ export class GameField extends Control{
 
   setPlanned(name:string, callback:()=>void){
     //this.mode = mode;
-    console.log(name);
+    console.log(name,'***');
     this.cursorStatus.planned = tech.builds.find(it=>it.desc[0] == name);//{name:name};
     console.log(callback);
     this.modeCallback = callback;
   }
 
-  addObject(player:number, obj:ITechBuild, x:number, y:number){
-    let object = new Tower(obj, this.res);//MapObject(obj, this.res);
+  addGold() {
+   const golds = parseData(this.map.imageData);
+    golds.map(gold => {
+      const { goldFull,goldLow,goldMed,goldMin } = this.res;
+      gold.addResources(goldFull,goldLow,goldMed,goldMin)
+      this.objects.add(gold)
+    })
+  }
+
+  addObject(player: number, obj: ITechBuild, x: number, y: number) {
+    //let buildMap:Record<string, IBuildConstructor> = {'tower':Tower, 'oreFactory':OreFactory};
+    let buildConstructor = buildMap[obj.name] || Tower;
+    let object = new buildConstructor(obj, this.res);//MapObject(obj, this.res);
     object.getUnits = ()=>{
-      return this.objects.list.filter(it=> it instanceof UnitObject && it.player!= player) as UnitObject[];
+      return this.objects.list.filter(it=> it instanceof AbstractUnit && it.player!= player) as AbstractUnit[];
     }
     object.position = new Vector(x,y);
     object.player = player;
@@ -360,7 +364,7 @@ export class GameField extends Control{
     //no optimal
     this.objects.list.forEach(it=>{
       if (it.player != 0 ) return;
-      if (it instanceof UnitObject){
+      if (it instanceof AbstractUnit){
         this.map.renderMtx(this.map.opened, makeCircleMap(3) /*['1111'.split(''),'1000'.split(''),'1000'.split(''),'0000'.split('')]*/, it.position.x, it.position.y, 'center');
       } else {
         this.map.renderMtx(this.map.opened, makeCircleMap(5), it.position.x, it.position.y, "center");  
@@ -379,7 +383,7 @@ export class GameField extends Control{
     //return true;
     let result = this.objects.list.find(it=>{
       if (unit == it) return false;
-      const near = (it as UnitObject).position.clone().sub(pos).abs();
+      const near = (it as AbstractUnit).position.clone().sub(pos).abs();
       //if (near< 20){
        // console.log(near);
       //}

@@ -1,11 +1,8 @@
 import Control from "../common/control";
 import { SettingsModel, SettingsPage } from "./settingsPage";
 import { StartPage } from "./startPage";
-import grass from '../ratalien/sprites/grass.png';
-import rocks from '../ratalien/sprites/tree2.png';
-import gold from '../ratalien/sprites/gold_full.png';
-import map from '../ratalien/map96.png';
-import plant from '../ratalien/sprites/plant.png';
+import { resources, resourceLoader } from '../ratalien/resources';
+
 import { Game } from "../ratalien/game";
 import { FinishPage } from './finishPage'
 
@@ -31,7 +28,7 @@ export class Application extends Control {
     this.main = new Control(this.node, 'div', style["global_main"]);
     //  this.footer = new Control(this.node, 'div', style["global_footer"]);
     
-    this.loader = new ResourceLoader();
+    this.loader = resourceLoader;
     
     this.settingsModel = new SettingsModel();
     this.settingsModel.loadFromStorage();
@@ -64,13 +61,7 @@ export class Application extends Control {
     settingsPage.onPlay = (settings) => {
       settingsPage.destroy();
       this.settingsModel.setData(settings);  //будет ли модель ??
-      this.loader.loadTextures({
-        map: map,
-        grass: grass,
-        rocks: rocks, 
-        gold: gold,
-        plant: plant
-      }).then(res => {
+      this.loader.loadTextures(resources).then(res => {
         const game = new Game(this.main.node, res);
         game.onExit = () => {
           game.destroy();

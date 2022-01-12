@@ -10,7 +10,7 @@ export interface IBuildInfo{
   cost:number
 }
 
-interface IUnitInfo{
+export interface IUnitInfo{
   spawn:Array<string>,
   deps: Array<string>,
   name: string,
@@ -24,7 +24,7 @@ interface IUnitInfo{
 
 export class GamePlayer{
   colorIndex:number;
-  money:number=5000;
+  money:number=50000;
   //energy:number;
   builds: Array<IBuildInfo> = [];
   units:Array<IUnitInfo> = [];
