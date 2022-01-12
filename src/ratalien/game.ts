@@ -51,7 +51,7 @@ export class Game extends Control{
 
     const field = new GameField(main.node, res, [player, botPlayer]);
     botPlayer.onBuild = (pos)=>{
-      field.addObject(1, tech.builds.find(it=>it.name == 'barracs'), pos.x, pos.y);
+      field.addObject(1, tech.builds.find(it=>it.name == 'barracs'), pos.x, pos.y,'plant');
     }
 
     botPlayer.onUnit = ()=>{

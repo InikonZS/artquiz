@@ -27,6 +27,7 @@ export class MapObject extends InteractiveObject{
     this.tiles = build.mtx.map(it=>it.map(jt=>parseInt(jt)));
     this.name = build.name;
     this.res = res;
+   // console.log(this.name,'%$%$')
   }
 
   inShape(tile:Vector, cursor:Vector){
@@ -61,7 +62,34 @@ export class MapObject extends InteractiveObject{
       if (primary){
         ctx.fillText('primary', pos.x, pos.y +40);
       }
-      ctx.drawImage(this.res['plant'], pos.x, pos.y, size * 4, size * 4 );
+      //**
+   // console.log(this.name)
+
+      if(this.name==='energyPlant'){
+
+        ctx.drawImage(this.res['energy'], pos.x, pos.y, size * 4, size * 4 );
+      }else if (this.name==='barracs'){
+        ctx.drawImage(this.res['barac'], pos.x, pos.y, size * 4, size * 4 );
+      }else if (this.name==='carFactory'){
+        ctx.drawImage(this.res['carFactory'], pos.x, pos.y, size * 4, size * 4 );
+      }else if (this.name==='radar'){
+        ctx.drawImage(this.res['radar'], pos.x, pos.y, size * 4, size * 4 );
+      }else if(this.name==='buildingCenter'){
+        ctx.drawImage(this.res['buildingCenter'], pos.x, pos.y, size * 4, size * 4 );
+
+      }
+      // else if (this.name==='repairStation'){
+      //
+      // }else if (this.name==='oreFactoryBig'){
+      //
+      // }
+      else if (this.name==='defendTower'){
+        ctx.drawImage(this.res['defendedTower'], pos.x, pos.y, size * 4, size * 4 );
+      }
+
+      else{
+        ctx.drawImage(this.res['plant'], pos.x, pos.y, size * 4, size * 4 );
+      }
   }
 
   drawTile(ctx:CanvasRenderingContext2D, position:IVector, camera:IVector, color:string, size:number){
