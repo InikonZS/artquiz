@@ -54,8 +54,9 @@ export class InteractiveList{
 
   private handleHover(){
     let highObject = this.hoveredObjects[this.hoveredObjects.length-1] || null;
-    if (this.hovered != highObject){
+    if (this.hovered != highObject) {
       this.hovered = highObject;
     }
   }
+
 }

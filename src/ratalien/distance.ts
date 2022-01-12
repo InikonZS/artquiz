@@ -1,5 +1,5 @@
 import {Vector} from '../common/vector';
-import {MapObject, UnitObject} from "./interactives";
+import {MapObject, AbstractUnit} from "./interactives";
 
 export function getTilingDistance(playerPosition:Vector, tilesPosition:Vector, tiles:Array<Array<number>>){
   let min = Number.MAX_SAFE_INTEGER;
@@ -15,7 +15,7 @@ export function getTilingDistance(playerPosition:Vector, tilesPosition:Vector, t
   return min;
 }
 
-export function findClosestUnit(playerPosition:Vector, units:Array<UnitObject>){
+export function findClosestUnit(playerPosition:Vector, units:Array<AbstractUnit>){
   let min = Number.MAX_SAFE_INTEGER;
   let minIndex = -1;
   units.forEach((it, i) => {
@@ -40,6 +40,8 @@ export function findClosestBuild(playerPosition:Vector, builds:Array<MapObject>)
   });
   return {distance: min, unit:builds[minIndex]}
 }
+
+
 
 export function makeCircleMap(radius:number){
   let d = radius*2 + 1;

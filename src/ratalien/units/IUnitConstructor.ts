@@ -1,5 +1,5 @@
-import { UnitObject } from "./unitObject";
+import { AbstractUnit } from "./AbstractUnit";
 
 export interface IUnitConstructor{
-  new ():UnitObject
+  new ():AbstractUnit
 }

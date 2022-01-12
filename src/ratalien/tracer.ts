@@ -1,5 +1,5 @@
 import { IVector, Vector } from "../common/vector";
-
+import { Gold } from './gold';
 function generate(){
   const map = [];
   for (let i=0; i<100; i++){
@@ -192,7 +192,7 @@ export function getMapFromImageData(data:ImageData){
   iterateImageData(data, (pos, color)=>{
     let mapColor = 0;
     if (isEqualColor(color, {r:255, g:255, b:0, a:255})){
-      mapColor = 1;
+     // mapColor = 1;
     } else if (isEqualColor(color, {r:255, g:0, b:0, a:255})){
       mapColor = 2;
     } else if (isEqualColor(color, {r:0, g:255, b:0, a:255})){
@@ -201,6 +201,18 @@ export function getMapFromImageData(data:ImageData){
       mapColor = 4;
     }
     map[pos.x][pos.y] = mapColor;
+  });
+  return map;
+}
+
+export function parseData(data:ImageData) {
+   const map:Gold[] = [];
+  iterateImageData(data, (pos, color)=>{
+    
+    if (isEqualColor(color, { r: 255, g: 255, b: 0, a: 255 })) {
+      const gold = new Gold(new Vector(pos.y, pos.x))
+     map.push(gold)
+    }
   });
   return map;
 }

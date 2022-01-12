@@ -3,7 +3,7 @@ import Signal from "../common/signal";
 import {Vector, IVector} from "../common/vector";
 import { InteractiveObject } from "./interactives";
 import {getMapFromImageData, getImageData, loadImage, findPath, indexateAsync, steps, tracePathes} from "./tracer";
-import mpfile from './map96.png';
+import mpfile from './map96g.png';
 
 class BaseNode{
   private owners:Array<BaseNode>;

@@ -2,6 +2,8 @@ import {Vector, IVector} from "../../common/vector";
 import { InteractiveObject } from "./interactiveObject";
 import { ITechBuild } from "./iTechBuild";
 import {consts} from "../globals";
+import { AbstractUnit } from "./abstractUnit";
+import { getTilingDistance } from "../distance";
 
 export class MapObject extends InteractiveObject{
   _position: Vector;
@@ -18,7 +20,8 @@ export class MapObject extends InteractiveObject{
     this._position = val;
   }
 
-  onDestroyed: ()=>void;
+  onDestroyed: () => void;
+   getUnits: ()=>AbstractUnit[];
   res: Record<string, HTMLImageElement>;
 
   constructor(build:ITechBuild, res:Record<string, HTMLImageElement>){
@@ -38,11 +41,16 @@ export class MapObject extends InteractiveObject{
     return false;
   }
 
-  damage(amount:number){
-    this.health -=amount;
-    if (this.health<=0){
-      this.onDestroyed();
-    }
+  damage(point: Vector, tile: Vector, unit: InteractiveObject) {
+ //(unit as AbstractUnit).weapon.getDamage()
+    const amount = 10;
+    const distance = getTilingDistance(tile, this.position, this.tiles);
+    if (distance === 0) {
+      this.health -=amount;
+      if (this.health<=0){
+        this.onDestroyed();
+      }
+    }    
   }
 
   render(ctx:CanvasRenderingContext2D, camera:Vector, delta:number, size?:number, selected?:boolean, primary?:boolean){
