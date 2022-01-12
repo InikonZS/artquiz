@@ -1,7 +1,7 @@
 import Control from "../common/control";
 import red from "./red.css";
 import {Vector, IVector} from "../common/vector";
-import {MapObject, UnitObject, ITechBuild, InteractiveObject, Tower} from "./interactives";
+import {MapObject, ITechBuild, InteractiveObject, Tower, UnitObject} from "./interactives";
 import { tech } from "./techTree";
 import {GamePlayer, IBuildInfo} from "./gamePlayer";
 import {getMapFromImageData, getImageData, loadImage, findPath, indexateAsync, steps, tracePathes, inBox} from "./tracer";
@@ -27,12 +27,13 @@ export class GameField extends Control{
   pathes: Vector[][];
   players: GamePlayer[];
   fps: number;
+  private buildName: string;
 
   constructor(parentNode: HTMLElement, res: Record<string, HTMLImageElement>, players:GamePlayer[]){
     super(parentNode, 'div', red['game_field']);
     this.res = res;  
     this.players = players;
-    
+    this.buildName=null;
     const canvas = new Control<HTMLCanvasElement>(this.node, 'canvas');
     this.canvas = canvas;
     this.map = new GameMap(96, 96, res['map'], res);
@@ -92,7 +93,9 @@ export class GameField extends Control{
         this.commandUnit();
       } else if (action == 'build'){
         this.modeCallback();
-        this.addObject(0, this.cursorStatus.planned, cursorTile.x, cursorTile.y); 
+       // console.log(this.buildName,'!!!')
+        this.addObject(0, this.cursorStatus.planned, cursorTile.x, cursorTile.y,this.buildName);
+        this.buildName=null
         this.cursorStatus.planned = null; 
       } else if (action == 'primary'){
         this.players[0].primaries[this.cursorStatus.hovered[0].name] = this.cursorStatus.hovered[0] as MapObject;
@@ -253,14 +256,15 @@ export class GameField extends Control{
 
   setPlanned(name:string, callback:()=>void){
     //this.mode = mode;
-    console.log(name);
+    console.log(name,'***');
+    this.buildName=name
     this.cursorStatus.planned = tech.builds.find(it=>it.desc[0] == name);//{name:name};
     console.log(callback);
     this.modeCallback = callback;
   }
 
-  addObject(player:number, obj:ITechBuild, x:number, y:number){
-    let object = new Tower(obj, this.res);//MapObject(obj, this.res);
+  addObject(player:number, obj:ITechBuild, x:number, y:number,name:string){
+    let object = new Tower(obj, this.res,name);//MapObject(obj, this.res);
     object.getUnits = ()=>{
       return this.objects.list.filter(it=> it instanceof UnitObject && it.player!= player) as UnitObject[];
     }

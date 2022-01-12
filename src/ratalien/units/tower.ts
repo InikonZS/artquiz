@@ -9,10 +9,10 @@ export class Tower extends MapObject{
   weapon: Weapon = new Weapon();
   getUnits: ()=>UnitObject[];
   
-  constructor(build:ITechBuild, res:Record<string, HTMLImageElement>){
+  constructor(build:ITechBuild, res:Record<string, HTMLImageElement>,name:string){
     super(build, res);
     this.weapon = new Weapon();
-    
+    this.name=name
   }
 
   render(ctx:CanvasRenderingContext2D, camera:Vector, delta:number, size?:number, selected?:boolean, primary?:boolean){

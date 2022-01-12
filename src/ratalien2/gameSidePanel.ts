@@ -84,6 +84,7 @@ export class GameSidePanel extends Control{
   }
 
   createBuild() {
+    console.log('createBulid')
     const blds = this.model.getAvailableBuilds();
     this.buildings.node.innerHTML = '';
     
@@ -119,7 +120,7 @@ export class GameSidePanel extends Control{
         }
         if (isBuilded){
           this.onBuildSelect(it, ()=>{
-            isBuilded = false; 
+            isBuilded = false;
             progress = 0;
             build.node.textContent = name;
             this.isReadingBuild = false;
