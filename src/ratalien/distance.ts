@@ -41,6 +41,8 @@ export function findClosestBuild(playerPosition:Vector, builds:Array<MapObject>)
   return {distance: min, unit:builds[minIndex]}
 }
 
+
+
 export function makeCircleMap(radius:number){
   let d = radius*2 + 1;
   let map = [];

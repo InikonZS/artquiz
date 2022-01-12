@@ -2,9 +2,12 @@ import { InteractiveObject } from './interactiveObject';
 import { MapObject } from './mapObject';
 import { AbstractUnit } from './abstractUnit';
 import {WeaponTrack} from './weaponTrack';
+import { Gold } from '../gold';
+import { OreFactory } from './oreFactory';
 
 export class TruckUnit extends AbstractUnit{
   weapon: WeaponTrack;
+  
   constructor(){
     super();
     this.weapon = new WeaponTrack();
@@ -18,12 +21,11 @@ export class TruckUnit extends AbstractUnit{
     this.logic();
   }
 
- getAction(hovered: InteractiveObject, mapTile?:number) {
-     let action = 'move';
-      
-        if (mapTile == 1){
+  getAction(hovered: InteractiveObject, mapTile?: number) {
+    let action = 'move';
+        if (hovered instanceof Gold ){
           action = 'gold';
-        } else if (hovered instanceof MapObject && hovered.name == 'barracs'&& hovered?.player == 0){
+        } else if (hovered instanceof OreFactory && hovered?.player == 0){
           action = 'cash_in'
         }
       
@@ -34,7 +36,10 @@ export class TruckUnit extends AbstractUnit{
     return 0;    
   }
 
-  // logic() {
-  //     this.setPath()
-  // }
+  logic() {
+    //this.target
+    //this.path
+    //this.attackTarget
+    // this.setPath()
+  }
 }

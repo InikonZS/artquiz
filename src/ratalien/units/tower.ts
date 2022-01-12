@@ -37,4 +37,5 @@ export class Tower extends MapObject{
   attack(target:Vector){
     this.weapon.tryShot(target);
   }
+
 }

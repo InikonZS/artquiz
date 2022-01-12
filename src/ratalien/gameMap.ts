@@ -92,13 +92,13 @@ export class GameMap{
           ctx.fillStyle = '#0006';
           
           ctx.fillText(i.toString() + ' / '+ j.toString(), this.position.x+0 +j*sz, this.position.y+0+i*sz);
-          if (this.opened[i][j]){
+          if (this.opened[i][j]) {
             ctx.drawImage(this.res['grass'], this.position.x+0 +j*sz, this.position.y+0+i*sz, sz, sz);
             if (this.map[i][j] == 2){
               ctx.drawImage(this.res['rocks'], this.position.x+0 +j*sz, this.position.y+0+i*sz - sz *0.5, sz, sz*1.5);
             }
-            if (this.map[i][j] == 1) {              
-             // ctx.drawImage(this.res['gold'], this.position.x+0 +j*sz, this.position.y+0+i*sz - (this.res['gold'].naturalHeight - 128), sz, sz* this.res['gold'].naturalHeight / 128);
+            if (this.map[i][j] == 1) {    
+              //ctx.drawImage(this.res['goldFull'], this.position.x+0 +j*sz, this.position.y+0+i*sz - (this.res['goldFull'].naturalHeight - 128), sz, sz* this.res['goldFull'].naturalHeight / 128);
             }
             
 

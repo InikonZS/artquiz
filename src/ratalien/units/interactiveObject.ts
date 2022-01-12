@@ -57,4 +57,8 @@ export class InteractiveObject{
   getDamage(target: InteractiveObject) {
     return 10;    
   }
+  
+  damage(point: Vector, tile: Vector, unit: InteractiveObject) {
+    
+  }
 }
