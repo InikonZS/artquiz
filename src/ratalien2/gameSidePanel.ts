@@ -84,7 +84,7 @@ export class GameSidePanel extends Control{
   }
 
   createBuild() {
-    console.log('createBulid')
+   // console.log('createBulid')
     const blds = this.model.getAvailableBuilds();
     this.buildings.node.innerHTML = '';
     

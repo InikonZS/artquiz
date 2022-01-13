@@ -17,7 +17,8 @@ import { OreFactory } from './units/oreFactory';
 import { IUnitConstructor } from "./units/IUnitConstructor";
 import { IBuildConstructor } from './units/IBuildConstructor';
 import { buildMap } from './units/buildMap';
-import {Explosion} from './units/explosion';
+import { Explosion } from './units/explosion';
+import { Gold } from './gold';
 
 
 export class GameField extends Control{
@@ -205,10 +206,34 @@ export class GameField extends Control{
     //[...this.mainSlot.list];
     tracePathes(traceMap, indexPoint, destinations, (pathes)=>{
       this.pathes = pathes;
-      console.log(pathes);
+     // console.log(pathes);
       pathes.forEach((path, i)=>{
         const unit = units[i];
         (unit as AbstractUnit).setPath(path, (pos)=>this.isEmptyTile(pos, unit), attackPoint);
+        //(unit as RoundNode).attackTarget = Vector.fromIVector(indexPoint).scale(10);
+      })
+    })  
+  }
+
+  setUnitTarget(unit: AbstractUnit, attackPoint: Vector) {
+    
+    let traceMap = this.getTraceMap();
+    // let indexPoint = this.getTileCursor();//{x:Math.floor(e.offsetX/this.sz), y:Math.floor(e.offsetY/this.sz)};
+    //console.log(this.selected);
+    if (!this.cursorStatus.isOnlyUnitsSelected()){
+      return;
+    }
+    const units: AbstractUnit[] = [unit];//[this.selected as UnitObject];
+    const destinations = units.map(unit=>{
+      return new Vector(Math.floor(unit.positionPx.x/this.sz), Math.floor(unit.positionPx.y/this.sz))
+    });
+    //[...this.mainSlot.list];
+    tracePathes(traceMap, attackPoint, destinations, (pathes)=>{
+      this.pathes = pathes;
+     // console.log(pathes);
+      pathes.forEach((path, i)=>{
+        const unit = units[i];
+        (unit as AbstractUnit).setPath(path, (pos)=>this.isEmptyTile(pos, unit), attackPoint.clone().scale(55));
         //(unit as RoundNode).attackTarget = Vector.fromIVector(indexPoint).scale(10);
       })
     })  
@@ -235,6 +260,20 @@ export class GameField extends Control{
       const tile = this.map.toTileVector(point);//new Vector(Math.floor(point.x / 55), Math.floor(point.y / 55));
       this.objects.list.map(object => object.damage(point, tile, unit));
     }
+    if (unit instanceof TruckUnit) {
+      unit.getResource = ()=>{
+        return this.objects.list.filter(it=> it instanceof Gold) as InteractiveObject[];
+      }
+      unit.setTarget = (attackPoint) => {
+        this.setUnitTarget(unit, attackPoint);
+      }
+
+      unit.getObjects = () => {
+        return this.objects.list;
+      }
+
+    }
+    
     unit.player = player;
     //unit.position = new Vector(20, 20); //for demo
     const spawn = tech.units.filter(item => item.name == name)[0].spawn[0];
@@ -252,7 +291,7 @@ export class GameField extends Control{
     //this.mode = mode;
     console.log(name,'***');
     this.cursorStatus.planned = tech.builds.find(it=>it.desc[0] == name);//{name:name};
-    console.log(callback);
+   // console.log(callback);
     this.modeCallback = callback;
   }
 
