@@ -1,10 +1,11 @@
 import Control from "../common/control";
 import style from "./style.css";
 import red from "./red.css";
-import { GamePlayer, IBuildInfo, IUnitInfo } from "./gamePlayer";
+import { GamePlayer, IUnitInfo } from "./gamePlayer";
+import { ITechBuild } from "./interactives";
 
 export class GameSide extends Control{
-  onBuildSelect: (name:IBuildInfo, clearFunc:()=>void)=>void;
+  onBuildSelect: (name:ITechBuild, clearFunc:()=>void)=>void;
   onUnitReady: (name:string)=>void;
   updateBuildHandler: () => void;
   model: GamePlayer;
@@ -20,7 +21,7 @@ export class GameSide extends Control{
   isReadingBuild: boolean = false;
   isReadingUnit:boolean = false;
   units: Control<HTMLElement>;
-  blds: Array<IBuildInfo>;
+  blds: Array<ITechBuild>;
   uns: Array<IUnitInfo>;
 
   constructor(parentNode: HTMLElement, player: GamePlayer){
@@ -57,14 +58,14 @@ export class GameSide extends Control{
     // Обработка нажатий на кнопoк Вверх/Вниз в столбце построек
     this.buttonFirstColumnUp.node.onclick = () => {
       if (this.blds.length > 6) {
-        let firstElement: IBuildInfo = this.blds.shift()
+        let firstElement: ITechBuild = this.blds.shift()
         this.blds.push(firstElement)
         this.createBuild(this.blds);
       }
     }
     this.buttonFirstColumnDown.node.onclick = () => {
       if (this.blds.length > 6) {
-        let lastElement: IBuildInfo = this.blds.pop()
+        let lastElement: ITechBuild = this.blds.pop()
         this.blds.unshift(lastElement)
         this.createBuild(this.blds);
       }
@@ -142,7 +143,7 @@ export class GameSide extends Control{
     };
   }
 
-  createBuild(blds: Array<IBuildInfo> = this.model.getAvailableBuilds()) {
+  createBuild(blds: Array<ITechBuild> = this.model.getAvailableBuilds()) {
     this.blds = blds;
     // const blds = this.model.getAvailableBuilds();
     this.buildings.node.innerHTML = '';

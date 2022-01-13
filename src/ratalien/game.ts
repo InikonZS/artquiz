@@ -51,11 +51,22 @@ export class Game extends Control{
 
     const field = new GameField(main.node, res, [player, botPlayer]);
     botPlayer.onBuild = (pos)=>{
-      field.addObject(1, tech.builds.find(it=>it.name == 'barracs'), pos.x, pos.y);
+       let build = botPlayer.getBuild();
+      
+      botPlayer.builds.push(build);
+      field.addObject(1, build, pos.x, pos.y);
+      //field.addObject(1, tech.builds.find(it=>it.name == 'barracs'), pos.x, pos.y);
     }
 
     botPlayer.onUnit = ()=>{
-      //field.addUnit(1, 'sol');
+     const availableUnit = botPlayer.getAvailableUnits();
+      if (!availableUnit.length) {
+        return;
+      }
+      const unit = availableUnit[Math.floor(Math.random() * availableUnit.length)];
+      console.log(unit.name)
+      botPlayer.units.push(unit);
+      field.addUnit(1, unit.name);
     }
 
     //botPlayer.
