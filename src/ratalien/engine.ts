@@ -392,7 +392,7 @@ export class MainCanvas extends Control{
     map.loadFromFile(mpfile);
 
     canvas.node.onmousedown =e=>{
-      console.log(e.button);
+     // console.log(e.button);
       if (e.button == 2) {
         let mp = map.map.map(it=>it.map(jt=>jt==0?Number.MAX_SAFE_INTEGER:-1));
         let indexPoint = {x:Math.floor(e.offsetX/10), y:Math.floor(e.offsetY/10)};

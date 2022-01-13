@@ -15,7 +15,11 @@ export class AbstractUnit extends InteractiveObject{
   health: number = 100;
   tileChecker: (pos: Vector) => boolean;
   type:string = 'unit';
-  onDamageTile:(point:Vector)=>void;
+  onDamageTile: (point: Vector) => void;
+  getResource: () => InteractiveObject[];
+  getObjects: () => InteractiveObject[];
+  setTarget: (point: Vector) => void;
+  getObjectInTile: (point: Vector) => InteractiveObject;
   protected gold: number = 0;
   maxGold: number = 3000;
   weapon: AbstractWeapon;
@@ -129,9 +133,9 @@ export class AbstractUnit extends InteractiveObject{
   setPath(path:Array<Vector>, tileChecker:(pos:Vector)=>boolean, attackPoint:Vector = null){
     this.attackTarget = attackPoint
     const sz =55;
-    console.log('sp ', path);
+   // console.log('sp ', path);
     this.path = [...path].reverse();
-    this.target = this.path.pop().clone().scale(sz);
+    this.target = this.path.pop()?.clone().scale(sz);
     this.tileChecker = tileChecker;
   }
 
@@ -152,4 +156,6 @@ export class AbstractUnit extends InteractiveObject{
   logic() {
     
   }
+
+  
 }

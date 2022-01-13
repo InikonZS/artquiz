@@ -42,9 +42,9 @@ export class TraceMap {
 
   activeUnitCoordinates(unit:UnitObject,coordinates: Record<string, number>) {
     this.activeUnits.length>0 && (this.activeUnits.length=0)
-    console.log(this.activeUnits,'ActiveUnits')
+   // console.log(this.activeUnits,'ActiveUnits')
    const rrr= this.activeUnitsObj.filter((el)=>el===unit)
-    console.log('isHere',rrr)
+   // console.log('isHere',rrr)
     this.activeUnitsObj.push(unit)
     this.activeUnits.push(coordinates)
   }

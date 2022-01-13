@@ -8,7 +8,7 @@ export class OreFactory extends MapObject{
   damage(point: Vector, tile: Vector, unit: InteractiveObject) {
  //(unit as AbstractUnit).weapon.getDamage()
     const amount = 10;
-    const distance = getTilingDistance(tile, this.position, this.tiles);
+    const {distance} = getTilingDistance(tile, this.position, this.tiles);
     if (distance === 0) {
       //TODO add player
       if (unit instanceof TruckUnit) {
