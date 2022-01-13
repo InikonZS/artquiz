@@ -1,6 +1,6 @@
 import { tech } from './techTree';
 import Signal from '../common/signal';
-import { MapObject } from './interactives';
+import { ITechBuild, MapObject } from './interactives';
 export interface IBuildInfo{
   desc:Array<string>,
   energy:number,
@@ -26,7 +26,7 @@ export class GamePlayer{
   colorIndex:number;
   money:number=50000;
   //energy:number;
-  builds: Array<IBuildInfo> = [];
+  builds: Array<ITechBuild> = [];
   units:Array<IUnitInfo> = [];
   openedMap: Array<Array<any>>;
   onUpdateBuild: Signal<void> = new Signal();
@@ -37,7 +37,7 @@ export class GamePlayer{
 
   }
 
-  setBuilds(build: IBuildInfo) {
+  setBuilds(build: ITechBuild) {
     this.money -= build.cost;
     this.builds.push(build);
     this.onUpdateBuild.emit();
@@ -54,7 +54,7 @@ export class GamePlayer{
     return {incoming, outcoming};
   }
 
-  getAvailableBuilds():Array<IBuildInfo> {
+  getAvailableBuilds():Array<ITechBuild> {
     if (!this.builds.length) {
       return tech.builds.filter(item => item.deps.includes('rootAccess'));
     }

@@ -59,11 +59,11 @@ export class AbstractUnit extends InteractiveObject{
     // ctx.fillText(`health: ${this.health}`, camera.x + this.positionPx.x, camera.y + this.positionPx.y - 20);
     // Прогресс-баз состояния здоровья Юнита
     ctx.strokeStyle = '#666'
-    ctx.strokeRect(camera.x + this.positionPx.x, this.positionPx.y - 20, 100, 10);
+    ctx.strokeRect(camera.x + this.positionPx.x,camera.y + this.positionPx.y - 20, 100, 10);
     ctx.fillStyle = '#ccc'
-    ctx.fillRect(camera.x + this.positionPx.x, this.positionPx.y - 20, 100, 10);
+    ctx.fillRect(camera.x + this.positionPx.x, camera.y + this.positionPx.y - 20, 100, 10);
     ctx.fillStyle = 'blue';
-    ctx.fillRect(camera.x + this.positionPx.x, this.positionPx.y - 20, this.health, 10);
+    ctx.fillRect(camera.x + this.positionPx.x, camera.y + this.positionPx.y - 20, this.health, 10);
     
     if (selected){
       ctx.fillText(`selected`, camera.x + this.positionPx.x, camera.y+ this.positionPx.y-30);  
