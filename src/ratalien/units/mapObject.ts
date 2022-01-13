@@ -64,12 +64,14 @@ export class MapObject extends InteractiveObject{
     const pos = new Vector(this.position.x*size, this.position.y*size).add(camera);
     
     // ctx.fillText(`health: ${this.health.toString()}/100`, pos.x, pos.y + 10);
+    // Прогресс-баз состояния здоровья Постройки
     ctx.strokeStyle = '#666'
     ctx.strokeRect(pos.x, pos.y, 100, 10);
     ctx.fillStyle = '#ccc'
     ctx.fillRect(pos.x, pos.y, 100, 10);
     ctx.fillStyle = 'blue';
-    ctx.fillRect(pos.x, pos.y, this.health, 10);    
+    ctx.fillRect(pos.x, pos.y, this.health, 10);
+    
     ctx.fillText(this.name, pos.x, pos.y + 20);
     
     if (selected){
