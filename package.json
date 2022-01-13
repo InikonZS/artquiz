@@ -13,7 +13,6 @@
   },
   "author": "",
   "license": "ISC",
-  "dependencies": {},
   "devDependencies": {
     "@webpack-cli/generators": "^2.4.1",
     "copy-webpack-plugin": "^10.1.0",
@@ -26,5 +25,13 @@
     "webpack": "^5.65.0",
     "webpack-cli": "^4.9.1",
     "webpack-dev-server": "^4.6.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/poli8512/artquiz.git"
+  },
+  "bugs": {
+    "url": "https://gitlab.com/poli8512/artquiz/issues"
+  },
+  "homepage": "https://gitlab.com/poli8512/artquiz#readme"
 }
