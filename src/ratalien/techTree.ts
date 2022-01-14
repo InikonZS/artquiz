@@ -234,7 +234,7 @@ const truck = {
 const heavyTank = {
   deps: ["carFactory", "techCenter"],
   spawn: ["carFactory"],
-  name: 'heavy tank',
+  name: 'heavyTank',
   cost: 1500,
   time: 50,
   radius: 30,
