@@ -84,11 +84,11 @@ export function indexateAsync( map:Array<Array<number>>, points:Array<{x:number,
     }
   }
   if (res.done){
-    console.log('finished ', (new Date()).valueOf() - startTime.valueOf());
+    //console.log('finished ', (new Date()).valueOf() - startTime.valueOf());
     onFinish();
   }else {
     setTimeout(()=>{
-      console.log('iteration '+ generation.toString(), (new Date()).valueOf() - iterationStart.valueOf());
+     // console.log('iteration '+ generation.toString(), (new Date()).valueOf() - iterationStart.valueOf());
       indexateAsync( map, res.value.points, res.value.generation, onFinish, startTime);
     }, 0);
   }

@@ -13,6 +13,10 @@ import {makeCircleMap, findClosestBuild} from "./distance";
 import {generateEmptyMap} from "./tracer";
 import {SolderUnit} from "./units/SolderUnit";
 import { TruckUnit } from "./units/TruckUnit";
+import { TankUnit } from './units/TankUnit';
+import { HeavyTankUnit } from './units/HeavyTankUnit';
+import { DogUnit } from './units/DogUnit';
+import { BomberUnit } from './units/BomberUnit';
 import { OreFactory } from './units/oreFactory';
 import { IUnitConstructor } from "./units/IUnitConstructor";
 import { IBuildConstructor } from './units/IBuildConstructor';
@@ -251,7 +255,14 @@ export class GameField extends Control{
   addUnit(player:number, name:string){
     //TODO check is empty,else, check neighbor
   //  console.log(name);
-    let unitMap:Record<string, IUnitConstructor> = {'solder':SolderUnit, 'truck':TruckUnit};
+    let unitMap: Record<string, IUnitConstructor> = {
+      'solder': SolderUnit,
+      'truck': TruckUnit,
+      'tank': TankUnit,
+      'heavyTank': HeavyTankUnit,
+      'dog': DogUnit,
+      'bomber': BomberUnit,
+    };
     let UnitConstructor = unitMap[name] || AbstractUnit;
     let unit = new UnitConstructor();//UnitObject();
     unit.onDamageTile = (point)=>{
