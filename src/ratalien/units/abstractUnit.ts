@@ -1,4 +1,4 @@
-import { findClosestBuild, findClosestUnit } from '../distance';
+import { findClosestBuild, findClosestUnit, getTilingDistance } from '../distance';
 import { Vector, IVector } from "../../common/vector";
 import { InteractiveObject } from "./interactiveObject";
 import {consts} from "../globals";
@@ -178,6 +178,17 @@ export class AbstractUnit extends InteractiveObject{
     const closestBuild = findClosestBuild(this.position.clone(), this.getResource().filter(it => it instanceof MapObject) as MapObject[]);
     return closestUnit.distance > closestBuild.distance ? closestBuild : closestUnit;
   }
-
+  
+  damage(point: Vector, tile: Vector, unit: InteractiveObject) {
+ //(unit as AbstractUnit).weapon.getDamage()
+    const amount = 10;
+    const {distance} = getTilingDistance(tile, this.position,[[1]]);
+    if (distance === 0) {
+      this.health -=amount;
+      if (this.health<=0){
+        this.onDestroyed();
+      }
+    }    
+  }
   
 }
