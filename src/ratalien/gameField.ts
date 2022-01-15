@@ -104,11 +104,15 @@ export class GameField extends Control{
       } else if (action == 'move'){
         this.commandUnit();
       } else if (action == 'build'){
-        this.modeCallback();
        
-        this.addObject(0, this.cursorStatus.planned, cursorTile.x, cursorTile.y);
-  
-        this.cursorStatus.planned = null; 
+       //find bulding
+        const builds = this.objects.list.filter(it => it.player === 0 && it instanceof MapObject) as MapObject[];
+        const closestBuild = findClosestBuild(cursorTile, builds);
+        if (!builds.length || closestBuild.distance <= 6) {
+          this.modeCallback();
+          this.addObject(0, this.cursorStatus.planned, cursorTile.x, cursorTile.y);
+          this.cursorStatus.planned = null; 
+        }      
       } else if (action == 'primary'){
         this.players[0].primaries[this.cursorStatus.hovered[0].name] = this.cursorStatus.hovered[0] as MapObject;
       } else if (action == 'attack'){
@@ -271,6 +275,12 @@ export class GameField extends Control{
       const tile = this.map.toTileVector(point);//new Vector(Math.floor(point.x / 55), Math.floor(point.y / 55));
       this.objects.list.map(object => object.damage(point, tile, unit));
     }
+    unit.getResource = ()=>{
+        return this.objects.list.filter(it=> it.player!=unit.player && !(it instanceof Gold)) as InteractiveObject[];
+    }
+    unit.setTarget = (attackPoint) => {
+      this.setUnitTarget(unit, attackPoint);
+    }
     if (unit instanceof TruckUnit) {
       unit.getResource = ()=>{
         return this.objects.list.filter(it=> it instanceof Gold) as InteractiveObject[];
@@ -282,8 +292,7 @@ export class GameField extends Control{
       unit.getObjects = () => {
         return this.objects.list;
       }
-
-    }
+    } 
     
     unit.player = player;
     //unit.position = new Vector(20, 20); //for demo
