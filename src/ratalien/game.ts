@@ -7,7 +7,8 @@ import {BotPlayer} from "./botPlayer";
 import { tech } from "./techTree";
 import {GamePlayer, IBuildInfo} from "./gamePlayer";
 import {consts} from "./globals";
-import {GameField} from "./gameField";
+import { GameField } from "./gameField";
+import { GameModel } from './gameModel';
 
 export class Game extends Control{
   player:GamePlayer;
@@ -46,15 +47,19 @@ export class Game extends Control{
     }
    //
     //const field = new GameField(main.node, res);
+    const gameModel = new GameModel();
+
     const player = new GamePlayer();
     const botPlayer = new BotPlayer(new Vector(20, 20)); 
 
     const field = new GameField(main.node, res, [player, botPlayer]);
-    botPlayer.onBuild = (pos)=>{
-       let build = botPlayer.getBuild();
-      
-      botPlayer.builds.push(build);
-      console.log(build.name)
+    player.onBuild = (build, pos) => {
+      field.addObject(0, build, pos.x, pos.y)
+    }
+    botPlayer.onBuild = (build, pos)=>{
+  //     let build = botPlayer.getBuild();      
+      //botPlayer.builds.push(build);
+      //console.log(build.name)
       field.addObject(1, build, pos.x, pos.y);
       //field.addObject(1, tech.builds.find(it=>it.name == 'barracs'), pos.x, pos.y);
     }
