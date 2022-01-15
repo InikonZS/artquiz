@@ -62,7 +62,7 @@ export class Application extends Control {
       settingsPage.destroy();
       this.settingsModel.setData(settings);  //будет ли модель ??
       this.loader.load(resources).then(res => {
-        const game = new Game(this.main.node, res.textures);
+        const game = new Game(this.main.node, res.textures, {credits: 30000, map: res.textures.map });
         game.onExit = () => {
           game.destroy();
           this.finishCycle();
