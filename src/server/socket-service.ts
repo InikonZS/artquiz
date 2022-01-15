@@ -4,7 +4,7 @@ import {
   connection,
   // IUtf8Message
 } from 'websocket';
-import { EventsType } from '../../web_app/src/socket-events-types';
+import { EventsType } from '../common/socket-events-types';
 import { playersList, PlayersList } from './player';
 import { thingList , ThingsList} from './thing';
 

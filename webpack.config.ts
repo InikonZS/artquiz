@@ -1,5 +1,5 @@
-import {serverConfig} from "./apps/server/webpack.part";
-import {webAppConfig} from "./apps/web_app/webpack.part";
+import {serverConfig} from "./src/webpack.srv";
+import {webAppConfig} from "./src/webpack.app";
 import {commonConfig} from "./webpack.common";
 
 export default [
