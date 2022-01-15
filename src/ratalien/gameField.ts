@@ -41,7 +41,7 @@ export class GameField extends Control{
 
     const canvas = new Control<HTMLCanvasElement>(this.node, 'canvas');
     this.canvas = canvas;
-    this.map = new GameMap(96, 96, res['map'], res);
+    this.map = new GameMap(96, 96, res['map'], res);  //TODO задать размеры исходя из выбранной карты
     
     this.cursorStatus= new GameCursorStatus(()=>{
       return this.players[0].primaries;

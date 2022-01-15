@@ -29,6 +29,8 @@ const config = {
             patterns: [
               { from: "./src/assets/img", to: "./public/img" },
               { from: "./src/assets/sound", to: "./public/sound" },
+              { from: "./src/ratalien/maps", to: "./public/maps" },
+
             ],
           }),
 

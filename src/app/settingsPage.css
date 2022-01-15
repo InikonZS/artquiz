@@ -39,6 +39,8 @@
 .input_settings{
   height: 20px;
   margin: 0 20px;
+  color: #000;
+  font-size: 14px;
 }
 /*
 .map_wrapper{
@@ -58,13 +60,39 @@
   height: 100%;
   
 }
-
+.map_slider{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
 .image_map{
   width: 200px;
   height: 200px;
-  background: url('../ratalien/map.png') no-repeat 0 0/cover;
- 
+  /* background: url('../ratalien/map.png') no-repeat 0 0/cover;*/
 }
+
+.map_select_wrapper{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.map_label,
+.map_select{
+  height: 25px;
+  margin: 10px;
+}
+
+.slider_button{
+  height: 40px;
+  text-align: center;
+  font-size: 24px;
+  align-self: center;
+  cursor: pointer;
+}
+
+
 
 .buttons_wrapper{
   display: flex;

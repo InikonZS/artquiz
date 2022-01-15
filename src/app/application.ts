@@ -11,6 +11,8 @@ import style from "./application.css";
 
 import { ResourceLoader } from "../ratalien/loader";
 
+import {DataModel} from './mapsLoader';
+
 export class Application extends Control {
  
   settingsModel: SettingsModel;
@@ -20,6 +22,7 @@ export class Application extends Control {
 
   loader: ResourceLoader;
   game: Game;
+  model: DataModel;
 
   constructor(parentNode: HTMLElement) {
     super(parentNode, 'div', style["global_wrapper"]);
@@ -29,6 +32,9 @@ export class Application extends Control {
     //  this.footer = new Control(this.node, 'div', style["global_footer"]);
     
     this.loader = resourceLoader;
+
+    this.model = new DataModel();
+    this.model.build();
     
     this.settingsModel = new SettingsModel();
     this.settingsModel.loadFromStorage();
@@ -53,7 +59,7 @@ export class Application extends Control {
   }
 
   private gameCycle() {
-    const settingsPage = new SettingsPage(this.main.node, this.settingsModel.getData());
+    const settingsPage = new SettingsPage(this.main.node, this.settingsModel.getData(), this.model.data);
     settingsPage.onBack = () => {
       settingsPage.destroy();
       this.mainCycle();
