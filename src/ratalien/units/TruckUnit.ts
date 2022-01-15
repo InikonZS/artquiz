@@ -31,7 +31,7 @@ export class TruckUnit extends AbstractUnit{
     let action = 'move';
         if (hovered instanceof Gold ){
           action = 'gold';
-        } else if (hovered instanceof OreFactory && hovered?.player == 0){
+        } else if (hovered instanceof OreFactory && hovered?.player == this.player){
           action = 'cash_in'
         }
       

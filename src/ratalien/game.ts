@@ -51,47 +51,30 @@ export class Game extends Control{
     //const field = new GameField(main.node, res);
     const gameModel = new GameModel();
 
-    const player = new GamePlayer();
+    const player = new GamePlayer(0);
     player.setMoney(options.credits);
-    const botPlayer = new BotPlayer(new Vector(20, 20)); 
+    const botPlayer = new BotPlayer((new Vector(20, 20)),1); 
     const map = new GameMap(96, 96, options.map, res);
     const field = new GameField(main.node, res, [player, botPlayer], map);
     player.onBuild = (build, pos) => {
-      field.addObject(0, build, pos.x, pos.y)
-    }
-    botPlayer.onBuild = (build, pos)=>{
-  //     let build = botPlayer.getBuild();      
-      //botPlayer.builds.push(build);
-      //console.log(build.name)
-      field.addObject(1, build, pos.x, pos.y);
-      //field.addObject(1, tech.builds.find(it=>it.name == 'barracs'), pos.x, pos.y);
+      field.addObject(player, build, pos.x, pos.y)
     }
 
-    botPlayer.onUnit = ()=>{
-     const availableUnit = botPlayer.getAvailableUnits();
-      if (!availableUnit.length) {
-        return;
-      }
-      const unit = availableUnit[Math.floor(Math.random() * availableUnit.length)];
-      console.log(unit.name)
-      botPlayer.units.push(unit);
-      field.addUnit(1, unit.name);
+    player.onUnit = (unit) => {
+      field.addUnit(player, unit.name)
+    }
+    botPlayer.onBuild = (build, pos) => {
+      field.addObject(botPlayer, build, pos.x, pos.y);
     }
 
-    //botPlayer.
-
-    botPlayer.onAttack = ()=>{
-      //let botUnits = field.units.filter(it=>it.player==1);
-      let playerBuilds = field.objects.list.filter(it=>it.player==0);
-      if (playerBuilds.length == 0) return;
-      /*botUnits.forEach(it=>{
-        if (it.attackTarget.health<=0){
-          it.attackTarget = null;
-        }
-      })*/
-      //if (botUnits.length ==0) return;
-      //botUnits[Math.floor(Math.random()* botUnits.length)].attackTarget = playerBuilds[Math.floor(Math.random()* playerBuilds.length)];
+    botPlayer.onUnit = (unit) => {
+      field.addUnit(botPlayer, unit.name);
     }
+
+    // botPlayer.onAttack = ()=>{
+    //   let playerBuilds = field.objects.list.filter(it=>it.player==0);
+    //   if (playerBuilds.length == 0) return;
+    // }
     
 
     //const side = new GameSide(main.node);
@@ -103,7 +86,7 @@ export class Game extends Control{
       field.setPlanned(name.desc[0], callback);
     }
     side.onUnitReady = (name:string)=>{
-      field.addUnit(0, name);
+      field.addUnit(player, name);
     }
   }
 }

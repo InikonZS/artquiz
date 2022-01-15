@@ -12,7 +12,9 @@ export class OreFactory extends MapObject{
     if (distance === 0) {
       //TODO add player
       if (unit instanceof TruckUnit) {
+        this.player.setMoney(unit.getGold() + this.player.money);
         unit.clearGold();
+        
       }
     }    
   }

@@ -1,4 +1,5 @@
 import {Vector, IVector} from "../../common/vector";
+import { GamePlayer } from "../gamePlayer";
 
 export class InteractiveObject{
   isHovered: boolean;
@@ -8,7 +9,7 @@ export class InteractiveObject{
   onClick: any;
   onDestroyed: ()=>void;
   //position: {x:number, y:number};
-  player:number;
+  player:GamePlayer;
   name:string;
   type:string = 'interactive';
   get position(){

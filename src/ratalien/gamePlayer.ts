@@ -1,7 +1,8 @@
 import { tech } from './techTree';
 import Signal from '../common/signal';
-import { ITechBuild, MapObject } from './interactives';
+import { InteractiveObject, ITechBuild, MapObject } from './interactives';
 import { Vector } from '../common/vector';
+import { IUnitConstructor } from './units/IUnitConstructor';
 export interface IBuildInfo{
   desc:Array<string>,
   energy:number,
@@ -34,10 +35,11 @@ export class GamePlayer{
   primaries: Record<string, MapObject> ={};
   //onUpdate:()=>void;
   onBuild:(build: ITechBuild, pos:Vector)=>void;
-  onUnit:()=>void;
-  onAttack:()=>void;
-  constructor(){
-
+  onUnit:(unit:IUnitInfo)=>void;
+  onAttack: () => void;
+  
+  constructor(index: number){
+    this.colorIndex = index;
   }
 
   setBuilds(build: ITechBuild) {
@@ -91,5 +93,18 @@ export class GamePlayer{
          // this.addObject(0, build.planned, position.x, position.y);
           //this.cursorStatus.planned = null; 
        // }
+  }
+
+  makeUnit(unit:IUnitInfo){
+    this.setUnit(unit);
+    this.onUnit(unit);
+  }
+
+   getPrimary(name:string){
+    return Object.values(this.primaries).find(it=>it.name == name) || null;
+  }
+
+  isPrimary( build:MapObject){
+    return Object.values(this.primaries).find(it=>it == build) != null;
   }
 }
