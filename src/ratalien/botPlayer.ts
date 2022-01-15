@@ -42,7 +42,7 @@ export class BotPlayer extends GamePlayer{
       }
       //this.onMove(this.startPoint.clone().add(new Vector(Math.floor(Math.random()*(4 +this.radius*2)-this.radius), Math.floor(Math.random()*(4+this.radius*2)-this.radius))));
       this.randomMove();
-    }, 1000);
+    }, 10000);
   }
 
   setUnit(unit: IUnitInfo) {

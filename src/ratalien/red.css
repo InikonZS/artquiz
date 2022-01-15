@@ -139,11 +139,11 @@
   border: 1px solid #777;  
 }
 .button_up{
-  background: url("../assets/img/aside/arrow-up.png") no-repeat center center;
+  background: url("../assets/img/aside/arrow-down.png") no-repeat center center;
   background-size: contain;
 }
 .button_down{
-  background: url("../assets/img/aside/arrow-down.png") no-repeat center center;
+  background: url("../assets/img/aside/arrow-up.png") no-repeat center center;
   background-size: contain;
 }
 .button__inactive{
