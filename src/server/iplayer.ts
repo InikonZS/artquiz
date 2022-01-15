@@ -1,9 +1,9 @@
-import Point from '../../web_app/src/point';
+// import Point from '../../web_app/src/point';
 export interface IThing {
   id: string;
   user: string;
-  point: Point;
-  icon: string;
+  // point: Point; 
+  // icon: string;
   color: string;
   isLocale?: boolean;
 }
