@@ -1,5 +1,6 @@
 import {Vector, IVector} from "../../common/vector";
 import { GamePlayer } from "../gamePlayer";
+import { createIdGenerator } from '../idGenerator';
 
 export class InteractiveObject{
   isHovered: boolean;
@@ -11,7 +12,8 @@ export class InteractiveObject{
   //position: {x:number, y:number};
   player:GamePlayer;
   name:string;
-  type:string = 'interactive';
+  type: string = 'interactive';
+  id: number;
   get position(){
     return new Vector(0,0);
   }
