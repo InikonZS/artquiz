@@ -54,6 +54,7 @@ export class Game extends Control{
        let build = botPlayer.getBuild();
       
       botPlayer.builds.push(build);
+      console.log(build.name)
       field.addObject(1, build, pos.x, pos.y);
       //field.addObject(1, tech.builds.find(it=>it.name == 'barracs'), pos.x, pos.y);
     }
