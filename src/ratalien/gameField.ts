@@ -54,7 +54,11 @@ export class GameField extends Control{
     ()=>{
       return this.getBuildMap();
     },
-    ()=>this.map.map);
+      () => this.map.map);
+    
+    this.cursorStatus.getCurrentPlayer = () => {
+      return this.players[0];
+    }
     this.objects = new InteractiveList();
     this.cursorStatus.getObjects = ()=>{
       return this.objects;
@@ -163,7 +167,7 @@ export class GameField extends Control{
         if ((it instanceof AbstractUnit) == false){
           return false;
         }
-        return it.player == 0 && inBox((it as AbstractUnit).positionPx, this.cursorStatus.multiStart,  this.getPixelCursor());
+        return it.player == this.players[0] && inBox((it as AbstractUnit).positionPx, this.cursorStatus.multiStart,  this.getPixelCursor());
       });
       
       this.cursorStatus.multiStart = null;
@@ -249,16 +253,16 @@ export class GameField extends Control{
     })  
   }
 
-  getPrimary(player:number, name:string){
-    return Object.values(this.players[player].primaries).find(it=>it.name == name) || null;
-  }
+  // getPrimary(player:number, name:string){
+  //   return Object.values(this.players[player].primaries).find(it=>it.name == name) || null;
+  // }
 
-  isPrimary(player:number, build:InteractiveObject){
-    return Object.values(this.players[player].primaries).find(it=>it == build) != null;
-  }
+  // isPrimary(player:number, build:InteractiveObject){
+  //   return Object.values(this.players[player].primaries).find(it=>it == build) != null;
+  // }
 
 //возможно, тут лучше передвать не нейм, а сам объект созданного солдата? 
-  addUnit(player:number, name:string){
+  addUnit(player:GamePlayer, name:string){
     //TODO check is empty,else, check neighbor
   //  console.log(name);
     let unitMap: Record<string, IUnitConstructor> = {
@@ -297,7 +301,7 @@ export class GameField extends Control{
     //unit.position = new Vector(20, 20); //for demo
     const spawn = tech.units.filter(item => item.name == name)[0].spawn[0];
     
-    let barrac = this.getPrimary(player, spawn);//Object.values(this.primaries[player]).find(it=>it.name == spawn);
+    let barrac = player.getPrimary(spawn);//Object.values(this.primaries[player]).find(it=>it.name == spawn);
     if (barrac){
       unit.positionPx = Vector.fromIVector({x:barrac.position.x*this.sz, y: barrac.position.y*this.sz});
     } 
@@ -323,20 +327,20 @@ export class GameField extends Control{
     })
   }
 
-  addObject(player: number, obj: ITechBuild, x: number, y: number) {
+  addObject(player: GamePlayer, obj: ITechBuild, x: number, y: number) {
     //let buildMap:Record<string, IBuildConstructor> = {'tower':Tower, 'oreFactory':OreFactory};
     let buildConstructor = buildMap[obj.name] || Tower;
-    let object = new buildConstructor(obj, this.res);//MapObject(obj, this.res);
-    object.getUnits = ()=>{
+    let build = new buildConstructor(obj, this.res);//MapObject(obj, this.res);
+    build.getUnits = ()=>{
       return this.objects.list.filter(it=> it instanceof AbstractUnit && it.player!= player) as AbstractUnit[];
     }
-    object.position = new Vector(x,y);
-    object.player = player;
-    if (this.players[player].primaries[object.name]==null){
-      this.players[player].primaries[object.name] = object;
+    build.position = new Vector(x,y);
+    build.player = player;
+    if (player.primaries[build.name]==null){
+      player.primaries[build.name] = build;
     } 
 
-    this.objects.add(object);
+    this.objects.add(build);
     //this.traceMap.addObjectData(object)
   }
 
@@ -347,7 +351,7 @@ export class GameField extends Control{
         delta,
         this.sz, 
         this.cursorStatus.selected.includes(it),
-        this.isPrimary(0, it)//Object.keys(this.primaries[0]).find(obj=>this.primaries[0][obj]==it)!=null
+        this.players[0].isPrimary(it as MapObject)//Object.keys(this.primaries[0]).find(obj=>this.primaries[0][obj]==it)!=null
       );
     });
   }
@@ -425,7 +429,7 @@ export class GameField extends Control{
 
     //no optimal
     this.objects.list.forEach(it=>{
-      if (it.player != 0 ) return;
+      if (it.player != this.players[0] ) return;
       if (it instanceof AbstractUnit){
         this.map.renderMtx(this.map.opened, makeCircleMap(3) /*['1111'.split(''),'1000'.split(''),'1000'.split(''),'0000'.split('')]*/, it.position.x, it.position.y, 'center');
       } else {
