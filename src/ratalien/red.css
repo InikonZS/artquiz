@@ -108,6 +108,7 @@
   justify-content: space-between;
   border: none;
   border-right: 1px solid #111;
+  position: relative;
 }
 .builds_column:last-child{
   border-right: none;
@@ -115,7 +116,9 @@
 .column_items{
   width: 100%;
   border: none;
-  height: calc(100vh - 300px);
+  /* height: calc(100vh - 300px); */
+  position: absolute;
+  top:0;
 }
 
 .column_footer{
@@ -123,6 +126,9 @@
   width: 100%;
   flex-shrink: 0;
   border:none;
+  position: absolute;
+  bottom: 0;
+  background: #000;
 }
 .button{
   width: 100%;
@@ -133,11 +139,11 @@
   border: 1px solid #777;  
 }
 .button_up{
-  background: url("../assets/img/aside/arrow-up.png") no-repeat center center;
+  background: url("../assets/img/aside/arrow-down.png") no-repeat center center;
   background-size: contain;
 }
 .button_down{
-  background: url("../assets/img/aside/arrow-down.png") no-repeat center center;
+  background: url("../assets/img/aside/arrow-up.png") no-repeat center center;
   background-size: contain;
 }
 .button__inactive{

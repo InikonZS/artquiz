@@ -57,19 +57,22 @@ export class GameSide extends Control{
 
     // Обработка нажатий на кнопoк Вверх/Вниз в столбце построек
     this.buttonFirstColumnUp.node.onclick = () => {
-      if (this.blds.length > 6) {
-        let firstElement: ITechBuild = this.blds.shift()
-        this.blds.push(firstElement)
-        this.createBuild(this.blds);
+      let colMarginTop = this.buildings.node.style.marginTop.replace(/[^0-9,-]/g, "")
+      let freeSpace = (window.innerHeight - 300 - (this.blds.length * 100) - Number(colMarginTop))
+      if (freeSpace < 100) {
+        // console.log('up colMarginTop = ', colMarginTop)
+        this.buildings.node.style.marginTop = String(Number(colMarginTop) - 100) + 'px';
+        this.changeFirstColumnButtonsState()
       }
     }
     this.buttonFirstColumnDown.node.onclick = () => {
-      if (this.blds.length > 6) {
-        let lastElement: ITechBuild = this.blds.pop()
-        this.blds.unshift(lastElement)
-        this.createBuild(this.blds);
+      let colMarginTop = this.buildings.node.style.marginTop.replace(/[^0-9,-]/g, "")
+      if (Number(colMarginTop) < 0) {
+        // console.log('down colMarginTop = ', colMarginTop)
+        this.buildings.node.style.marginTop = String(Number(colMarginTop) + 100) + 'px';
+        this.changeFirstColumnButtonsState()
       }
-    }    
+    }     
     
     const unitsW = new Control(buildItems.node, 'div', red["builds_column"]);
     this.units = new Control(unitsW.node, 'div', red["column_items"]);
@@ -80,21 +83,24 @@ export class GameSide extends Control{
     this.changeSecondColumnButtonsState();
     this.createUnits();
 
-    // Обработка нажатий на кнопoк Вверх/Вниз в столбце юнитов
+    // Обработка нажатий на кнопoк Вверх/Вниз в столбце Юнитов
     this.buttonSecondColumnUp.node.onclick = () => {
-      if (this.uns.length > 6) {
-        let firstElement: IUnitInfo = this.uns.shift()
-        this.uns.push(firstElement)
-        this.createUnits(this.uns);
+      let colMarginTop = this.units.node.style.marginTop.replace(/[^0-9,-]/g, "")
+      let freeSpace = (window.innerHeight - 300 - (this.uns.length * 100) - Number(colMarginTop))
+      if (freeSpace < 100) {
+        // console.log('up colMarginTop = ', colMarginTop)
+        this.units.node.style.marginTop = String(Number(colMarginTop) - 100) + 'px';
+        this.changeSecondColumnButtonsState()
       }
     }
     this.buttonSecondColumnDown.node.onclick = () => {
-      if (this.uns.length > 6) {
-        let firstElement: IUnitInfo = this.uns.pop()
-        this.uns.unshift(firstElement)
-        this.createUnits(this.uns);
+      let colMarginTop = this.units.node.style.marginTop.replace(/[^0-9,-]/g, "")
+      if (Number(colMarginTop) < 0) {
+        // console.log('down colMarginTop = ', colMarginTop)
+        this.units.node.style.marginTop = String(Number(colMarginTop) + 100) + 'px';
+        this.changeSecondColumnButtonsState()
       }
-    }
+    }     
   } 
   
   updateMoney(value: number){
@@ -200,23 +206,40 @@ export class GameSide extends Control{
 
   changeFirstColumnButtonsState() {
     // Менять состояние кнопок вверх/вниз в зависимости от количества Построек
-    if (this.blds.length <= 6) {
-      this.buttonFirstColumnUp.node.classList.add(red["button__inactive"])
-      this.buttonFirstColumnDown.node.classList.add(red["button__inactive"])
+    let colMarginTop = this.buildings.node.style.marginTop.replace(/[^0-9,-]/g, "")
+    let freeSpace = (window.innerHeight - 300 - (this.blds.length * 100) - Number(colMarginTop))
+    if (freeSpace > 100) {
+      this.buttonFirstColumnUp.node.classList.add(red["button__inactive"]) //перемотка вверх не нужна
     } else {
-      this.buttonFirstColumnUp.node.classList.remove(red["button__inactive"])
-      this.buttonFirstColumnDown.node.classList.remove(red["button__inactive"])
+      this.buttonFirstColumnUp.node.classList.remove(red["button__inactive"]) //перемотка вверх нужна
+    }
+    if (Number(colMarginTop) < 0) {
+      this.buttonFirstColumnDown.node.classList.remove(red["button__inactive"]) //перемотка вниз нужна
+    } else {
+      this.buttonFirstColumnDown.node.classList.add(red["button__inactive"]) //перемотка вниз не нужна
     }    
   }
 
   changeSecondColumnButtonsState() {
     // Менять состояние кнопок вверх/вниз в зависимости от количества Юнитов
-    if (this.uns.length <= 6) {
-      this.buttonSecondColumnUp.node.classList.add(red["button__inactive"])
-      this.buttonSecondColumnDown.node.classList.add(red["button__inactive"])
+    let colMarginTop = this.units.node.style.marginTop.replace(/[^0-9,-]/g, "")
+    let freeSpace = (window.innerHeight - 300 - (this.uns.length * 100) - Number(colMarginTop))
+    console.log('colMarginTop: ', colMarginTop)
+    console.log('freeSpace: ', freeSpace)
+    if (freeSpace > 100) {
+      this.buttonSecondColumnUp.node.classList.add(red["button__inactive"]) //перемотка вверх не нужна
+      console.log('перемотка вверх не нужна')
     } else {
-      this.buttonSecondColumnUp.node.classList.remove(red["button__inactive"])
-      this.buttonSecondColumnDown.node.classList.remove(red["button__inactive"])
+      this.buttonSecondColumnUp.node.classList.remove(red["button__inactive"]) //перемотка вверх нужна
+      console.log('перемотка вверх нужна')
     }
+    if (Number(colMarginTop) < 0) {
+      this.buttonSecondColumnDown.node.classList.remove(red["button__inactive"]) //перемотка вниз нужна
+      console.log('перемотка вниз нужна')
+    } else {
+      this.buttonSecondColumnDown.node.classList.add(red["button__inactive"]) //перемотка вниз не нужна
+      console.log('перемотка вниз не нужна')
+    }    
   }
+
 }

@@ -39,14 +39,14 @@ export class GameField extends Control{
   players: GamePlayer[];
   fps: number;
 
-  constructor(parentNode: HTMLElement, res: Record<string, HTMLImageElement>, players:GamePlayer[]){
+  constructor(parentNode: HTMLElement, res: Record<string, HTMLImageElement>, players:GamePlayer[], map: GameMap){
     super(parentNode, 'div', red['game_field']);
     this.res = res;  
     this.players = players;
 
     const canvas = new Control<HTMLCanvasElement>(this.node, 'canvas');
     this.canvas = canvas;
-    this.map = new GameMap(96, 96, res['map'], res);
+    this.map = map;
     
     this.cursorStatus= new GameCursorStatus(()=>{
       return this.players[0].primaries;
@@ -56,7 +56,9 @@ export class GameField extends Control{
     },
     ()=>this.map.map);
     this.objects = new InteractiveList();
-   
+    this.cursorStatus.getObjects = ()=>{
+      return this.objects;
+    }
     this.addGold();
     this.objects.onChangeHovered = ((last, current)=>{
       this.cursorStatus.hovered = current?[current]:[];
@@ -104,11 +106,15 @@ export class GameField extends Control{
       } else if (action == 'move'){
         this.commandUnit();
       } else if (action == 'build'){
-        this.modeCallback();
-       
-        this.addObject(0, this.cursorStatus.planned, cursorTile.x, cursorTile.y);
-  
-        this.cursorStatus.planned = null; 
+        this.players[0].build(this.cursorStatus.planned, cursorTile.clone());
+       //find bulding
+        // const builds = this.objects.list.filter(it => it.player === 0 && it instanceof MapObject) as MapObject[];
+        // const closestBuild = findClosestBuild(cursorTile, builds);
+        // if (!builds.length || closestBuild.distance <= 6) {
+         this.modeCallback();
+        //   this.addObject(0, this.cursorStatus.planned, cursorTile.x, cursorTile.y);
+         this.cursorStatus.planned = null; 
+        // }      
       } else if (action == 'primary'){
         this.players[0].primaries[this.cursorStatus.hovered[0].name] = this.cursorStatus.hovered[0] as MapObject;
       } else if (action == 'attack'){
@@ -271,19 +277,21 @@ export class GameField extends Control{
       const tile = this.map.toTileVector(point);//new Vector(Math.floor(point.x / 55), Math.floor(point.y / 55));
       this.objects.list.map(object => object.damage(point, tile, unit));
     }
+    unit.getResource = ()=>{
+        return this.objects.list.filter(it=> it.player!=unit.player && !(it instanceof Gold)) as InteractiveObject[];
+    }
+    unit.setTarget = (attackPoint) => {
+      this.setUnitTarget(unit, attackPoint);
+    }
     if (unit instanceof TruckUnit) {
       unit.getResource = ()=>{
         return this.objects.list.filter(it=> it instanceof Gold) as InteractiveObject[];
-      }
-      unit.setTarget = (attackPoint) => {
-        this.setUnitTarget(unit, attackPoint);
       }
 
       unit.getObjects = () => {
         return this.objects.list;
       }
-
-    }
+    } 
     
     unit.player = player;
     //unit.position = new Vector(20, 20); //for demo

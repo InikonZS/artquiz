@@ -1,7 +1,8 @@
 import { IVector, Vector } from "../common/vector";
 import { InteractiveObject, ITechBuild, MapObject } from "./interactives";
-import { checkMap } from "./distance";
+import { checkMap, findClosestBuild } from "./distance";
 import {AbstractUnit} from './units/abstractUnit'
+import { InteractiveList } from "./interactiveList";
 
 export class GameCursorStatus{
   pixelPosition:Vector = new Vector(0, 0);
@@ -13,6 +14,7 @@ export class GameCursorStatus{
   getPrimaries: () => Record<string, MapObject>;
   getMap: () => Array<Array<number>>;
   getRealMap: () => Array<Array<number>>;
+  getObjects: () => InteractiveList;
 
   constructor(getPrimaries:()=>Record<string, MapObject>, getMap:()=>Array<Array<number>>, getRealMap:()=>Array<Array<number>>){
     this.getPrimaries = getPrimaries;
@@ -23,9 +25,9 @@ export class GameCursorStatus{
   getAction(){
     let action:string = 'select';
     if (this.planned){
-      const mask = checkMap(this.getMap(), this.planned.mtx.map(it=>it.map(jt=>Number.parseInt(jt))), this.tilePosition);
-      
-      if (mask.flat(1).find(it=>it!=0) == null){
+      const mask = this.getBuildMask();
+      if (mask.flat(1).find(it => it != 0) == null) {
+        
         action = 'build';
       } else {
         action = 'no_build';
@@ -60,6 +62,17 @@ export class GameCursorStatus{
       }
     }
     return action;
+  }
+
+  getBuildMask() {
+    const mask = checkMap(this.getMap(), this.planned.mtx.map(it => it.map(jt => Number.parseInt(jt))), this.tilePosition);
+    const redMask = this.planned.mtx.map(it => it.map(jt => Number.parseInt(jt)));
+    const builds = this.getObjects().list.filter(it => it.player === 0 && it instanceof MapObject) as MapObject[];
+    const closestBuild = findClosestBuild(this.tilePosition.clone(), builds);
+    if (!(!builds.length || closestBuild.distance <= 6)) { 
+      return redMask;
+    }
+    return mask;
   }
 
   isOnlyUnitsSelected(){
@@ -103,7 +116,7 @@ export class GameCursorStatus{
   renderBuildPlanned(ctx: CanvasRenderingContext2D, camera:Vector){
     //const cursorTile = this.getTileCursor();
     //this.currentBuilding.render();
-    const mask = checkMap(this.getMap(), this.planned.mtx.map(it=>it.map(jt=>Number.parseInt(jt))), this.tilePosition);
+    const mask = this.getBuildMask();
     this.drawObject(ctx, this.planned.mtx, this.tilePosition, camera, "#ff06", 55);
     this.drawObject(ctx, /*this.planned.mtx*/mask.map(it=>it.map(jt=>jt.toString())), this.tilePosition, camera, "#f00", 55);
   }

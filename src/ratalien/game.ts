@@ -7,13 +7,16 @@ import {BotPlayer} from "./botPlayer";
 import { tech } from "./techTree";
 import {GamePlayer, IBuildInfo} from "./gamePlayer";
 import {consts} from "./globals";
-import {GameField} from "./gameField";
+import { GameField } from "./gameField";
+import { GameModel } from './gameModel';
+import { GameMap } from "./gameMap";
+import { IGameOptions } from './IGameOptions';
 
 export class Game extends Control{
   player:GamePlayer;
   currentPlayer:number = 0;
   onExit: () => void;
-  constructor(parentNode: HTMLElement, res: Record<string, HTMLImageElement>){
+  constructor(parentNode: HTMLElement, res: Record<string, HTMLImageElement>, options: IGameOptions){
     super(parentNode, 'div', red['global_wrapper']);
     this.node.onmouseleave = (e)=>{
      // console.log(e.offsetX, e.offsetY);
@@ -46,14 +49,20 @@ export class Game extends Control{
     }
    //
     //const field = new GameField(main.node, res);
-    const player = new GamePlayer();
-    const botPlayer = new BotPlayer(new Vector(20, 20)); 
+    const gameModel = new GameModel();
 
-    const field = new GameField(main.node, res, [player, botPlayer]);
-    botPlayer.onBuild = (pos)=>{
-       let build = botPlayer.getBuild();
-      
-      botPlayer.builds.push(build);
+    const player = new GamePlayer();
+    player.setMoney(options.credits);
+    const botPlayer = new BotPlayer(new Vector(20, 20)); 
+    const map = new GameMap(96, 96, options.map, res);
+    const field = new GameField(main.node, res, [player, botPlayer], map);
+    player.onBuild = (build, pos) => {
+      field.addObject(0, build, pos.x, pos.y)
+    }
+    botPlayer.onBuild = (build, pos)=>{
+  //     let build = botPlayer.getBuild();      
+      //botPlayer.builds.push(build);
+      //console.log(build.name)
       field.addObject(1, build, pos.x, pos.y);
       //field.addObject(1, tech.builds.find(it=>it.name == 'barracs'), pos.x, pos.y);
     }
