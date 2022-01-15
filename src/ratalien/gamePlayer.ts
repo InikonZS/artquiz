@@ -25,7 +25,7 @@ export interface IUnitInfo{
 
 export class GamePlayer{
   colorIndex:number;
-  money:number=50000;
+  money:number=0;
   //energy:number;
   builds: Array<ITechBuild> = [];
   units:Array<IUnitInfo> = [];

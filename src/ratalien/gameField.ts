@@ -39,14 +39,14 @@ export class GameField extends Control{
   players: GamePlayer[];
   fps: number;
 
-  constructor(parentNode: HTMLElement, res: Record<string, HTMLImageElement>, players:GamePlayer[]){
+  constructor(parentNode: HTMLElement, res: Record<string, HTMLImageElement>, players:GamePlayer[], map: GameMap){
     super(parentNode, 'div', red['game_field']);
     this.res = res;  
     this.players = players;
 
     const canvas = new Control<HTMLCanvasElement>(this.node, 'canvas');
     this.canvas = canvas;
-    this.map = new GameMap(96, 96, res['map'], res);
+    this.map = map;
     
     this.cursorStatus= new GameCursorStatus(()=>{
       return this.players[0].primaries;

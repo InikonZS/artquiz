@@ -9,12 +9,14 @@ import {GamePlayer, IBuildInfo} from "./gamePlayer";
 import {consts} from "./globals";
 import { GameField } from "./gameField";
 import { GameModel } from './gameModel';
+import { GameMap } from "./gameMap";
+import { IGameOptions } from './IGameOptions';
 
 export class Game extends Control{
   player:GamePlayer;
   currentPlayer:number = 0;
   onExit: () => void;
-  constructor(parentNode: HTMLElement, res: Record<string, HTMLImageElement>){
+  constructor(parentNode: HTMLElement, res: Record<string, HTMLImageElement>, options: IGameOptions){
     super(parentNode, 'div', red['global_wrapper']);
     this.node.onmouseleave = (e)=>{
      // console.log(e.offsetX, e.offsetY);
@@ -50,9 +52,10 @@ export class Game extends Control{
     const gameModel = new GameModel();
 
     const player = new GamePlayer();
+    player.setMoney(options.credits);
     const botPlayer = new BotPlayer(new Vector(20, 20)); 
-
-    const field = new GameField(main.node, res, [player, botPlayer]);
+    const map = new GameMap(96, 96, options.map, res);
+    const field = new GameField(main.node, res, [player, botPlayer], map);
     player.onBuild = (build, pos) => {
       field.addObject(0, build, pos.x, pos.y)
     }
