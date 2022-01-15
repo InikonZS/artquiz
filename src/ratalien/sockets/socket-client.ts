@@ -36,14 +36,14 @@ class SocketClient {
         _websocket.onmessage = (ev) => {
             const response: IServerResponseMessage = JSON.parse(ev.data);
             console.log('_websocket.onmessage',response.type)
-            for(let type of this.listeners.keys()){
-                if(type==response.type){
-                    for(let callback of this.listeners.get(type)){
-                        callback.call(this,response.content);
-                    }
-                    break;
-                }
-            }
+            // for(let type of this.listeners.keys()){
+            //     if(type==response.type){
+            //         for(let callback of this.listeners.get(type)){
+            //             callback.call(this,response.content);
+            //         }
+            //         break;
+            //     }
+            // }
         }
     }
     destroy() {
@@ -68,12 +68,12 @@ class SocketClient {
         }        
     }
     sendHash(){
-        for(let t of this.msgHash.hash.keys()){
-            const typeMsg = this.msgHash.hash.get(t)
-            for(let o of typeMsg.keys()){
-               setTimeout(()=>this.wsc.send(JSON.stringify(typeMsg.get(o))),1)
-            }
-        }
+        // for(let t of this.msgHash.hash.keys()){
+        //     const typeMsg = this.msgHash.hash.get(t)
+        //     for(let o of typeMsg.keys()){
+        //        setTimeout(()=>this.wsc.send(JSON.stringify(typeMsg.get(o))),1)
+        //     }
+        // }
     }
     on(type:string, callback){
         let cbSet:Set<(data:any)=>void> 

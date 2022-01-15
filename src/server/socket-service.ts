@@ -6,7 +6,6 @@ import {
 } from 'websocket';
 import { EventsType } from '../common/socket-events-types';
 import { playersList, PlayersList } from './player';
-import { thingList , ThingsList} from './thing';
 
 // import { connect } from 'http2';
 // import { any } from 'nconf';
@@ -19,7 +18,7 @@ const httpWSServer = createServer(requestHandler);
 const wssPort = '3000';
 
 httpWSServer.listen(wssPort, () => {
-  console.log(`WS is listening on ${wssPort}`);
+  console.log(`WebSocket is listening on ${wssPort}`);
 });
 
 // const websocket = require('websocket');
@@ -39,10 +38,8 @@ class SocketService {
     this.wss = new websocket.server({ httpServer: srv });
     this.wss.on('request', this.onConnect);
   }
-
   onConnect(request) {
     const connection = request.accept(undefined, request.origin);
-
     connection.on('message', (_message) => {
       const sendAll = (type, content) => {
         let arr = Array.from(playersList.list().keys());
@@ -57,9 +54,9 @@ class SocketService {
       };
       const sendAllList = () => {
         sendList(EventsType.USER_LIST, playersList)
-        sendList(EventsType.THING_LIST ,thingList)
+        // sendList(EventsType.THING_LIST ,thingList)
       }
-      const sendList = (type: EventsType ,thisList:PlayersList | ThingsList) => {
+      const sendList = (type: EventsType ,thisList:PlayersList)  => {
         let arr = Array.from(thisList.list().keys());
         let list = [];
         for (let i in arr) {
@@ -70,20 +67,20 @@ class SocketService {
       };
 
       let data = JSON.parse(_message.utf8Data);
-      console.log(data.type, 'xxxx');
-      if (data.type == EventsType.USER_CONNECT) {
-        playersList.add(data.content.player, connection);
-        for(let k in data.content.player.thingsList){
-          const thing = data.content.player.thingsList[k]
-          thingList.add(thing)
-        }
-        sendAllList();
-      } else if (data.type == EventsType.USER_CHANGE) {
-        playersList.list().get(data.content.id).change(data.content);
-        sendAllList();
-      } else if (data.type == EventsType.THING_CHANGE) {
-        sendAll(EventsType.THING_CHANGE, data.content);
-      }
+      // console.log(data.type, 'xxxx');
+      // if (data.type == EventsType.USER_CONNECT) {
+      //   // playersList.add(data.content.player, connection);
+      //   for(let k in data.content.player.thingsList){
+      //     const thing = data.content.player.thingsList[k]
+      //     // thingList.add(thing)
+      //   }
+      //   sendAllList();
+      // } else if (data.type == EventsType.USER_CHANGE) {
+      //   playersList.list().get(data.content.id).change(data.content);
+      //   sendAllList();
+      // } else if (data.type == EventsType.THING_CHANGE) {
+      //   sendAll(EventsType.THING_CHANGE, data.content);
+      // }
     });
   }
 }

@@ -1,4 +1,4 @@
-import { IPlayer } from './iplayer';
+// import { IPlayer } from './iplayer';
 import { connection } from 'websocket';
 
 class Player {
@@ -25,9 +25,9 @@ class Player {
 
 class PlayersList {
   public _list: Map<string, Player> = new Map();
-  add(player: IPlayer, connection) {
-    this._list.set(player.id, new Player(player.id, player.name, connection));
-  }
+  //  add(player: IPlayer, connection) {
+  //    this._list.set(player.id, new Player(player.id, player.name, connection));
+  //  }
   list() {
     return this._list;
   }
