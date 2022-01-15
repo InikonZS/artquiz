@@ -7,7 +7,7 @@ import { TankUnit } from "./TankUnit";
 import { TruckUnit } from "./TruckUnit";
 
 export const units:Record<string, IUnitConstructor> = {
-  'solder': SolderUnit, 
+  'solder': SolderUnit,
   'truck': TruckUnit,
   'tank': TankUnit,
   'heavyTank': HeavyTankUnit,

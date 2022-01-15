@@ -1,6 +1,7 @@
 import {Vector, IVector} from "../../common/vector";
 import { GamePlayer } from "../gamePlayer";
 import { createIdGenerator } from '../idGenerator';
+import { InteractiveList } from "../interactiveList";
 
 export class InteractiveObject{
   isHovered: boolean;
@@ -8,7 +9,8 @@ export class InteractiveObject{
   onMouseEnter: any;
   onMouseLeave: any;
   onClick: any;
-  onDestroyed: ()=>void;
+  onDestroyed: () => void;
+  getList: () => InteractiveList;
   //position: {x:number, y:number};
   player:GamePlayer;
   name:string;
