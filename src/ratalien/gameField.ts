@@ -39,14 +39,14 @@ export class GameField extends Control{
   players: GamePlayer[];
   fps: number;
 
-  constructor(parentNode: HTMLElement, res: Record<string, HTMLImageElement>, players:GamePlayer[]){
+  constructor(parentNode: HTMLElement, res: Record<string, HTMLImageElement>, players:GamePlayer[], map: GameMap){
     super(parentNode, 'div', red['game_field']);
     this.res = res;  
     this.players = players;
 
     const canvas = new Control<HTMLCanvasElement>(this.node, 'canvas');
     this.canvas = canvas;
-    this.map = new GameMap(96, 96, res['map'], res);
+    this.map = map;
     
     this.cursorStatus= new GameCursorStatus(()=>{
       return this.players[0].primaries;
@@ -54,9 +54,15 @@ export class GameField extends Control{
     ()=>{
       return this.getBuildMap();
     },
-    ()=>this.map.map);
+      () => this.map.map);
+    
+    this.cursorStatus.getCurrentPlayer = () => {
+      return this.players[0];
+    }
     this.objects = new InteractiveList();
-   
+    this.cursorStatus.getObjects = ()=>{
+      return this.objects;
+    }
     this.addGold();
     this.objects.onChangeHovered = ((last, current)=>{
       this.cursorStatus.hovered = current?[current]:[];
@@ -104,11 +110,15 @@ export class GameField extends Control{
       } else if (action == 'move'){
         this.commandUnit();
       } else if (action == 'build'){
-        this.modeCallback();
-       
-        this.addObject(0, this.cursorStatus.planned, cursorTile.x, cursorTile.y);
-  
-        this.cursorStatus.planned = null; 
+        this.players[0].build(this.cursorStatus.planned, cursorTile.clone());
+       //find bulding
+        // const builds = this.objects.list.filter(it => it.player === 0 && it instanceof MapObject) as MapObject[];
+        // const closestBuild = findClosestBuild(cursorTile, builds);
+        // if (!builds.length || closestBuild.distance <= 6) {
+         this.modeCallback();
+        //   this.addObject(0, this.cursorStatus.planned, cursorTile.x, cursorTile.y);
+         this.cursorStatus.planned = null; 
+        // }      
       } else if (action == 'primary'){
         this.players[0].primaries[this.cursorStatus.hovered[0].name] = this.cursorStatus.hovered[0] as MapObject;
       } else if (action == 'attack'){
@@ -157,7 +167,7 @@ export class GameField extends Control{
         if ((it instanceof AbstractUnit) == false){
           return false;
         }
-        return it.player == 0 && inBox((it as AbstractUnit).positionPx, this.cursorStatus.multiStart,  this.getPixelCursor());
+        return it.player == this.players[0] && inBox((it as AbstractUnit).positionPx, this.cursorStatus.multiStart,  this.getPixelCursor());
       });
       
       this.cursorStatus.multiStart = null;
@@ -243,16 +253,16 @@ export class GameField extends Control{
     })  
   }
 
-  getPrimary(player:number, name:string){
-    return Object.values(this.players[player].primaries).find(it=>it.name == name) || null;
-  }
+  // getPrimary(player:number, name:string){
+  //   return Object.values(this.players[player].primaries).find(it=>it.name == name) || null;
+  // }
 
-  isPrimary(player:number, build:InteractiveObject){
-    return Object.values(this.players[player].primaries).find(it=>it == build) != null;
-  }
+  // isPrimary(player:number, build:InteractiveObject){
+  //   return Object.values(this.players[player].primaries).find(it=>it == build) != null;
+  // }
 
 //возможно, тут лучше передвать не нейм, а сам объект созданного солдата? 
-  addUnit(player:number, name:string){
+  addUnit(player:GamePlayer, name:string){
     //TODO check is empty,else, check neighbor
   //  console.log(name);
     let unitMap: Record<string, IUnitConstructor> = {
@@ -271,25 +281,27 @@ export class GameField extends Control{
       const tile = this.map.toTileVector(point);//new Vector(Math.floor(point.x / 55), Math.floor(point.y / 55));
       this.objects.list.map(object => object.damage(point, tile, unit));
     }
+    unit.getResource = ()=>{
+        return this.objects.list.filter(it=> it.player!=unit.player && !(it instanceof Gold)) as InteractiveObject[];
+    }
+    unit.setTarget = (attackPoint) => {
+      this.setUnitTarget(unit, attackPoint);
+    }
     if (unit instanceof TruckUnit) {
       unit.getResource = ()=>{
         return this.objects.list.filter(it=> it instanceof Gold) as InteractiveObject[];
-      }
-      unit.setTarget = (attackPoint) => {
-        this.setUnitTarget(unit, attackPoint);
       }
 
       unit.getObjects = () => {
         return this.objects.list;
       }
-
-    }
+    } 
     
     unit.player = player;
     //unit.position = new Vector(20, 20); //for demo
     const spawn = tech.units.filter(item => item.name == name)[0].spawn[0];
     
-    let barrac = this.getPrimary(player, spawn);//Object.values(this.primaries[player]).find(it=>it.name == spawn);
+    let barrac = player.getPrimary(spawn);//Object.values(this.primaries[player]).find(it=>it.name == spawn);
     if (barrac){
       unit.positionPx = Vector.fromIVector({x:barrac.position.x*this.sz, y: barrac.position.y*this.sz});
     } 
@@ -315,20 +327,20 @@ export class GameField extends Control{
     })
   }
 
-  addObject(player: number, obj: ITechBuild, x: number, y: number) {
+  addObject(player: GamePlayer, obj: ITechBuild, x: number, y: number) {
     //let buildMap:Record<string, IBuildConstructor> = {'tower':Tower, 'oreFactory':OreFactory};
     let buildConstructor = buildMap[obj.name] || Tower;
-    let object = new buildConstructor(obj, this.res);//MapObject(obj, this.res);
-    object.getUnits = ()=>{
+    let build = new buildConstructor(obj, this.res);//MapObject(obj, this.res);
+    build.getUnits = ()=>{
       return this.objects.list.filter(it=> it instanceof AbstractUnit && it.player!= player) as AbstractUnit[];
     }
-    object.position = new Vector(x,y);
-    object.player = player;
-    if (this.players[player].primaries[object.name]==null){
-      this.players[player].primaries[object.name] = object;
+    build.position = new Vector(x,y);
+    build.player = player;
+    if (player.primaries[build.name]==null){
+      player.primaries[build.name] = build;
     } 
 
-    this.objects.add(object);
+    this.objects.add(build);
     //this.traceMap.addObjectData(object)
   }
 
@@ -339,7 +351,7 @@ export class GameField extends Control{
         delta,
         this.sz, 
         this.cursorStatus.selected.includes(it),
-        this.isPrimary(0, it)//Object.keys(this.primaries[0]).find(obj=>this.primaries[0][obj]==it)!=null
+        this.players[0].isPrimary(it as MapObject)//Object.keys(this.primaries[0]).find(obj=>this.primaries[0][obj]==it)!=null
       );
     });
   }
@@ -417,7 +429,7 @@ export class GameField extends Control{
 
     //no optimal
     this.objects.list.forEach(it=>{
-      if (it.player != 0 ) return;
+      if (it.player != this.players[0] ) return;
       if (it instanceof AbstractUnit){
         this.map.renderMtx(this.map.opened, makeCircleMap(3) /*['1111'.split(''),'1000'.split(''),'1000'.split(''),'0000'.split('')]*/, it.position.x, it.position.y, 'center');
       } else {

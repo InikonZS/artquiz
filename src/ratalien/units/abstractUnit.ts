@@ -1,7 +1,10 @@
-import {Vector, IVector} from "../../common/vector";
+import { findClosestBuild, findClosestUnit, getTilingDistance } from '../distance';
+import { Vector, IVector } from "../../common/vector";
 import { InteractiveObject } from "./interactiveObject";
 import {consts} from "../globals";
 import AbstractWeapon from "./abstractWeapon";
+import { MapObject } from './mapObject';
+import { GamePlayer } from '../gamePlayer';
 
 export class AbstractUnit extends InteractiveObject{
   positionPx: Vector;
@@ -9,7 +12,7 @@ export class AbstractUnit extends InteractiveObject{
   speed: number = 8.5;
   name:string;
   attackTarget: Vector;
-  player:number;
+  player:GamePlayer;
   time: number= 0;
   path: Vector[];
   health: number = 100;
@@ -23,6 +26,7 @@ export class AbstractUnit extends InteractiveObject{
   protected gold: number = 0;
   maxGold: number = 3000;
   weapon: AbstractWeapon;
+   targetEnemy: { distance: number; unit: AbstractUnit; } | { distance: number; unit: MapObject; tile: Vector; };
 
   get position(){
     return new Vector(Math.floor(this.positionPx.x/55), Math.floor(this.positionPx.y / 55));
@@ -46,7 +50,7 @@ export class AbstractUnit extends InteractiveObject{
 
   render(ctx:CanvasRenderingContext2D, camera:Vector,delta:number, size:number, selected:boolean){
     const sz = 10;
-    ctx.fillStyle = this.isHovered?"#9999":consts.colors[this.player];
+    ctx.fillStyle = this.isHovered?"#9999":consts.colors[this.player.colorIndex];
     ctx.strokeStyle = "#000";
     ctx.lineWidth = 1;
     ctx.beginPath();
@@ -145,7 +149,7 @@ export class AbstractUnit extends InteractiveObject{
 
   getAction(hovered: InteractiveObject, mapTile?:number) {
     let action = 'move';
-    if (hovered && hovered.player!=0){
+    if (hovered && hovered.player!=this.player){
       action = 'attack';
     } else {
       action = 'move';
@@ -153,9 +157,39 @@ export class AbstractUnit extends InteractiveObject{
     return action;
   }
 
-  logic() {
-    
+ logic() {
+    const closestUnit = findClosestUnit(this.position.clone(), this.getResource().filter(it => it instanceof AbstractUnit) as AbstractUnit[]);
+    const closestBuild = findClosestBuild(this.position.clone(), this.getResource().filter(it => it instanceof MapObject) as MapObject[]);
+    const targetEnemy = closestUnit.distance > closestBuild.distance ? closestBuild : closestUnit;
+   
+    if (!this.attackTarget) {
+      this.targetEnemy = targetEnemy;
+      if (this.targetEnemy.unit instanceof MapObject) {
+        this.setTarget(closestBuild.tile)
+      } else if(this.targetEnemy.unit instanceof AbstractUnit){
+        this.setTarget(closestUnit.unit.position);
+      }
+    } else if(this.targetEnemy.unit.health ===0) {
+      this.attackTarget = null;
+    }
   }
 
+  findClosestEnemy() {
+    const closestUnit = findClosestUnit(this.position.clone(), this.getResource().filter(it => it instanceof AbstractUnit) as AbstractUnit[]);
+    const closestBuild = findClosestBuild(this.position.clone(), this.getResource().filter(it => it instanceof MapObject) as MapObject[]);
+    return closestUnit.distance > closestBuild.distance ? closestBuild : closestUnit;
+  }
+  
+  damage(point: Vector, tile: Vector, unit: InteractiveObject) {
+ //(unit as AbstractUnit).weapon.getDamage()
+    const amount = 10;
+    const {distance} = getTilingDistance(tile, this.position,[[1]]);
+    if (distance === 0) {
+      this.health -=amount;
+      if (this.health<=0){
+        this.onDestroyed();
+      }
+    }    
+  }
   
 }

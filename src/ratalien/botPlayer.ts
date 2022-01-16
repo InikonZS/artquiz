@@ -2,6 +2,7 @@ import { Vector } from "../common/vector";
 import { GamePlayer } from "./gamePlayer";
 import { ITechBuild } from "./interactives";
 import { tech } from './techTree';
+import { IUnitConstructor } from "./units/IUnitConstructor";
 
 
 interface IUnitInfo{
@@ -18,13 +19,14 @@ interface IUnitInfo{
 export class BotPlayer extends GamePlayer{
   startPoint: Vector;
   radius: number = 0;
+  money: number = 30000;
   //onMove:(pos:Vector)=>void;
-  onBuild:(pos:Vector)=>void;
-  onUnit:()=>void;
+  onBuild:(build: ITechBuild, pos:Vector)=>void;
+  onUnit:(unit:IUnitInfo)=>void;
   onAttack:()=>void;
   unitsBuildArray = ['barracs', 'techCenter', 'carFactory', 'dogHouse'];
-  constructor(startPoint:Vector){
-    super();
+  constructor(startPoint:Vector, index:number){
+    super(index);
     this.startPoint = startPoint;
     this.randomMove();
   }
@@ -33,12 +35,20 @@ export class BotPlayer extends GamePlayer{
     setTimeout(()=>{
       this.radius += this.radius< 10?1:0.5;
       let rnd = Math.random();
-      if (rnd<0.3){
-        this.onBuild(this.startPoint.clone().add(new Vector(Math.floor(Math.random()*(4 +this.radius*2)-this.radius), Math.floor(Math.random()*(4+this.radius*2)-this.radius))));
-      } else if(rnd<0.6){
-        this.onUnit();
+      console.log(rnd)
+      if (rnd < 0.3) {
+        const build = this.getBuild();
+        this.setBuilds(build);
+        this.onBuild(build, this.startPoint.clone().add(new Vector(Math.floor(Math.random()*(4 +this.radius*2)-this.radius), Math.floor(Math.random()*(4+this.radius*2)-this.radius))));
+      } else if (rnd < 0.6) {
+        const availableUnit = this.getAvailableUnits();
+        if (availableUnit.length) {
+          const unit = availableUnit[Math.floor(Math.random() * availableUnit.length)];
+          this.units.push(unit);
+          this.onUnit(unit);
+        }        
       } else {
-        this.onAttack();
+        //this.onAttack();
       }
       //this.onMove(this.startPoint.clone().add(new Vector(Math.floor(Math.random()*(4 +this.radius*2)-this.radius), Math.floor(Math.random()*(4+this.radius*2)-this.radius))));
       this.randomMove();

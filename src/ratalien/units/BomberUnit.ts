@@ -8,9 +8,16 @@ export class BomberUnit extends AbstractUnit{
     this.weapon = new WeaponBomber();
     this.weapon.onBulletTarget = (point)=>{
       this.onDamageTile?.(point);
+      const newEnemy = this.findClosestEnemy();
+      if (newEnemy !== this.targetEnemy) {
+        this.attackTarget = null;
+      }
     }
   }
-
+  step(delta: number) {
+    super.step(delta);
+    this.logic();
+  }
   addGold(amount: number): boolean {
     return false;
   }

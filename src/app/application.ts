@@ -10,9 +10,9 @@ import "../style.css";
 import style from "./application.css";
 
 import { ResourceLoader } from "../ratalien/loader";
+import {SocketClient, wsc} from "../ratalien/sockets/socket-client";
 
 export class Application extends Control {
- 
   settingsModel: SettingsModel;
   header: Control<HTMLElement>;
   main: Control<HTMLElement>;
@@ -62,7 +62,7 @@ export class Application extends Control {
       settingsPage.destroy();
       this.settingsModel.setData(settings);  //будет ли модель ??
       this.loader.load(resources).then(res => {
-        const game = new Game(this.main.node, res.textures);
+        const game = new Game(this.main.node, res.textures, {credits: 30000, map: res.textures.map });
         game.onExit = () => {
           game.destroy();
           this.finishCycle();
@@ -75,6 +75,10 @@ export class Application extends Control {
     const startPage = new StartPage(this.main.node);
     startPage.animateIn();
     startPage.onGamePlay = (typeGame) => {
+      console.log("***")
+      //*chooseGameMode
+      const randomNameI= Math.floor(Math.random()*100)
+      wsc.sendMessage('TESTName'+randomNameI,'')
       startPage.animateOut().then(() => {
         startPage.destroy();
         this.gameCycle();
