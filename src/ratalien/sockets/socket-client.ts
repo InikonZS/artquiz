@@ -1,5 +1,6 @@
+import { EventsType } from "../../common/socket-events-types";
 interface IServerResponseMessage {
-  type: string;
+  type: EventsType;
   content: string;
 }
 interface IServerRequestMessage {
@@ -34,31 +35,27 @@ export class SocketClient {
     this.connect();
   }
 
-  connect(){
+  connect() {
     // const fn_connect = this.connect;
     this._websocket = new WebSocket("ws://127.0.0.1:3000/");
     this._websocket.onopen = () => {
+      this.event(EventsType.CONNECT, "");
       this.wsc = this._websocket;
       this.sendHash();
     };
     this._websocket.onmessage = (ev) => {
       const response: IServerResponseMessage = JSON.parse(ev.data);
-      for (let type of this.listeners.keys()) {
-        if (type == response.type) {
-          for (let callback of this.listeners.get(type)) {
-            callback.call(this, response.content);
-          }
-          break;
-        }
-      }
+      this.event(response.type, response.content);
     };
     this._websocket.onclose = (e) => {
-      console.log(
-        "Socket is closed. Reconnect will be attempted in 1 second."
-      );
-      setTimeout(() =>{ this.connect(); }, 1000);
+      this.event(EventsType.DISCONNECT, "");
+      console.log("Socket is closed. Reconnect will be attempted in 1 second.");
+      setTimeout(() => {
+        this.connect();
+      }, 1000);
     };
     this._websocket.onerror = (err) => {
+      this.event(EventsType.ERROR, "");
       console.error("Socket encountered error: ", err, "Closing socket");
     };
   }
@@ -108,6 +105,16 @@ export class SocketClient {
 
   remove(type: string, callback: (params: any) => void) {
     this.listeners.get(type).delete(callback);
+  }
+  event(ev_type: EventsType, content: string) {
+    for (let type of this.listeners.keys()) {
+      if (type == ev_type) {
+        for (let callback of this.listeners.get(type)) {
+          callback.call(this, content);
+        }
+        break;
+      }
+    }
   }
 }
 
