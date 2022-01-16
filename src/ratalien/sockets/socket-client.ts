@@ -54,8 +54,7 @@ export class SocketClient {
     };
     this._websocket.onclose = (e) => {
       console.log(
-        "Socket is closed. Reconnect will be attempted in 1 second.",
-        e.reason
+        "Socket is closed. Reconnect will be attempted in 1 second."
       );
       setTimeout(() =>{ this.connect(); }, 1000);
     };
