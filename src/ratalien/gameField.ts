@@ -23,6 +23,7 @@ import { IBuildConstructor } from './units/IBuildConstructor';
 import { buildMap } from './units/buildMap';
 import { Explosion } from './units/explosion';
 import { Gold } from './gold';
+import { units } from './units/unitMap';
 
 
 export class GameField extends Control{
@@ -110,15 +111,9 @@ export class GameField extends Control{
       } else if (action == 'move'){
         this.commandUnit();
       } else if (action == 'build'){
-        this.players[0].build(this.cursorStatus.planned, cursorTile.clone());
-       //find bulding
-        // const builds = this.objects.list.filter(it => it.player === 0 && it instanceof MapObject) as MapObject[];
-        // const closestBuild = findClosestBuild(cursorTile, builds);
-        // if (!builds.length || closestBuild.distance <= 6) {
-         this.modeCallback();
-        //   this.addObject(0, this.cursorStatus.planned, cursorTile.x, cursorTile.y);
-         this.cursorStatus.planned = null; 
-        // }      
+        this.players[0].build(this.cursorStatus.planned, cursorTile.clone());       
+        this.modeCallback();       
+        this.cursorStatus.planned = null;    
       } else if (action == 'primary'){
         this.players[0].primaries[this.cursorStatus.hovered[0].name] = this.cursorStatus.hovered[0] as MapObject;
       } else if (action == 'attack'){
@@ -181,12 +176,9 @@ export class GameField extends Control{
   }
 
   getTraceMap(){
-    //add builds on map;
-    //generateEmptyMap(96, 96, 0);
     let map = this.map.map.map(it=>it.map(jt=>jt));
     this.objects.list.forEach(it=>{
       if (it instanceof MapObject){
-        //console.log(it.tiles);
         this.map.renderMtx(map, it.tiles.map(ii=>ii.map(jj=>jj.toString())), it.position.x, it.position.y, 'corner');
       }
     })
@@ -194,12 +186,9 @@ export class GameField extends Control{
   }
 
   getBuildMap(){
-    //add builds on map;
-    //generateEmptyMap(96, 96, 0);
     let map = this.map.map.map(it=>it.map(jt=>jt));
     this.objects.list.forEach(it=>{
       if (it instanceof MapObject){
-       // console.log(it.tiles);
         this.map.renderMtx(map, it.tiles.map(ii=>ii.map(jj=>jj.toString())), it.position.x, it.position.y, 'corner');
       }
     })
@@ -208,23 +197,20 @@ export class GameField extends Control{
 
   commandUnit(attackPoint:Vector = null){
     let traceMap = this.getTraceMap();
-    let indexPoint = this.getTileCursor();//{x:Math.floor(e.offsetX/this.sz), y:Math.floor(e.offsetY/this.sz)};
-    //console.log(this.selected);
+    let indexPoint = this.getTileCursor();
     if (!this.cursorStatus.isOnlyUnitsSelected()){
       return;
     }
-    const units:AbstractUnit[] = this.cursorStatus.selected as AbstractUnit[];//[this.selected as UnitObject];
+    const units:AbstractUnit[] = this.cursorStatus.selected as AbstractUnit[];
     const destinations = units.map(unit=>{
       return new Vector(Math.floor(unit.positionPx.x/this.sz), Math.floor(unit.positionPx.y/this.sz))
     });
-    //[...this.mainSlot.list];
+    
     tracePathes(traceMap, indexPoint, destinations, (pathes)=>{
       this.pathes = pathes;
-     // console.log(pathes);
       pathes.forEach((path, i)=>{
         const unit = units[i];
         (unit as AbstractUnit).setPath(path, (pos)=>this.isEmptyTile(pos, unit), attackPoint);
-        //(unit as RoundNode).attackTarget = Vector.fromIVector(indexPoint).scale(10);
       })
     })  
   }
@@ -232,48 +218,29 @@ export class GameField extends Control{
   setUnitTarget(unit: AbstractUnit, attackPoint: Vector) {
     
     let traceMap = this.getTraceMap();
-    // let indexPoint = this.getTileCursor();//{x:Math.floor(e.offsetX/this.sz), y:Math.floor(e.offsetY/this.sz)};
-    //console.log(this.selected);
     if (!this.cursorStatus.isOnlyUnitsSelected()){
       return;
     }
-    const units: AbstractUnit[] = [unit];//[this.selected as UnitObject];
+    const units: AbstractUnit[] = [unit];
     const destinations = units.map(unit=>{
       return new Vector(Math.floor(unit.positionPx.x/this.sz), Math.floor(unit.positionPx.y/this.sz))
     });
-    //[...this.mainSlot.list];
     tracePathes(traceMap, attackPoint, destinations, (pathes)=>{
       this.pathes = pathes;
-     // console.log(pathes);
       pathes.forEach((path, i)=>{
         const unit = units[i];
-        (unit as AbstractUnit).setPath(path, (pos)=>this.isEmptyTile(pos, unit), attackPoint.clone().scale(55));
-        //(unit as RoundNode).attackTarget = Vector.fromIVector(indexPoint).scale(10);
+        (unit as AbstractUnit).setPath(path, (pos) => this.isEmptyTile(pos, unit), attackPoint.clone().scale(55));
       })
     })  
   }
 
-  // getPrimary(player:number, name:string){
-  //   return Object.values(this.players[player].primaries).find(it=>it.name == name) || null;
-  // }
-
-  // isPrimary(player:number, build:InteractiveObject){
-  //   return Object.values(this.players[player].primaries).find(it=>it == build) != null;
-  // }
+ 
 
 //возможно, тут лучше передвать не нейм, а сам объект созданного солдата? 
   addUnit(player:GamePlayer, name:string){
     //TODO check is empty,else, check neighbor
-  //  console.log(name);
-    let unitMap: Record<string, IUnitConstructor> = {
-      'solder': SolderUnit,
-      'truck': TruckUnit,
-      'tank': TankUnit,
-      'heavyTank': HeavyTankUnit,
-      'dog': DogUnit,
-      'bomber': BomberUnit,
-    };
-    let UnitConstructor = unitMap[name] || AbstractUnit;
+  
+    let UnitConstructor = units[name] || AbstractUnit;
     let unit = new UnitConstructor();//UnitObject();
     unit.onDamageTile = (point)=>{
       const ex = new Explosion(point);
@@ -281,29 +248,18 @@ export class GameField extends Control{
       const tile = this.map.toTileVector(point);//new Vector(Math.floor(point.x / 55), Math.floor(point.y / 55));
       this.objects.list.map(object => object.damage(point, tile, unit));
     }
-    unit.getResource = ()=>{
-        return this.objects.list.filter(it=> it.player!=unit.player && !(it instanceof Gold)) as InteractiveObject[];
-    }
+    
     unit.setTarget = (attackPoint) => {
       this.setUnitTarget(unit, attackPoint);
     }
-    if (unit instanceof TruckUnit) {
-      unit.getResource = ()=>{
-        return this.objects.list.filter(it=> it instanceof Gold) as InteractiveObject[];
-      }
-
-      unit.getObjects = () => {
-        return this.objects.list;
-      }
-    } 
     
     unit.player = player;
     //unit.position = new Vector(20, 20); //for demo
     const spawn = tech.units.filter(item => item.name == name)[0].spawn[0];
     
-    let barrac = player.getPrimary(spawn);//Object.values(this.primaries[player]).find(it=>it.name == spawn);
-    if (barrac){
-      unit.positionPx = Vector.fromIVector({x:barrac.position.x*this.sz, y: barrac.position.y*this.sz});
+    let primary = player.getPrimary(spawn);//Object.values(this.primaries[player]).find(it=>it.name == spawn);
+    if (primary){
+      unit.positionPx = Vector.fromIVector({x:primary.position.x*this.sz, y: primary.position.y*this.sz});
     } 
     
     unit.name = name;
@@ -331,9 +287,6 @@ export class GameField extends Control{
     //let buildMap:Record<string, IBuildConstructor> = {'tower':Tower, 'oreFactory':OreFactory};
     let buildConstructor = buildMap[obj.name] || Tower;
     let build = new buildConstructor(obj, this.res);//MapObject(obj, this.res);
-    build.getUnits = ()=>{
-      return this.objects.list.filter(it=> it instanceof AbstractUnit && it.player!= player) as AbstractUnit[];
-    }
     build.position = new Vector(x,y);
     build.player = player;
     if (player.primaries[build.name]==null){

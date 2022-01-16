@@ -20,7 +20,7 @@ export class MapObject extends InteractiveObject{
   }
 
   onDestroyed: () => void;
-   getUnits: ()=>AbstractUnit[];
+  // getUnits: ()=>AbstractUnit[];
   res: Record<string, HTMLImageElement>;
 
   constructor(build:ITechBuild, res:Record<string, HTMLImageElement>){

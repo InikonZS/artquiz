@@ -86,13 +86,6 @@ export class GamePlayer{
   build(build: ITechBuild, position: Vector) {
     this.setBuilds(build);
     this.onBuild(build, position);
-  //  const builds = this.objects.list.filter(it => it.player === 0 && it instanceof MapObject) as MapObject[];
-        //const closestBuild = findClosestBuild(position, builds);
-        //if (!builds.length || closestBuild.distance <= 6) {
-          //this.modeCallback();
-         // this.addObject(0, build.planned, position.x, position.y);
-          //this.cursorStatus.planned = null; 
-       // }
   }
 
   makeUnit(unit:IUnitInfo){

@@ -7,7 +7,7 @@ import { WeaponSolder } from "./weaponSolder";
 
 export class Tower extends MapObject{
   weapon: WeaponSolder = new WeaponSolder();
-  getUnits: ()=>AbstractUnit[];
+  //getUnits: ()=>AbstractUnit[];
   
   constructor(build:ITechBuild, res:Record<string, HTMLImageElement>){
     super(build, res);
@@ -20,14 +20,15 @@ export class Tower extends MapObject{
     super.render(ctx, camera, delta, size, selected, primary);
     this.step(delta);
     this.weapon.render(ctx, camera);
-    this.logic(this.getUnits());
+    this.logic();
   }
 
   step(delta:number){
     this.weapon.step(delta);
   }
 
-  logic(enemies:AbstractUnit[]){
+  logic(){
+    const enemies = this.getList().list.filter(it => it instanceof AbstractUnit) as AbstractUnit[];
     const near = findClosestUnit(this.position.clone().scale(55), enemies);
     if (near.unit){
       this.attack(near.unit.positionPx);
