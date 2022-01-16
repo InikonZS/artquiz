@@ -4,6 +4,7 @@
     "noImplicitAny": true,
     "module": "es6",
     "target": "es5",
+    "downlevelIteration": true,
     "allowJs": true
   },
   "files": ["src/index.ts", "./module.d.ts"]

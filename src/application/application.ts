@@ -10,6 +10,7 @@ import {SoundManager} from "./soundManager";
 import style from "./application.css";
 import { ArtistQuestionView } from "./artistQuestionView";
 import { PictureQuestionView } from "./pictureQuestionView";
+import {SocketClient} from "../ratalien/sockets/socket-client";
 
 export class Application extends Control{
   model: QuizDataModel;
@@ -20,7 +21,6 @@ export class Application extends Control{
 
   constructor(parentNode:HTMLElement){
     super(parentNode, 'div', style["global_wrapper"]);
-
     this.header = new Control(this.node, 'div', style["global_header"]);
     this.main = new Control(this.node, 'div', style["global_main"]);
     this.footer = new Control(this.node, 'div', style["global_footer"]);

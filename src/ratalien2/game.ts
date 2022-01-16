@@ -50,6 +50,7 @@ export class GameSettings extends Control{
     super(parentNode);
     const startButton = new Control(this.node, 'button', '', 'Start');
     startButton.node.onclick = ()=>{
+
       this.onStart?.({/*settings*/});
     }
   }

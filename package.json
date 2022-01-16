@@ -42,6 +42,8 @@
   },
   "homepage": "https://gitlab.com/poli8512/artquiz#readme",
   "dependencies": {
+    "@types/node": "^17.0.8",
+    "@types/websocket": "^1.0.4",
     "fs": "^0.0.1-security",
     "nodemon": "^2.0.15",
     "sass": "^1.48.0",
