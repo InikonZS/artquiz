@@ -13,12 +13,12 @@ export class GameMap{
   cached:boolean = false;
   imageData: ImageData;
 
-  constructor(sizeX:number, sizeY:number, map:HTMLImageElement, textures:Record<string, HTMLImageElement>){
+  constructor(map:HTMLImageElement, textures:Record<string, HTMLImageElement>){
     this.map = [];
     this.imageData = getImageData(map);
     this.res = textures;
     this.map = getMapFromImageData(this.imageData);
-    this.opened = generateEmptyMap(96,96, 0);
+    this.opened = generateEmptyMap(map.naturalWidth, map.naturalHeight, 0);
     this.canvas = document.createElement('canvas');
     this.ctx = this.canvas.getContext('2d');
     

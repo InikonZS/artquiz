@@ -11,7 +11,7 @@ import style from "./application.css";
 
 import { ResourceLoader } from "../ratalien/loader";
 
-import {DataModel} from './mapsLoader';
+import {MapsModel} from './mapsLoader';
 
 export class Application extends Control {
  
@@ -22,7 +22,7 @@ export class Application extends Control {
 
   loader: ResourceLoader;
   game: Game;
-  model: DataModel;
+  model: MapsModel;
 
   constructor(parentNode: HTMLElement) {
     super(parentNode, 'div', style["global_wrapper"]);
@@ -33,11 +33,12 @@ export class Application extends Control {
     
     this.loader = resourceLoader;
 
-    this.model = new DataModel();
+    this.model = new MapsModel();
     this.model.build();
-    
+       
     this.settingsModel = new SettingsModel();
-    this.settingsModel.loadFromStorage();
+    this.settingsModel.loadFromStorage();  //оставлять сохранение? 
+    
     this.mainCycle();
   }
 
@@ -59,6 +60,7 @@ export class Application extends Control {
   }
 
   private gameCycle() {
+    
     const settingsPage = new SettingsPage(this.main.node, this.settingsModel.getData(), this.model.data);
     settingsPage.onBack = () => {
       settingsPage.destroy();
@@ -66,9 +68,9 @@ export class Application extends Control {
     }
     settingsPage.onPlay = (settings) => {
       settingsPage.destroy();
-      this.settingsModel.setData(settings);  //будет ли модель ??
-      this.loader.load(resources).then(res => {
-        const game = new Game(this.main.node, res.textures);
+      this.settingsModel.setData(settings);
+      this.loader.load(resources).then(res => { //в ресурсах есть мар??
+        const game = new Game(this.main.node, res.textures, settings/*{credits: 30000, map: res.textures.map }*/);
         game.onExit = () => {
           game.destroy();
           this.finishCycle();

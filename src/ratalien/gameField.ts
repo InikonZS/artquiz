@@ -13,11 +13,16 @@ import {makeCircleMap, findClosestBuild} from "./distance";
 import {generateEmptyMap} from "./tracer";
 import {SolderUnit} from "./units/SolderUnit";
 import { TruckUnit } from "./units/TruckUnit";
+import { TankUnit } from './units/TankUnit';
+import { HeavyTankUnit } from './units/HeavyTankUnit';
+import { DogUnit } from './units/DogUnit';
+import { BomberUnit } from './units/BomberUnit';
 import { OreFactory } from './units/oreFactory';
 import { IUnitConstructor } from "./units/IUnitConstructor";
 import { IBuildConstructor } from './units/IBuildConstructor';
 import { buildMap } from './units/buildMap';
-import {Explosion} from './units/explosion';
+import { Explosion } from './units/explosion';
+import { Gold } from './gold';
 
 
 export class GameField extends Control{
@@ -34,15 +39,15 @@ export class GameField extends Control{
   players: GamePlayer[];
   fps: number;
 
-  constructor(parentNode: HTMLElement, res: Record<string, HTMLImageElement>, players:GamePlayer[]){
+  constructor(parentNode: HTMLElement, res: Record<string, HTMLImageElement>, players:GamePlayer[], map: GameMap){
     super(parentNode, 'div', red['game_field']);
     this.res = res;  
     this.players = players;
 
     const canvas = new Control<HTMLCanvasElement>(this.node, 'canvas');
     this.canvas = canvas;
-    this.map = new GameMap(96, 96, res['map'], res);  //TODO задать размеры исходя из выбранной карты
     
+    this.map = map;    
     this.cursorStatus= new GameCursorStatus(()=>{
       return this.players[0].primaries;
     },
@@ -51,7 +56,9 @@ export class GameField extends Control{
     },
     ()=>this.map.map);
     this.objects = new InteractiveList();
-   
+    this.cursorStatus.getObjects = ()=>{
+      return this.objects;
+    }
     this.addGold();
     this.objects.onChangeHovered = ((last, current)=>{
       this.cursorStatus.hovered = current?[current]:[];
@@ -99,11 +106,15 @@ export class GameField extends Control{
       } else if (action == 'move'){
         this.commandUnit();
       } else if (action == 'build'){
-        this.modeCallback();
-       
-        this.addObject(0, this.cursorStatus.planned, cursorTile.x, cursorTile.y);
-  
-        this.cursorStatus.planned = null; 
+        this.players[0].build(this.cursorStatus.planned, cursorTile.clone());
+       //find bulding
+        // const builds = this.objects.list.filter(it => it.player === 0 && it instanceof MapObject) as MapObject[];
+        // const closestBuild = findClosestBuild(cursorTile, builds);
+        // if (!builds.length || closestBuild.distance <= 6) {
+         this.modeCallback();
+        //   this.addObject(0, this.cursorStatus.planned, cursorTile.x, cursorTile.y);
+         this.cursorStatus.planned = null; 
+        // }      
       } else if (action == 'primary'){
         this.players[0].primaries[this.cursorStatus.hovered[0].name] = this.cursorStatus.hovered[0] as MapObject;
       } else if (action == 'attack'){
@@ -205,10 +216,34 @@ export class GameField extends Control{
     //[...this.mainSlot.list];
     tracePathes(traceMap, indexPoint, destinations, (pathes)=>{
       this.pathes = pathes;
-      console.log(pathes);
+     // console.log(pathes);
       pathes.forEach((path, i)=>{
         const unit = units[i];
         (unit as AbstractUnit).setPath(path, (pos)=>this.isEmptyTile(pos, unit), attackPoint);
+        //(unit as RoundNode).attackTarget = Vector.fromIVector(indexPoint).scale(10);
+      })
+    })  
+  }
+
+  setUnitTarget(unit: AbstractUnit, attackPoint: Vector) {
+    
+    let traceMap = this.getTraceMap();
+    // let indexPoint = this.getTileCursor();//{x:Math.floor(e.offsetX/this.sz), y:Math.floor(e.offsetY/this.sz)};
+    //console.log(this.selected);
+    if (!this.cursorStatus.isOnlyUnitsSelected()){
+      return;
+    }
+    const units: AbstractUnit[] = [unit];//[this.selected as UnitObject];
+    const destinations = units.map(unit=>{
+      return new Vector(Math.floor(unit.positionPx.x/this.sz), Math.floor(unit.positionPx.y/this.sz))
+    });
+    //[...this.mainSlot.list];
+    tracePathes(traceMap, attackPoint, destinations, (pathes)=>{
+      this.pathes = pathes;
+     // console.log(pathes);
+      pathes.forEach((path, i)=>{
+        const unit = units[i];
+        (unit as AbstractUnit).setPath(path, (pos)=>this.isEmptyTile(pos, unit), attackPoint.clone().scale(55));
         //(unit as RoundNode).attackTarget = Vector.fromIVector(indexPoint).scale(10);
       })
     })  
@@ -226,7 +261,14 @@ export class GameField extends Control{
   addUnit(player:number, name:string){
     //TODO check is empty,else, check neighbor
   //  console.log(name);
-    let unitMap:Record<string, IUnitConstructor> = {'solder':SolderUnit, 'truck':TruckUnit};
+    let unitMap: Record<string, IUnitConstructor> = {
+      'solder': SolderUnit,
+      'truck': TruckUnit,
+      'tank': TankUnit,
+      'heavyTank': HeavyTankUnit,
+      'dog': DogUnit,
+      'bomber': BomberUnit,
+    };
     let UnitConstructor = unitMap[name] || AbstractUnit;
     let unit = new UnitConstructor();//UnitObject();
     unit.onDamageTile = (point)=>{
@@ -235,6 +277,22 @@ export class GameField extends Control{
       const tile = this.map.toTileVector(point);//new Vector(Math.floor(point.x / 55), Math.floor(point.y / 55));
       this.objects.list.map(object => object.damage(point, tile, unit));
     }
+    unit.getResource = ()=>{
+        return this.objects.list.filter(it=> it.player!=unit.player && !(it instanceof Gold)) as InteractiveObject[];
+    }
+    unit.setTarget = (attackPoint) => {
+      this.setUnitTarget(unit, attackPoint);
+    }
+    if (unit instanceof TruckUnit) {
+      unit.getResource = ()=>{
+        return this.objects.list.filter(it=> it instanceof Gold) as InteractiveObject[];
+      }
+
+      unit.getObjects = () => {
+        return this.objects.list;
+      }
+    } 
+    
     unit.player = player;
     //unit.position = new Vector(20, 20); //for demo
     const spawn = tech.units.filter(item => item.name == name)[0].spawn[0];
@@ -252,7 +310,7 @@ export class GameField extends Control{
     //this.mode = mode;
     console.log(name,'***');
     this.cursorStatus.planned = tech.builds.find(it=>it.desc[0] == name);//{name:name};
-    console.log(callback);
+   // console.log(callback);
     this.modeCallback = callback;
   }
 

@@ -7,7 +7,7 @@ export interface IMapsData{
   src: string
 }
 
-export class DataModel{
+export class MapsModel{
  // private questionsPerCategory = 10;
   data: Array<IMapsData>;
 
@@ -18,7 +18,7 @@ export class DataModel{
   public async build(){
     this.data = await this.loadImagesData(mapsData);
     console.log(this.data);
-    return this;
+    return this.data;
   }
 
   public loadImagesData(url:string): Promise<Array<IMapsData>>{
@@ -32,6 +32,7 @@ export class DataModel{
         };
         return record;
       });
+      //console.log(modelData)
       return modelData;
     });
   }

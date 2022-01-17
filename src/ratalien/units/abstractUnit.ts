@@ -1,7 +1,9 @@
-import {Vector, IVector} from "../../common/vector";
+import { findClosestBuild, findClosestUnit, getTilingDistance } from '../distance';
+import { Vector, IVector } from "../../common/vector";
 import { InteractiveObject } from "./interactiveObject";
 import {consts} from "../globals";
 import AbstractWeapon from "./abstractWeapon";
+import { MapObject } from './mapObject';
 
 export class AbstractUnit extends InteractiveObject{
   positionPx: Vector;
@@ -15,10 +17,15 @@ export class AbstractUnit extends InteractiveObject{
   health: number = 100;
   tileChecker: (pos: Vector) => boolean;
   type:string = 'unit';
-  onDamageTile:(point:Vector)=>void;
+  onDamageTile: (point: Vector) => void;
+  getResource: () => InteractiveObject[];
+  getObjects: () => InteractiveObject[];
+  setTarget: (point: Vector) => void;
+  getObjectInTile: (point: Vector) => InteractiveObject;
   protected gold: number = 0;
   maxGold: number = 3000;
   weapon: AbstractWeapon;
+   targetEnemy: { distance: number; unit: AbstractUnit; } | { distance: number; unit: MapObject; tile: Vector; };
 
   get position(){
     return new Vector(Math.floor(this.positionPx.x/55), Math.floor(this.positionPx.y / 55));
@@ -52,7 +59,15 @@ export class AbstractUnit extends InteractiveObject{
     ctx.stroke();
     ctx.fillStyle = "#000";
     ctx.fillText(this.name, camera.x + this.positionPx.x, camera.y+ this.positionPx.y-10);
-    ctx.fillText(`health: ${this.health}`, camera.x + this.positionPx.x, camera.y+ this.positionPx.y-20);
+    // ctx.fillText(`health: ${this.health}`, camera.x + this.positionPx.x, camera.y + this.positionPx.y - 20);
+    // Прогресс-баз состояния здоровья Юнита
+    ctx.strokeStyle = '#666'
+    ctx.strokeRect(camera.x + this.positionPx.x,camera.y + this.positionPx.y - 20, 100, 10);
+    ctx.fillStyle = '#ccc'
+    ctx.fillRect(camera.x + this.positionPx.x, camera.y + this.positionPx.y - 20, 100, 10);
+    ctx.fillStyle = 'blue';
+    ctx.fillRect(camera.x + this.positionPx.x, camera.y + this.positionPx.y - 20, this.health, 10);
+    
     if (selected){
       ctx.fillText(`selected`, camera.x + this.positionPx.x, camera.y+ this.positionPx.y-30);  
     }
@@ -121,9 +136,9 @@ export class AbstractUnit extends InteractiveObject{
   setPath(path:Array<Vector>, tileChecker:(pos:Vector)=>boolean, attackPoint:Vector = null){
     this.attackTarget = attackPoint
     const sz =55;
-    console.log('sp ', path);
+   // console.log('sp ', path);
     this.path = [...path].reverse();
-    this.target = this.path.pop().clone().scale(sz);
+    this.target = this.path.pop()?.clone().scale(sz);
     this.tileChecker = tileChecker;
   }
 
@@ -141,7 +156,39 @@ export class AbstractUnit extends InteractiveObject{
     return action;
   }
 
-  logic() {
-    
+ logic() {
+    const closestUnit = findClosestUnit(this.position.clone(), this.getResource().filter(it => it instanceof AbstractUnit) as AbstractUnit[]);
+    const closestBuild = findClosestBuild(this.position.clone(), this.getResource().filter(it => it instanceof MapObject) as MapObject[]);
+    const targetEnemy = closestUnit.distance > closestBuild.distance ? closestBuild : closestUnit;
+   
+    if (!this.attackTarget) {
+      this.targetEnemy = targetEnemy;
+      if (this.targetEnemy.unit instanceof MapObject) {
+        this.setTarget(closestBuild.tile)
+      } else {
+        this.setTarget(closestUnit.unit.position);
+      }
+    } else if(this.targetEnemy.unit.health ===0) {
+      this.attackTarget = null;
+    }
   }
+
+  findClosestEnemy() {
+    const closestUnit = findClosestUnit(this.position.clone(), this.getResource().filter(it => it instanceof AbstractUnit) as AbstractUnit[]);
+    const closestBuild = findClosestBuild(this.position.clone(), this.getResource().filter(it => it instanceof MapObject) as MapObject[]);
+    return closestUnit.distance > closestBuild.distance ? closestBuild : closestUnit;
+  }
+  
+  damage(point: Vector, tile: Vector, unit: InteractiveObject) {
+ //(unit as AbstractUnit).weapon.getDamage()
+    const amount = 10;
+    const {distance} = getTilingDistance(tile, this.position,[[1]]);
+    if (distance === 0) {
+      this.health -=amount;
+      if (this.health<=0){
+        this.onDestroyed();
+      }
+    }    
+  }
+  
 }

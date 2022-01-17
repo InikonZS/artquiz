@@ -1,7 +1,9 @@
 import Control from "../common/control";
 import style from "./settingsPage.css"
-import { DataModel, IMapsData } from "./mapsLoader";
+import { MapsModel, IMapsData } from "./mapsLoader";
+import { IGameOptions } from '../ratalien/IGameOptions'
 
+/*
 export interface ISettings {
   money: number,
   speed: number,
@@ -10,18 +12,17 @@ export interface ISettings {
    // TODO что в интерфейсе настроек??
 
 }
-
-const defaultSettings: ISettings = {
-  money: 10000,
-  speed: 7,
-  idMap: 1,
-  players: ['player_1']
+*/
+const defaultSettings: IGameOptions = {
+  map: new Image(),
+  credits: 10000
+  //speed: 7,
 }
 
 const mapSizes = ['64x64', '64x96', '96x96', '128x96', '128x128']
 
 export class SettingsModel {
-  private settings: ISettings;
+  private settings: IGameOptions;
   constructor() {
   }
 
@@ -33,7 +34,7 @@ export class SettingsModel {
     if (!checkStorageData(storageData)) {
       this.settings = defaultSettings;
     } else {
-      const data: ISettings = JSON.parse(storageData);
+      const data: IGameOptions = JSON.parse(storageData);
       this.settings = data;
     }
   }
@@ -42,7 +43,7 @@ export class SettingsModel {
     return JSON.parse(JSON.stringify(this.settings));
   }
 
-  setData(data: ISettings) {
+  setData(data: IGameOptions) {
     this.settings = data;
     this.saveToStorage();
   }
@@ -54,18 +55,27 @@ export class SettingsModel {
 
 export class SettingsPage extends Control {
   onBack: () => void;
-  onPlay: (settings: ISettings) => void;
+  onPlay: (settings: IGameOptions) => void;
   maps: IMapsData[];
   filteredMaps: IMapsData[];
   map: IMapsData;
+  mapImage: HTMLImageElement;
+  credit: number;
 
-  constructor(parentNode: HTMLElement, initialSettings: ISettings, maps: IMapsData[]) {
-
+  constructor(parentNode: HTMLElement, initialSettings: IGameOptions, maps: IMapsData[]) {
+    
     super(parentNode, 'div', style["main_wrapper"]);// TODO сделать анимацию страницы //{default: style["main_wrapper"], hidden: style["hide"]});    
+    this.credit = initialSettings.credits;
+    
     this.maps = maps;
+
     this.filterMaps('64x64');  //TODO запихнуть в дефолтные настройки
+
     this.map = this.filteredMaps[0];
-    const settings: ISettings = initialSettings;
+    
+
+    //const settings: ISettings = initialSettings;
+
     const settingsWrapper = new Control(this.node, 'div', style["settings_wrapper"]);
 
     const basicSettingsWrapper = new Control(settingsWrapper.node, 'div', style["basic_settings_wrapper"]);
@@ -74,7 +84,10 @@ export class SettingsPage extends Control {
     const moneyInput = new Control<HTMLInputElement>(moneyWrapper.node, 'input', style['input_settings']);
     moneyInput.node.type = 'text';
     moneyInput.node.value = '10000'
-    moneyInput.node.readOnly = true;
+    moneyInput.node.onchange = () => {
+      this.credit = Number(moneyInput.node.value);
+    }
+   // moneyInput.node.readOnly = true;
 
     const speedWrapper = new Control(basicSettingsWrapper.node, 'div', style["item_wrapper"]);
     const speedLabel = new Control<HTMLLabelElement>(speedWrapper.node, 'label', '', 'Скорость')
@@ -83,7 +96,7 @@ export class SettingsPage extends Control {
       const speedValue = new Control<HTMLOptionElement>(speedInput.node, 'option', style[''], `${i}`);
       speedValue.node.value = i.toString();
       speedValue.node.onclick = () => {
-        // TODO выбор скорости
+        //
       }
     }
 
@@ -148,6 +161,10 @@ export class SettingsPage extends Control {
 
     const saveButton = new Control(buttonsWrapper.node, 'button', '', 'play');
     saveButton.node.onclick = () => {
+      const settings:IGameOptions = {
+        map:this.mapImage,
+        credits: this.credit
+      };
       this.onPlay(settings);
     }
   }
@@ -166,5 +183,6 @@ export class SettingsPage extends Control {
   changeMap(imageMap: HTMLImageElement, selectedMapInput: Control<HTMLInputElement>, num:number = 0){
     this.setImageMap(imageMap, num);
     selectedMapInput.node.value = this.map.name + '  '+ this.map.size;
+    this.mapImage = imageMap;
   }
 }

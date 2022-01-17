@@ -1,6 +1,7 @@
 import { tech } from './techTree';
 import Signal from '../common/signal';
-import { MapObject } from './interactives';
+import { ITechBuild, MapObject } from './interactives';
+import { Vector } from '../common/vector';
 export interface IBuildInfo{
   desc:Array<string>,
   energy:number,
@@ -24,20 +25,22 @@ export interface IUnitInfo{
 
 export class GamePlayer{
   colorIndex:number;
-  money:number=50000;
+  money:number=0;
   //energy:number;
-  builds: Array<IBuildInfo> = [];
+  builds: Array<ITechBuild> = [];
   units:Array<IUnitInfo> = [];
   openedMap: Array<Array<any>>;
   onUpdateBuild: Signal<void> = new Signal();
   primaries: Record<string, MapObject> ={};
   //onUpdate:()=>void;
-
+  onBuild:(build: ITechBuild, pos:Vector)=>void;
+  onUnit:()=>void;
+  onAttack:()=>void;
   constructor(){
 
   }
 
-  setBuilds(build: IBuildInfo) {
+  setBuilds(build: ITechBuild) {
     this.money -= build.cost;
     this.builds.push(build);
     this.onUpdateBuild.emit();
@@ -54,7 +57,7 @@ export class GamePlayer{
     return {incoming, outcoming};
   }
 
-  getAvailableBuilds():Array<IBuildInfo> {
+  getAvailableBuilds():Array<ITechBuild> {
     if (!this.builds.length) {
       return tech.builds.filter(item => item.deps.includes('rootAccess'));
     }
@@ -76,5 +79,17 @@ export class GamePlayer{
   setMoney(value:number){
     this.money = value;
     this.onUpdateBuild.emit();
+  }
+
+  build(build: ITechBuild, position: Vector) {
+    this.setBuilds(build);
+    this.onBuild(build, position);
+  //  const builds = this.objects.list.filter(it => it.player === 0 && it instanceof MapObject) as MapObject[];
+        //const closestBuild = findClosestBuild(position, builds);
+        //if (!builds.length || closestBuild.distance <= 6) {
+          //this.modeCallback();
+         // this.addObject(0, build.planned, position.x, position.y);
+          //this.cursorStatus.planned = null; 
+       // }
   }
 }

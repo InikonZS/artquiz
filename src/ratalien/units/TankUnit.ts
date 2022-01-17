@@ -1,15 +1,11 @@
-import { Vector } from '../../common/vector';
-import { findClosestBuild, findClosestUnit } from '../distance';
 import {AbstractUnit} from './abstractUnit';
 import { InteractiveObject } from './interactiveObject';
-import { MapObject } from './mapObject';
-import { WeaponSolder } from './weaponSolder';
-export class SolderUnit extends AbstractUnit{
-  weapon: WeaponSolder;
- 
+import { WeaponTank } from './weaponTank';
+export class TankUnit extends AbstractUnit{
+  weapon: WeaponTank;
   constructor(){
     super();
-    this.weapon = new WeaponSolder();
+    this.weapon = new WeaponTank();
     this.weapon.onBulletTarget = (point)=>{
       this.onDamageTile?.(point);
       const newEnemy = this.findClosestEnemy();
@@ -28,10 +24,6 @@ export class SolderUnit extends AbstractUnit{
     return false;
   }
   getDamage(target: InteractiveObject) {
-    return 10;    
+    return 20;    
   }
-
-  
-
-
 }

@@ -1,4 +1,4 @@
-import { AbstractUnit } from "./AbstractUnit";
+import { AbstractUnit } from "./abstractUnit";
 
 export interface IUnitConstructor{
   new ():AbstractUnit
