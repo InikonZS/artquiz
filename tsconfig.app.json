@@ -5,6 +5,7 @@
     "module": "es6",
     "target": "es5",
     "downlevelIteration": true,
+    "moduleResolution": "node", 
     "allowJs": true
   },
   "files": ["src/index.ts", "./module.d.ts"]

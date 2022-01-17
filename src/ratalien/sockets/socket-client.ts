@@ -1,9 +1,11 @@
 import { EventsType } from "../../common/socket-events-types";
+import {session} from './session';
 interface IServerResponseMessage {
   type: EventsType;
   content: string;
 }
 interface IServerRequestMessage {
+  sessionID: string;
   type: string;
   user: string;
   object: string;
@@ -39,6 +41,7 @@ export class SocketClient {
     // const fn_connect = this.connect;
     this._websocket = new WebSocket("ws://127.0.0.1:3000/");
     this._websocket.onopen = () => {
+      this.sendRequest(EventsType.CONNECT,'id user','id object',{});
       this.event(EventsType.CONNECT, "");
       this.wsc = this._websocket;
       this.sendHash();
@@ -48,6 +51,7 @@ export class SocketClient {
       this.event(response.type, response.content);
     };
     this._websocket.onclose = (e) => {
+      this.wsc = null;
       this.event(EventsType.DISCONNECT, "");
       console.log("Socket is closed. Reconnect will be attempted in 1 second.");
       setTimeout(() => {
@@ -74,12 +78,13 @@ export class SocketClient {
   sendRequest(type: string, user: string, object: string, content: any) {
     console.log("sendQeu");
     const request: IServerRequestMessage = {
+      sessionID: session.id,
       type: type,
       user: user,
       object: object,
       content: content,
     };
-    this._websocket.send(JSON.stringify(request));
+    // this._websocket.send(JSON.stringify(request));
     this.msgHash.add(request);
     if (this.wsc) {
       this.sendHash();
@@ -88,8 +93,8 @@ export class SocketClient {
   sendHash() {
     for (let t of this.msgHash.hash.keys()) {
       const typeMsg = this.msgHash.hash.get(t);
-
       for (let o of typeMsg.keys()) {
+        console.log('/? ? ?',typeMsg.get(o))
         this.wsc.send(JSON.stringify(typeMsg.get(o)));
       }
     }
@@ -102,7 +107,6 @@ export class SocketClient {
     cbSet.add(callback);
     this.listeners.set(type, cbSet);
   }
-
   remove(type: string, callback: (params: any) => void) {
     this.listeners.get(type).delete(callback);
   }
