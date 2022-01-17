@@ -1,5 +1,5 @@
 import { BomberUnit } from "./BomberUnit";
-import { DogUnit } from "./dogUnit";
+import { DogUnit } from "./DogUnit";
 import { HeavyTankUnit } from "./HeavyTankUnit";
 import { IUnitConstructor } from "./IUnitConstructor";
 import { SolderUnit } from "./SolderUnit";

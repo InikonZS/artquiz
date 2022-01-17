@@ -69,8 +69,17 @@ export class Game extends Control{
     player.onUnit = (unit) => {
       field.addUnit(player, unit.name)
     }
-    botPlayer.onBuild = (build, pos) => {
-      field.addObject(botPlayer, build, pos.x, pos.y);
+    console.log('botPlayer', botPlayer)
+    botPlayer.onBuild = (build, pos) => { // field.objects - все объекты, кот есть на поле игрока и бота
+      field.addObject(botPlayer, build, pos.x, pos.y); //pos.x и y  - координаты где строить здание
+      // Тут видны все актуальные постройки
+      // И вероятно тут лучше будет строить
+      // botPlayer.startPoint - начальная
+      // field.objects
+
+      // console.log('field.objects.list ', field.objects.list)
+      let playerBuilds = field.objects.list.filter(it => it.type !== 'interactive');
+      console.log('playerBuilds', playerBuilds)
     }
 
     botPlayer.onUnit = (unit) => {

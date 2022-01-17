@@ -1,4 +1,4 @@
-import { Vector } from "../common/vector";
+import { Vector, IVector } from "../common/vector";
 import { GamePlayer } from "./gamePlayer";
 import { ITechBuild } from "./interactives";
 import { tech } from './techTree';
@@ -25,22 +25,42 @@ export class BotPlayer extends GamePlayer{
   onUnit:(unit:IUnitInfo)=>void;
   onAttack:()=>void;
   unitsBuildArray = ['barracs', 'techCenter', 'carFactory', 'dogHouse'];
+  circlePoints: Array<IVector>;
+  startAngle: number = 20; // угол отклонения при расчете точек на окружности
+  stepBuilding: number = 1; // номер круга допустимой постройки
   constructor(startPoint:Vector, index:number){
     super(index);
     this.startPoint = startPoint;
     this.randomMove();
+    this.circlePoints = this.getCirclePoints()
+    console.log('точки на 1й окружности: ', this.circlePoints)
   }
 
-  randomMove(){
+  randomMove() {
     setTimeout(()=>{
-      this.radius += this.radius< 10?1:0.5;
+      this.radius += this.radius< 10 ? 1 : 0.5;
       let rnd = Math.random();
-      console.log(rnd)
-      if (rnd < 0.3) {
-        const build = this.getBuild();
+
+      // console.log(rnd)
+      if (rnd < 0.3) { // Создаем здание
+        const build = this.getBuild(); // получение здания
         this.setBuilds(build);
-        this.onBuild(build, this.startPoint.clone().add(new Vector(Math.floor(Math.random()*(4 +this.radius*2)-this.radius), Math.floor(Math.random()*(4+this.radius*2)-this.radius))));
-      } else if (rnd < 0.6) {
+
+        let curX = this.circlePoints[this.circlePoints.length - 1].x; //Math.floor(Math.random() * (4 + this.radius * 2) - this.radius);
+        let curY = this.circlePoints[this.circlePoints.length - 1].y; //Math.floor(Math.random() * (4 + this.radius * 2) - this.radius);
+        let vector = this.startPoint.clone().add(
+          new Vector(
+            curX,
+            curY
+          )
+        )
+        this.circlePoints.pop()
+        console.log('this.circlePoints: ', this.circlePoints)
+
+        this.onBuild(build,
+          this.startPoint.clone().add(vector)
+        );
+      } else if (rnd < 0.6) { // строит юнита
         const availableUnit = this.getAvailableUnits();
         if (availableUnit.length) {
           const unit = availableUnit[Math.floor(Math.random() * availableUnit.length)];
@@ -51,8 +71,14 @@ export class BotPlayer extends GamePlayer{
         //this.onAttack();
       }
       //this.onMove(this.startPoint.clone().add(new Vector(Math.floor(Math.random()*(4 +this.radius*2)-this.radius), Math.floor(Math.random()*(4+this.radius*2)-this.radius))));
+      
+      if (this.circlePoints.length === 0) {
+        this.stepBuilding++
+        this.circlePoints = this.getCirclePoints()
+        console.log(`точки на ${this.stepBuilding}й окружности: `, this.circlePoints)
+      }
       this.randomMove();
-    }, 10000);
+    }, 500);
   }
 
   setUnit(unit: IUnitInfo) {
@@ -70,4 +96,44 @@ export class BotPlayer extends GamePlayer{
     return builds[Math.floor(Math.random() * builds.length)];
   }
 
+  getCirclePoints(){
+    let arrPoints: Array<IVector> = []
+    let angle = this.startAngle / this.stepBuilding;
+    console.log('угол поворота: ', angle)
+    for(let i=0; i <=180; i = i + angle){
+      let x:number = this.startPoint.x + this.minDistance * this.stepBuilding * Math.cos(i);
+      let y:number = this.startPoint.y + this.minDistance * this.stepBuilding * Math.sin(i);
+      arrPoints.push({ x, y })
+    }
+    return arrPoints
+  } 
+
 }
+
+//todo
+/*
+0) Если построек еще нет, строим произвольную точку start
+1) Получить координаты всех точек, лежащих на окружности с центром start и радиусом this.minDistance 
+  (this.minDistance - минимальное допустимое расстояние до постройки - из общих настроек)
+  методом полрной засечки (приращение координат по углу и расстоянию).
+
+  getCirclePoints(r: number = 1){
+    let arrPoints: Array<IVector> = []
+    for(let i=0; i <=180; i=i+10){
+      let x:number = this.startPoint.x + this.minDistance * r * Math.cos(i)
+      let y:number = this.startPoint.y + this.minDistance * r * Math.sin(i)
+      arrPoints.push({ x, y })
+    }
+    return arrPoints
+  } 
+
+2) Обход массива arrPoints. Если 
+  - расстояние до ближайшего своего здания > this.minDistance
+  - расстояние до ближайшего здания противника > this.minDistance
+  - если на этом месте можно строить
+  => строим здание
+
+3) По окончанию обхода, построить новую окружность с радиусом this.minDistance * 2 
+и повторять шаго 1 и 2
+
+*/
