@@ -69,7 +69,7 @@ export class Game extends Control{
     player.onUnit = (unit) => {
       field.addUnit(player, unit.name)
     }
-    console.log('botPlayer', botPlayer)
+    
     botPlayer.onBuild = (build, pos) => { // field.objects - все объекты, кот есть на поле игрока и бота
       field.addObject(botPlayer, build, pos.x, pos.y); //pos.x и y  - координаты где строить здание
       // Тут видны все актуальные постройки
@@ -78,8 +78,11 @@ export class Game extends Control{
       // field.objects
 
       // console.log('field.objects.list ', field.objects.list)
-      let playerBuilds = field.objects.list.filter(it => it.type !== 'interactive');
-      console.log('playerBuilds', playerBuilds)
+      // let playerBuilds = field.objects.list.filter(it => it.type === 'build'); //todo как понять это здание игрока или бота?
+
+
+      let playerBuilds = field.objects.list.filter(it=>(it.player!==player) && (it.type === 'build'));
+      console.log('not playerBuilds', playerBuilds)
     }
 
     botPlayer.onUnit = (unit) => {
@@ -87,7 +90,7 @@ export class Game extends Control{
     }
 
     // botPlayer.onAttack = ()=>{
-    //   let playerBuilds = field.objects.list.filter(it=>it.player==0);
+      // let playerBuilds = field.objects.list.filter(it=>it.player==player);
     //   if (playerBuilds.length == 0) return;
     // }
     

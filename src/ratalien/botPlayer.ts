@@ -25,15 +25,15 @@ export class BotPlayer extends GamePlayer{
   onUnit:(unit:IUnitInfo)=>void;
   onAttack:()=>void;
   unitsBuildArray = ['barracs', 'techCenter', 'carFactory', 'dogHouse'];
-  circlePoints: Array<IVector>;
+  circlePoints: Array<IVector> = [];
   startAngle: number = 20; // угол отклонения при расчете точек на окружности
   stepBuilding: number = 1; // номер круга допустимой постройки
   constructor(startPoint:Vector, index:number){
     super(index);
     this.startPoint = startPoint;
     this.randomMove();
-    this.circlePoints = this.getCirclePoints()
-    console.log('точки на 1й окружности: ', this.circlePoints)
+    // this.circlePoints = this.getCirclePoints()
+    // console.log('точки на 1й окружности: ', this.circlePoints)
   }
 
   randomMove() {
@@ -46,17 +46,24 @@ export class BotPlayer extends GamePlayer{
         const build = this.getBuild(); // получение здания
         this.setBuilds(build);
 
-        let curX = this.circlePoints[this.circlePoints.length - 1].x; //Math.floor(Math.random() * (4 + this.radius * 2) - this.radius);
-        let curY = this.circlePoints[this.circlePoints.length - 1].y; //Math.floor(Math.random() * (4 + this.radius * 2) - this.radius);
+        let curX: number;
+        let curY: number;
+
+        if (this.circlePoints.length === 0) {
+          curX = this.startPoint.x
+          curY = this.startPoint.y
+        } else {
+          curX = this.circlePoints[this.circlePoints.length - 1].x; //Math.floor(Math.random() * (4 + this.radius * 2) - this.radius);
+          curY = this.circlePoints[this.circlePoints.length - 1].y; //Math.floor(Math.random() * (4 + this.radius * 2) - this.radius);
+          this.circlePoints.pop()
+          // console.log('this.circlePoints: ', this.circlePoints)
+        }
         let vector = this.startPoint.clone().add(
           new Vector(
             curX,
             curY
           )
         )
-        this.circlePoints.pop()
-        console.log('this.circlePoints: ', this.circlePoints)
-
         this.onBuild(build,
           this.startPoint.clone().add(vector)
         );
@@ -75,7 +82,7 @@ export class BotPlayer extends GamePlayer{
       if (this.circlePoints.length === 0) {
         this.stepBuilding++
         this.circlePoints = this.getCirclePoints()
-        console.log(`точки на ${this.stepBuilding}й окружности: `, this.circlePoints)
+        // console.log(`точки на ${this.stepBuilding}й окружности: `, this.circlePoints)
       }
       this.randomMove();
     }, 500);
