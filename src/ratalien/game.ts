@@ -11,6 +11,8 @@ import { GameField } from "./gameField";
 import { GameModel } from './gameModel';
 import { GameMap } from "./gameMap";
 import { IGameOptions } from './IGameOptions';
+import { globalGameInfo } from './globalGameInfo';
+import { createIdGenerator } from './idGenerator';
 
 export class Game extends Control{
   player:GamePlayer;
@@ -18,6 +20,10 @@ export class Game extends Control{
   onExit: () => void;
   constructor(parentNode: HTMLElement, res: Record<string, HTMLImageElement>, options: IGameOptions){
     super(parentNode, 'div', red['global_wrapper']);
+    const idGenerator =  createIdGenerator('playerId')
+    globalGameInfo.nextId = () => {
+      return idGenerator() //TODO add options
+    }
     this.node.onmouseleave = (e)=>{
      // console.log(e.offsetX, e.offsetY);
       if (e.offsetX>this.node.clientWidth){

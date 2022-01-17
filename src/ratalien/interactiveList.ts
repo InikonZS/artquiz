@@ -3,7 +3,7 @@ import { InteractiveObject } from "./interactives";
 
 export class InteractiveList{
   public list:InteractiveObject[];
-  hoveredObjects:InteractiveObject[];
+  hoveredObjects: InteractiveObject[];
 
   _hovered:InteractiveObject;
   set hovered(value:InteractiveObject){
@@ -21,7 +21,10 @@ export class InteractiveList{
     this.hoveredObjects = [];
   }
 
-  add(object:InteractiveObject){
+  add(object: InteractiveObject) {
+    object.getList = () => {
+      return this;
+    }
     object.onMouseEnter = ()=>{
       this.hoveredObjects.push(object);
       this.handleHover();

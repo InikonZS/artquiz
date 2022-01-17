@@ -10,7 +10,7 @@ import "../style.css";
 import style from "./application.css";
 
 import { ResourceLoader } from "../ratalien/loader";
-import {SocketClient, wsc} from "../ratalien/sockets/socket-client";
+import "../ratalien/sockets/socket-client";
 
 export class Application extends Control {
   settingsModel: SettingsModel;
@@ -78,7 +78,7 @@ export class Application extends Control {
       console.log("***")
       //*chooseGameMode
       const randomNameI= Math.floor(Math.random()*100)
-      wsc.sendMessage('TESTName'+randomNameI,'')
+      // wsc.sendMessage('TESTName'+randomNameI,'')
       startPage.animateOut().then(() => {
         startPage.destroy();
         this.gameCycle();

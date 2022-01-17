@@ -15,7 +15,7 @@ export class TruckUnit extends AbstractUnit{
     this.weapon = new WeaponTrack();
     this.weapon.onBulletTarget = (point)=>{
       this.onDamageTile?.(point);
-      const newClosestGold =  findClosestGold(this.position.clone(),  this.getResource());
+      const newClosestGold =  findClosestGold(this.position.clone(),  this.getList().list.filter(item=>item instanceof Gold));
       if (newClosestGold !== this.closestGold) {
         this.attackTarget = null;
       }
@@ -44,14 +44,15 @@ export class TruckUnit extends AbstractUnit{
 
   logic() {
     if (this.gold >= 3000) {
-      const closestBuild = findClosestBuild(this.position.clone(), this.getObjects().filter(item=>item.name == 'oreFactory'&&this.player===item.player) as MapObject[]);
+      const oreFactory = this.getList().list.filter(item => item.name == 'oreFactory' && this.player === item.player) as MapObject[];
+      const closestBuild = findClosestBuild(this.position.clone(), oreFactory);
       //console.log(closestBuild.tile)
       if (closestBuild.tile) {
         this.setTarget(closestBuild.tile);
       }
       
     }else if (!this.attackTarget) {
-      this.closestGold = findClosestGold(this.position.clone(), this.getResource());
+      this.closestGold = findClosestGold(this.position.clone(), this.getList().list.filter(item=>item instanceof Gold));
      //console.log(this.closestGold.position)
       this.setTarget(this.closestGold.position);
     }

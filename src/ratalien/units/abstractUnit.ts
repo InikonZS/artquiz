@@ -19,10 +19,10 @@ export class AbstractUnit extends InteractiveObject{
   tileChecker: (pos: Vector) => boolean;
   type:string = 'unit';
   onDamageTile: (point: Vector) => void;
-  getResource: () => InteractiveObject[];
-  getObjects: () => InteractiveObject[];
+ // getResource: () => InteractiveObject[];
+ // getObjects: () => InteractiveObject[];
   setTarget: (point: Vector) => void;
-  getObjectInTile: (point: Vector) => InteractiveObject;
+  //getObjectInTile: (point: Vector) => InteractiveObject;
   protected gold: number = 0;
   maxGold: number = 3000;
   weapon: AbstractWeapon;
@@ -157,9 +157,11 @@ export class AbstractUnit extends InteractiveObject{
     return action;
   }
 
- logic() {
-    const closestUnit = findClosestUnit(this.position.clone(), this.getResource().filter(it => it instanceof AbstractUnit) as AbstractUnit[]);
-    const closestBuild = findClosestBuild(this.position.clone(), this.getResource().filter(it => it instanceof MapObject) as MapObject[]);
+  logic() {
+   const units = this.getList().list.filter(it=> it instanceof AbstractUnit&&it.player!=this.player) as AbstractUnit[];
+   const builds =this.getList().list.filter(it=> it instanceof MapObject&&it.player!=this.player) as MapObject[];
+    const closestUnit = findClosestUnit(this.position.clone(), units);
+    const closestBuild = findClosestBuild(this.position.clone(), builds);
     const targetEnemy = closestUnit.distance > closestBuild.distance ? closestBuild : closestUnit;
    
     if (!this.attackTarget) {
@@ -175,8 +177,10 @@ export class AbstractUnit extends InteractiveObject{
   }
 
   findClosestEnemy() {
-    const closestUnit = findClosestUnit(this.position.clone(), this.getResource().filter(it => it instanceof AbstractUnit) as AbstractUnit[]);
-    const closestBuild = findClosestBuild(this.position.clone(), this.getResource().filter(it => it instanceof MapObject) as MapObject[]);
+    const units = this.getList().list.filter(it=> it instanceof AbstractUnit&&it.player!=this.player) as AbstractUnit[];
+   const builds =this.getList().list.filter(it=> it instanceof MapObject&&it.player!=this.player) as MapObject[];
+    const closestUnit = findClosestUnit(this.position.clone(), units);
+    const closestBuild = findClosestBuild(this.position.clone(), builds);
     return closestUnit.distance > closestBuild.distance ? closestBuild : closestUnit;
   }
   
