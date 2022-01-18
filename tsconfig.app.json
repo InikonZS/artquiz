@@ -5,8 +5,13 @@
     "module": "es6",
     "target": "es5",
     "downlevelIteration": true,
+<<<<<<< HEAD
     "allowJs": true,
     "sourceMap": true
+=======
+    "moduleResolution": "node", 
+    "allowJs": true
+>>>>>>> 21513f5938a9c3bd4a0619121ffddffd5d37098a
   },
   "files": ["src/index.ts", "./module.d.ts"]
 }

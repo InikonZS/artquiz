@@ -1,29 +1,20 @@
-import {createServer, RequestListener, Server} from 'http';
-import {IServerResponseMessage} from './socket-server-interface';
-import {
-  connection, IUtf8Message,
-  // IUtf8Message
-} from 'websocket';
-import {EventsType} from '../common/socket-events-types';
-import {playersList, PlayersList} from './player';
-import {thingList, ThingsList} from './thing';
-
-// import { connect } from 'http2';
-// import { any } from 'nconf';
-// import { string } from 'prop-types';
+import { createServer, RequestListener, Server } from "http";
+import { IServerResponseMessage } from "./socket-server-interface";
+import { connection, IUtf8Message } from "websocket";
+import { EventsType } from "../common/socket-events-types";
+import { connectionList } from "./connectlist";
 
 const requestHandler: RequestListener = (request, response) => {
-  response.end('Hello  Node.js Server!');
+  response.end("Hello  Node.js Server!");
 };
 const httpWSServer = createServer(requestHandler);
-const wssPort = '3000';
+const wssPort = "3000";
 
 httpWSServer.listen(wssPort, () => {
-  console.log(`WS is listening on ${wssPort}`);
+  console.log(`WSocket is listening on ${wssPort}`);
 });
 
-//const websocket = require('websocket');
-import * as websocket from 'websocket';
+import * as websocket from "websocket";
 
 const sendResponse = (client: connection, type: string, obj: any) => {
   const responseMessage: IServerResponseMessage = {
@@ -34,19 +25,20 @@ const sendResponse = (client: connection, type: string, obj: any) => {
 };
 
 class SocketService {
-  private wss:websocket.server;
-  private connections: connection[];
-  public usersName: string[];
+  private wss: websocket.server;
+  private connections: any[];
+  private usersName: any[];
 
   constructor(srv: Server) {
-    this.wss = new websocket.server({httpServer: srv});
-    this.wss.on('request', (request:websocket.request)=>this.onConnect(request));
+    this.wss = new websocket.server({ httpServer: srv });
+    this.wss.on("request", (request: websocket.request) =>
+      this.onConnect(request)
+    );
     this.connections = []
     this.usersName=[]
-//Undefined
   }
 
-  onConnect(request:websocket.request) {
+  onConnect(request: websocket.request) {
     const connection = request.accept(undefined, request.origin);
    //console.log("Wow connect")
     connection.on('message', (_message) => {
@@ -99,8 +91,11 @@ class SocketService {
       if (_message.type === 'utf8') {
         const message = _message as IUtf8Message;
         let data = JSON.parse(message.utf8Data);
-        if (data.type === 'message') {
-          sendAllList();
+        if (data.type == EventsType.CONNECT) {
+          console.log("EventsType.CONNECT", data.sessionID);
+          connectionList.add(data.sessionID, connection);
+        } else {
+          console.log(`Unknow EventsType [${data.type}]` );
         }
 
         if (data.type == EventsType.USER_CONNECT) {
@@ -131,10 +126,9 @@ class SocketService {
       }else{
         throw new Error('Not utf8');
       }
-     });
-
+    });
   }
 }
 
 const wsc = new SocketService(httpWSServer);
-export {wsc};
+export { wsc };

@@ -1,7 +1,11 @@
-import { IPlayer } from './iplayer';
 import { connection } from 'websocket';
 
-class Player {
+interface IConnect {
+  id: string
+  name: string
+}
+
+class Connection {
   public id: string;
   public name: string = '';
   public connection: connection | null = null;
@@ -14,7 +18,7 @@ class Player {
   change({name}){
     this.name = name || '';
   }
-  toJSON() {
+  toJSON():IConnect {
     return {
       id: this.id,
       name: this.name,
@@ -23,15 +27,15 @@ class Player {
   
 }
 
-class PlayersList {
-  public _list: Map<string, Player> = new Map();
-  add(player: IPlayer, connection) {
-    this._list.set(player.id, new Player(player.id, player.name, connection));
+class ConnectionList {
+  public _list: Map<string, Connection> = new Map();
+  add(connect: Connection | IConnect, connection) {
+    this._list.set(connect.id, new Connection(connect.id, connect.name, connection));
   }
   list() {
     return this._list;
   }
 }
 
-const playersList = new PlayersList();
-export { playersList,PlayersList  };
+const connectionList = new ConnectionList();
+export { connectionList,ConnectionList  };

@@ -14,6 +14,7 @@ import {SocketClient, wsc} from "../ratalien/sockets/socket-client";
 import {EventsType} from "../common/socket-events-types";
 import Signal from "../common/signal";
 
+
 export class Application extends Control {
   settingsModel: SettingsModel;
   header: Control<HTMLElement>;
@@ -88,6 +89,7 @@ this.typeGame=null
     startPage.animateIn();
 
     startPage.onGamePlay = (typeGame) => {
+
       console.log("***",typeGame)
       this.typeGame='multiplayer'
       const randomNameI = Math.floor(Math.random() * 100)
@@ -100,8 +102,6 @@ this.typeGame=null
         }
         this.onSignal.emit(response)
       })
-
-
       startPage.animateOut().then(() => {
         startPage.destroy();
         this.gameCycle();
