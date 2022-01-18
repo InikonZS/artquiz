@@ -1,3 +1,12 @@
+
+//import {types} from "sass";
+//import Map = types.Map;
+
+// import {types} from "sass";
+// import Map = types.Map;
+
+import Signal from "../../common/signal";
+
 import { EventsType } from "../../common/socket-events-types";
 import {session} from './session';
 interface IServerResponseMessage {
@@ -26,11 +35,20 @@ class MsgHash {
     this.hash.get(msg.type).set(msg.object, msg);
   }
 }
-
+interface IResponsePlayers {
+  users:string[]
+}
 export class SocketClient {
   private wsc: WebSocket = null;
   private msgHash: MsgHash = new MsgHash();
   private listeners: Map<string, Set<(data: any) => void>> = new Map();
+// <<<<<<< HEAD
+//   private _websocket: WebSocket = new WebSocket('ws://127.0.0.1:3000/');
+   onGetPlayers: Signal<IResponsePlayers>=new Signal<IResponsePlayers>();
+//
+//   constructor() {
+//     this._websocket = new WebSocket('ws://127.0.0.1:3000/');
+// =======
   private _websocket: WebSocket = new WebSocket("ws://127.0.0.1:3000/");
 
   constructor() {
@@ -40,6 +58,7 @@ export class SocketClient {
   connect() {
     // const fn_connect = this.connect;
     this._websocket = new WebSocket("ws://127.0.0.1:3000/");
+//>>>>>>> 21513f5938a9c3bd4a0619121ffddffd5d37098a
     this._websocket.onopen = () => {
       this.sendRequest(EventsType.CONNECT,'id user','id object',{});
       this.event(EventsType.CONNECT, "");
@@ -48,6 +67,7 @@ export class SocketClient {
     };
     this._websocket.onmessage = (ev) => {
       const response: IServerResponseMessage = JSON.parse(ev.data);
+
       this.event(response.type, response.content);
     };
     this._websocket.onclose = (e) => {
@@ -76,6 +96,7 @@ export class SocketClient {
   }
 
   sendRequest(type: string, user: string, object: string, content: any) {
+
     console.log("sendQeu");
     const request: IServerRequestMessage = {
       sessionID: session.id,
@@ -84,8 +105,13 @@ export class SocketClient {
       object: object,
       content: content,
     };
-    // this._websocket.send(JSON.stringify(request));
-    this.msgHash.add(request);
+//<<<<<<< HEAD
+    this._websocket.send(JSON.stringify(request))
+    //this.msgHash.add(request)
+// =======
+//     // this._websocket.send(JSON.stringify(request));
+//     this.msgHash.add(request);
+// >>>>>>> 21513f5938a9c3bd4a0619121ffddffd5d37098a
     if (this.wsc) {
       this.sendHash();
     }
@@ -123,4 +149,5 @@ export class SocketClient {
 }
 
 const wsc = new SocketClient();
+
 export { wsc, IServerRequestMessage, IServerResponseMessage };
