@@ -4,4 +4,5 @@ export enum EventsType {
     USER_CHANGE = 'user-change',
     THING_CHANGE = 'thing-change',
     THING_LIST = 'thing-list',
+    ADD_PLAYER='add_player'
 }

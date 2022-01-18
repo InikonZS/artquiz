@@ -4,6 +4,8 @@
 // import {types} from "sass";
 // import Map = types.Map;
 
+import Signal from "../../common/signal";
+
 interface IServerResponseMessage {
   type: string;
   content: string;
@@ -30,28 +32,31 @@ class MsgHash {
     this.hash.get(msg.type).set(msg.object, msg)
   }
 }
-
+interface IResponsePlayers {
+  users:string[]
+}
 export class SocketClient {
   private wsc: WebSocket = null;
   private msgHash: MsgHash = new MsgHash();
   private listeners: Map<string, Set<(data: any) => void>> = new Map();
   private _websocket: WebSocket = new WebSocket('ws://127.0.0.1:3000/');
+  onGetPlayers: Signal<IResponsePlayers>=new Signal<IResponsePlayers>();
 
   constructor() {
     this._websocket = new WebSocket('ws://127.0.0.1:3000/');
-    //console.log('^^^%%%',this._websocket.readyState)
     this._websocket.onopen = () => {
       this.wsc = this._websocket;
       this.sendHash();
     };
     this._websocket.onmessage = (ev) => {
       const response: IServerResponseMessage = JSON.parse(ev.data);
+      const users:IResponsePlayers=JSON.parse(response.content)
       if (response.type === 'activePlayers') {
-        console.log('PlayersName',response.content)
+        console.log('PlayersName',response)
+       this.onGetPlayers.emit(users)
       }
       for (let type of this.listeners.keys()) {
         if (type == response.type) {
-          // @ts-ignore
           for (let callback of this.listeners.get(type)) {
             callback.call(this, response.content);
           }
@@ -73,7 +78,7 @@ export class SocketClient {
   }
 
   sendRequest(type: string, user: string, object: string, content: any) {
-    console.log('sendQeu')
+    console.log(content)
     const request: IServerRequestMessage = {
       type: type,
       user: user,
@@ -81,7 +86,7 @@ export class SocketClient {
       content: content,
     };
     this._websocket.send(JSON.stringify(request))
-    this.msgHash.add(request)
+    //this.msgHash.add(request)
     if (this.wsc) {
       this.sendHash();
     }
@@ -112,4 +117,4 @@ export class SocketClient {
 }
 
 const wsc = new SocketClient();
-export {wsc, IServerRequestMessage, IServerResponseMessage}
+export {wsc,IServerRequestMessage, IServerResponseMessage}

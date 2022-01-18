@@ -48,13 +48,14 @@ class SocketService {
 
   onConnect(request:websocket.request) {
     const connection = request.accept(undefined, request.origin);
-    console.log("THISconnections",this)
-    // console.log('$$')
-    // const name='Player'
-    console.log("Wow connect")
+   //console.log("Wow connect")
     connection.on('message', (_message) => {
-      console.log('MESS')
       const sendAll = (type, content) => {
+        console.log(content)
+        this.connections.forEach(connection => {
+           sendResponse(connection,type,JSON.stringify(content))
+           //connection.sendUTF(JSON.stringify('Request' + this.usersName))
+         })
         let arr = Array.from(playersList.list().keys());
         for (let i in arr) {
           let p = playersList.list().get(arr[i]);
@@ -68,10 +69,10 @@ class SocketService {
       const sendAllList = () => {
         sendList(EventsType.USER_LIST, playersList)
         sendList(EventsType.THING_LIST, thingList)
-       this.connections.forEach(connection => {
-          sendResponse(connection,'activePlayers',{users:this.usersName})
-          //connection.sendUTF(JSON.stringify('Request' + this.usersName))
-        })
+       // this.connections.forEach(connection => {
+       //    sendResponse(connection,'activePlayers',JSON.stringify({users:this.usersName}))
+       //    //connection.sendUTF(JSON.stringify('Request' + this.usersName))
+       //  })
       }
       const sendList = (type: EventsType, thisList: PlayersList | ThingsList) => {
         let arr = Array.from(thisList.list().keys());
@@ -89,12 +90,6 @@ class SocketService {
         if (data.type === 'message') {
           sendAllList();
         }
-        if (data.type === 'addPlayer') {
-          this.connections.push(connection)
-          console.log('push')
-          this.usersName.push(data.user)
-          sendAllList();
-        }
 
         if (data.type == EventsType.USER_CONNECT) {
           playersList.add(data.content.player, connection);
@@ -103,6 +98,11 @@ class SocketService {
             thingList.add(thing)
           }
           sendAllList();
+        }
+        if(data.type== EventsType.ADD_PLAYER){
+          this.connections.push(connection)
+          this.usersName.push(data.content.name)
+          sendAll(EventsType.ADD_PLAYER,{names:this.usersName});
         }
         else if (data.type == EventsType.USER_CHANGE) {
           playersList.list().get(data.content.id).change(data.content);

@@ -25,6 +25,7 @@ const tsRuleWebApp: RuleSetRule = {
 }
 export const webAppConfig: Configuration = {
     entry: join(__dirname, 'index.ts'),
+    devtool:'inline-source-map',
     output: {
         path: join(__dirname, '..', 'dist', 'web_app'),
         filename: 'bundle.js'

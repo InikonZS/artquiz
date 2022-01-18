@@ -1,19 +1,20 @@
 import Control from "../common/control";
 import style from "./settingsPage.css"
+import {SocketClient, wsc} from "../ratalien/sockets/socket-client";
 
 export interface ISettings{
   money: number,
   speed: number,
   idMap: number,
   players: string[] // TODO что в интерфейсе настроек??
-  
+
 }
 
 const defaultSettings:ISettings = {
   money: 5000,
   speed: 7,
   idMap: 1,
-  players: ['player_1', 'player_2', 'player_3'] 
+  players: ['player_1', 'player_2', 'player_3']
 }
 export class SettingsModel{
   private settings: ISettings;
@@ -50,10 +51,11 @@ export class SettingsModel{
 export class SettingsPage extends Control{
   onBack: ()=>void;
   onPlay: (settings:ISettings)=>void;
+  private wsc: SocketClient;
+  private players: Control<HTMLLabelElement>;
 
-  constructor(parentNode:HTMLElement, initialSettings:ISettings){
+  constructor(parentNode:HTMLElement, initialSettings:ISettings,usersOnline?:string[]){
     super(parentNode, 'div', style["main_wrapper"]);//{default: style["main_wrapper"], hidden: style["hide"]});    
-    
     const settings: ISettings = initialSettings;
     const settingsWrapper = new Control(this.node, 'div', style["settings_wrapper"]);
 
@@ -71,8 +73,14 @@ export class SettingsPage extends Control{
     speedInput.node.type = 'text';
 
     const playersWrapper = new Control(settingsWrapper.node, 'div', style["players_wrapper"]);
-    const players = new Control<HTMLLabelElement>(playersWrapper.node, 'textarea', style['players_area'], 'Игроки')
-
+    this.players = new Control<HTMLLabelElement>(playersWrapper.node, 'textarea', style['players_area'], 'Игроки')
+console.log("$$$",usersOnline)
+    if(usersOnline){
+      const usersList=new Control(playersWrapper.node,'ul')
+      usersOnline.forEach(us=> {
+        const li = new Control(usersList.node,'li','',us)
+      })
+    }
     const infoWrapper = new Control(settingsWrapper.node, 'div', style["info_wrapper"]);
     const info = new Control<HTMLLabelElement>(infoWrapper.node, 'textarea', style['info_area'], 'Информация')
 
