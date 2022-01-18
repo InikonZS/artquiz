@@ -51,20 +51,32 @@ class SocketService {
    //console.log("Wow connect")
     connection.on('message', (_message) => {
       const sendAll = (type, content) => {
-        console.log(content)
-        this.connections.forEach(connection => {
-           sendResponse(connection,type,JSON.stringify(content))
-           //connection.sendUTF(JSON.stringify('Request' + this.usersName))
-         })
-        let arr = Array.from(playersList.list().keys());
-        for (let i in arr) {
-          let p = playersList.list().get(arr[i]);
-          try {
-            sendResponse(p.connection, type, content);
-          } catch (e) {
-            //console.log(e);
+        const other=this.connections.filter(c=>c!=connection)
+        const cur=this.connections.filter(c=>c==connection)
+        other.forEach(c=>{
+          console.log("TTTTT",type,other)
+          if(type==EventsType.ADD_PLAYER){
+            sendResponse(c,type,JSON.stringify(content.newPlayer))
           }
-        }
+          sendResponse(c,type,JSON.stringify(content))
+        })
+        cur.forEach(c=>{
+          console.log("UUU",type.cur)
+          if(type==EventsType.ADD_PLAYER){
+            sendResponse(c,type,JSON.stringify(content.usersOnline))
+          }
+          sendResponse(c,type,JSON.stringify(content))
+        })
+
+        // let arr = Array.from(playersList.list().keys());
+        // for (let i in arr) {
+        //   let p = playersList.list().get(arr[i]);
+        //   try {
+        //     sendResponse(p.connection, type, content);
+        //   } catch (e) {
+        //     //console.log(e);
+        //   }
+        // }
       };
       const sendAllList = () => {
         sendList(EventsType.USER_LIST, playersList)
@@ -102,7 +114,11 @@ class SocketService {
         if(data.type== EventsType.ADD_PLAYER){
           this.connections.push(connection)
           this.usersName.push(data.content.name)
-          sendAll(EventsType.ADD_PLAYER,{names:this.usersName});
+          const usersOnline=this.usersName.filter(us=>us!==data.content.name)
+          sendAll(EventsType.ADD_PLAYER,{usersOnline,newPlayer:data.content.name})
+        }
+        if(data.type== EventsType.SEND_MESSAGE){
+          sendAll(EventsType.SEND_MESSAGE,{name:data.content.user,text:data.content.text})
         }
         else if (data.type == EventsType.USER_CHANGE) {
           playersList.list().get(data.content.id).change(data.content);

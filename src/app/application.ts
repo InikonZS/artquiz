@@ -26,7 +26,8 @@ export class Application extends Control {
   private drawBinded: (s: string[]) => void;
   private typeGame: string;
   private playersOnline: string[];
-  protected onSignal:Signal<string[]>=new Signal<string[]>()
+  protected onSignal:Signal<string>=new Signal<string>()
+  private userName: string;
   constructor(parentNode: HTMLElement) {
     super(parentNode, 'div', style["global_wrapper"]);
 this.typeGame=null
@@ -60,15 +61,15 @@ this.typeGame=null
   }
 
   private gameCycle() {
-    console.log(this.typeGame==='multiplayer')
     this.settingsPage = new SettingsPage(this.main.node,this.settingsModel.getData(),
-      this.typeGame==='multiplayer' && this.playersOnline );
+      this.typeGame==='multiplayer' && this.playersOnline,
+      this.typeGame==='multiplayer' && this.userName);
     this.settingsPage.onBack = () => {
       this.settingsPage.destroy();
       this.mainCycle();
     }
-    //передаем сюда все существующие изменения и подписываемся на новые
-    this.onSignal.add((r)=>console.log(r))
+    this.onSignal.add((params)=>this.settingsPage.addPlayerName(params)
+    )
     this.settingsPage.onPlay = (settings) => {
       this.settingsPage.destroy();
       this.settingsModel.setData(settings);  //будет ли модель ??
@@ -90,10 +91,14 @@ this.typeGame=null
       console.log("***",typeGame)
       this.typeGame='multiplayer'
       const randomNameI = Math.floor(Math.random() * 100)
-      wsc.sendRequest(EventsType.ADD_PLAYER, '', '', {name: 'TESTName' + randomNameI})
+      this.userName='TESTName' + randomNameI
+      wsc.sendRequest(EventsType.ADD_PLAYER, '', '', {name: this.userName})
       wsc.on(EventsType.ADD_PLAYER, (t) => {
-        this.playersOnline=JSON.parse(t).names
-        this.onSignal.emit(JSON.parse(t).names)
+        const response = JSON.parse(t)
+        if(response instanceof Array && response.length>0){
+          this.playersOnline=response
+        }
+        this.onSignal.emit(response)
       })
 
 

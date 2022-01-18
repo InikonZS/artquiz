@@ -28,7 +28,9 @@
   padding: 10px;
   gap:10px;
 }
-
+.chatList{
+  background: #777777;
+}
 .item_wrapper{
   display: flex;
   flex-wrap: wrap;
