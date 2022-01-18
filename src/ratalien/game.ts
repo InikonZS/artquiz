@@ -13,6 +13,8 @@ import { GameMap } from "./gameMap";
 import { IGameOptions } from './IGameOptions';
 import { globalGameInfo } from './globalGameInfo';
 import { createIdGenerator } from './idGenerator';
+import { checkMap, findClosestBuild } from "./distance";
+import { MapObject } from "./interactives";
 
 export class Game extends Control{
   player:GamePlayer;
@@ -71,21 +73,23 @@ export class Game extends Control{
     }
     
     botPlayer.onBuild = (build, pos) => { // field.objects - все объекты, кот есть на поле игрока и бота
-      field.addObject(botPlayer, build, pos.x, pos.y); //pos.x и y  - координаты где строить здание
-      // Тут видны все актуальные постройки
-      // И вероятно тут лучше будет строить
-      // botPlayer.startPoint - начальная
-      // field.objects
+      // const builds = field.objects.list.filter(it => (it.type === 'build')) as MapObject[];
+      const builds = field.objects.list.filter(it => it instanceof MapObject) as MapObject[];
+      // field.objects.list.filter(it => (it.player === 'GamePlayer' && it.type === 'build')) as MapObject[]; // Здания игрока
+      // field.objects.list.filter(it => (it.player === 'BotPlayer' && it.type === 'build')) as MapObject[]; // Здания бота
 
-      // console.log('field.objects.list ', field.objects.list)
-      // let playerBuilds = field.objects.list.filter(it => it.type === 'build'); //todo как понять это здание игрока или бота?
+      // console.log('pos.clone() ', pos.clone())
+      // console.log('builds ', builds)
+      const closestBuild = findClosestBuild(pos.clone(), builds);
 
-
-      let playerBuilds = field.objects.list.filter(it=>(it.player!==player) && (it.type === 'build'));
-      console.log('not playerBuilds', playerBuilds)
+      if (!builds.length || closestBuild.distance >= 6) { 
+        // строим здание на позиции pos
+        field.addObject(botPlayer, build, pos.x, pos.y);
+      }      
     }
 
     botPlayer.onUnit = (unit) => {
+      // console.log('unit.name', unit.name)
       field.addUnit(botPlayer, unit.name);
     }
 

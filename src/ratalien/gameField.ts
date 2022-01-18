@@ -31,7 +31,7 @@ export class GameField extends Control{
   map:GameMap;
   sz:number = 55;
   canvas: Control<HTMLCanvasElement>;
-  objects: InteractiveList;//MapObject[]=[];
+  objects: InteractiveList;//MapObject[]=[]; // все здания, юниты бота и игрока
   modeCallback: () => void;
   //primaries: Array<Record<string, MapObject>> =[{},{}];
   res: Record<string, HTMLImageElement>;
@@ -237,7 +237,11 @@ export class GameField extends Control{
  
 
 //возможно, тут лучше передвать не нейм, а сам объект созданного солдата? 
-  addUnit(player:GamePlayer, name:string){
+  addUnit(player: GamePlayer, name: string) {
+    console.log('')
+    console.log('fn addUnit')
+    console.log('player ', player)
+    console.log('name ', name)
     //TODO check is empty,else, check neighbor
   
     let UnitConstructor = units[name] || AbstractUnit;

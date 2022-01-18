@@ -3,7 +3,7 @@ import { GamePlayer } from "./gamePlayer";
 import { ITechBuild } from "./interactives";
 import { tech } from './techTree';
 import { IUnitConstructor } from "./units/IUnitConstructor";
-
+import { checkMap, findClosestBuild } from "./distance";
 
 interface IUnitInfo{
   spawn:Array<string>,
@@ -26,14 +26,12 @@ export class BotPlayer extends GamePlayer{
   onAttack:()=>void;
   unitsBuildArray = ['barracs', 'techCenter', 'carFactory', 'dogHouse'];
   circlePoints: Array<IVector> = [];
-  startAngle: number = 20; // угол отклонения при расчете точек на окружности
-  stepBuilding: number = 1; // номер круга допустимой постройки
+  startAngle: number = 10; // угол отклонения при расчете точек на окружности
+  stepBuilding: number = 0; // номер круга допустимой постройки
   constructor(startPoint:Vector, index:number){
     super(index);
     this.startPoint = startPoint;
     this.randomMove();
-    // this.circlePoints = this.getCirclePoints()
-    // console.log('точки на 1й окружности: ', this.circlePoints)
   }
 
   randomMove() {
@@ -42,37 +40,43 @@ export class BotPlayer extends GamePlayer{
       let rnd = Math.random();
 
       // console.log(rnd)
-      if (rnd < 0.3) { // Создаем здание
+      if (rnd < 0.5) { // Создаем здание
         const build = this.getBuild(); // получение здания
         this.setBuilds(build);
 
         let curX: number;
         let curY: number;
 
-        if (this.circlePoints.length === 0) {
+        if (this.circlePoints.length === 0 && this.stepBuilding===0) {
+          // строим первое здание
           curX = this.startPoint.x
           curY = this.startPoint.y
         } else {
-          curX = this.circlePoints[this.circlePoints.length - 1].x; //Math.floor(Math.random() * (4 + this.radius * 2) - this.radius);
-          curY = this.circlePoints[this.circlePoints.length - 1].y; //Math.floor(Math.random() * (4 + this.radius * 2) - this.radius);
+          const lastEl = this.circlePoints[this.circlePoints.length - 1]
+          curX = lastEl.x;
+          curY = lastEl.y;
           this.circlePoints.pop()
-          // console.log('this.circlePoints: ', this.circlePoints)
         }
-        let vector = this.startPoint.clone().add(
-          new Vector(
+        let vector =  new Vector(
             curX,
             curY
           )
-        )
+        let currentPointAdd = vector.clone().add(vector)
         this.onBuild(build,
-          this.startPoint.clone().add(vector)
+          this.startPoint.clone().add(currentPointAdd)
         );
-      } else if (rnd < 0.6) { // строит юнита
+      }
+      else if (rnd < 0.6) { // строит юнита
+        // console.log('')
+        // console.log('строит юнита')
         const availableUnit = this.getAvailableUnits();
         if (availableUnit.length) {
-          const unit = availableUnit[Math.floor(Math.random() * availableUnit.length)];
+          const randonUnit = Math.floor(Math.random() * availableUnit.length)
+          const unit = availableUnit[randonUnit];
+          // console.log('randonUnit чтобы построить: ', unit)
           this.units.push(unit);
-          this.onUnit(unit);
+          // console.log('this.units ', this.units)
+          // this.onUnit(unit); //todo ошибка при постронении юнита
         }        
       } else {
         //this.onAttack();
@@ -82,7 +86,7 @@ export class BotPlayer extends GamePlayer{
       if (this.circlePoints.length === 0) {
         this.stepBuilding++
         this.circlePoints = this.getCirclePoints()
-        // console.log(`точки на ${this.stepBuilding}й окружности: `, this.circlePoints)
+        // console.log(`точки на ${this.stepBuilding}-й окружности: `, this.circlePoints)
       }
       this.randomMove();
     }, 500);
@@ -106,7 +110,6 @@ export class BotPlayer extends GamePlayer{
   getCirclePoints(){
     let arrPoints: Array<IVector> = []
     let angle = this.startAngle / this.stepBuilding;
-    console.log('угол поворота: ', angle)
     for(let i=0; i <=180; i = i + angle){
       let x:number = this.startPoint.x + this.minDistance * this.stepBuilding * Math.cos(i);
       let y:number = this.startPoint.y + this.minDistance * this.stepBuilding * Math.sin(i);

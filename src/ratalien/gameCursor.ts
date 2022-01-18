@@ -71,6 +71,7 @@ export class GameCursorStatus{
     const redMask = this.planned.mtx.map(it => it.map(jt => Number.parseInt(jt)));
     const player = this.getCurrentPlayer();
     const builds = this.getObjects().list.filter(it => it.player === player&& it instanceof MapObject) as MapObject[];
+
     const closestBuild = findClosestBuild(this.tilePosition.clone(), builds);
     if (!(!builds.length || closestBuild.distance <= 6)) { 
       return redMask;
