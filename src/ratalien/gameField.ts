@@ -23,6 +23,7 @@ import { IBuildConstructor } from './units/IBuildConstructor';
 import { buildMap } from './units/buildMap';
 import { Explosion } from './units/explosion';
 import { Gold } from './gold';
+import { MiniMapGame } from "./miniMapGame";
 
 
 export class GameField extends Control{
@@ -38,8 +39,10 @@ export class GameField extends Control{
   pathes: Vector[][];
   players: GamePlayer[];
   fps: number;
+  miniMap: MiniMapGame;
+  
 
-  constructor(parentNode: HTMLElement, res: Record<string, HTMLImageElement>, players:GamePlayer[], map: GameMap){
+  constructor(parentNode: HTMLElement, res: Record<string, HTMLImageElement>, players:GamePlayer[], map: GameMap, miniMap: MiniMapGame){
     super(parentNode, 'div', red['game_field']);
     this.res = res;  
     this.players = players;
@@ -47,6 +50,9 @@ export class GameField extends Control{
     const canvas = new Control<HTMLCanvasElement>(this.node, 'canvas');
     this.canvas = canvas;
     
+    
+    this.miniMap = miniMap;
+
     this.map = map;    
     this.cursorStatus= new GameCursorStatus(()=>{
       return this.players[0].primaries;
@@ -347,7 +353,9 @@ export class GameField extends Control{
         delta,
         this.sz, 
         this.cursorStatus.selected.includes(it),
-        this.isPrimary(0, it)//Object.keys(this.primaries[0]).find(obj=>this.primaries[0][obj]==it)!=null
+        this.isPrimary(0, it),
+        this.miniMap.ctx
+        //Object.keys(this.primaries[0]).find(obj=>this.primaries[0][obj]==it)!=null
       );
     });
   }
@@ -412,6 +420,8 @@ export class GameField extends Control{
     const canvasSize = this.getCanvasSize();
     ctx.fillRect(0, 0, canvasSize.width, canvasSize.height);
     this.map.renderMap(ctx, this.getCanvasSize(), this.getVisibleTileRect(), this.getTileCursor(), this.map.position);
+    this.miniMap.renderMap(this.miniMap.ctx, this.getCanvasSize(), this.getVisibleTileRect(), this.getTileCursor(), this.map.position);
+    
     this.renderObjects(ctx, delta);
     this.cursorStatus.render(ctx, this.map.position);
 

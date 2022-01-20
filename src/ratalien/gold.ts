@@ -21,7 +21,7 @@ export class Gold extends InteractiveObject{
     this.position = pos;
   }
 
-  render(ctx: CanvasRenderingContext2D, camera: Vector, ...props: any): void {
+  render(ctx: CanvasRenderingContext2D, camera: Vector,  ...props: any): void {
     let img = this.goldFull;
     if (this.gold === 800) {
       img = this.goldMed;
@@ -30,7 +30,12 @@ export class Gold extends InteractiveObject{
     } else if( this.gold <= 400){
       img = this.goldMin;
     }
-    ctx.drawImage(img, camera.x + this.position.x *55, camera.y + this.position.y * 55, 55, 55)
+    ctx.drawImage(img, camera.x + this.position.x *55, camera.y + this.position.y * 55, 55, 55);
+    const miniCtx = props[props.length - 1];
+    //console.log('mini', miniCtx)
+    miniCtx.fillStyle = '#f00';
+    miniCtx.fillRect(this.position.x*2, this.position.y*2, 2, 2);
+
     //this.position.x + 0 + j * sz, this.position.y + 0 + i * sz - (this.res['goldFull'].naturalHeight - 128), sz, sz * this.res['goldFull'].naturalHeight / 128);
     //this.drawTile(ctx, this.position, camera, '#ff0', 55);
   }

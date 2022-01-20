@@ -1,39 +1,41 @@
 import Control from "../common/control";
 import style from "./style.css";
 import red from "./red.css";
-import {Vector, IVector} from "../common/vector";
-import {GameSide} from "./gameSidePanel";
-import {BotPlayer} from "./botPlayer";
+import { Vector, IVector } from "../common/vector";
+import { GameSide } from "./gameSidePanel";
+import { BotPlayer } from "./botPlayer";
 import { tech } from "./techTree";
-import {GamePlayer, IBuildInfo} from "./gamePlayer";
-import {consts} from "./globals";
+import { GamePlayer, IBuildInfo } from "./gamePlayer";
+import { consts } from "./globals";
 import { GameField } from "./gameField";
 import { GameModel } from './gameModel';
 import { GameMap } from "./gameMap";
 import { IGameOptions } from './IGameOptions';
 
-export class Game extends Control{
-  player:GamePlayer;
-  currentPlayer:number = 0;
+import { MiniMapGame } from './miniMapGame'
+
+export class Game extends Control {
+  player: GamePlayer;
+  currentPlayer: number = 0;
   onExit: () => void;
-  constructor(parentNode: HTMLElement, res: Record<string, HTMLImageElement>, options: IGameOptions){
+  constructor(parentNode: HTMLElement, res: Record<string, HTMLImageElement>, options: IGameOptions) {
     super(parentNode, 'div', red['global_wrapper']);
-    this.node.onmouseleave = (e)=>{
-     // console.log(e.offsetX, e.offsetY);
-      if (e.offsetX>this.node.clientWidth){
+    this.node.onmouseleave = (e) => {
+      // console.log(e.offsetX, e.offsetY);
+      if (e.offsetX > this.node.clientWidth) {
         field.map.currentMove = consts.moves[5]
       }
-      if (e.offsetX<0){
+      if (e.offsetX < 0) {
         field.map.currentMove = consts.moves[3]
       }
-      if (e.offsetY>this.node.clientHeight){
+      if (e.offsetY > this.node.clientHeight) {
         field.map.currentMove = consts.moves[7]
       }
-      if (e.offsetY<0){
+      if (e.offsetY < 0) {
         field.map.currentMove = consts.moves[1]
       }
     }
-    this.node.onmouseenter = ()=>{
+    this.node.onmouseenter = () => {
       field.map.currentMove = null;
     }
     this.node.oncontextmenu = e => e.preventDefault();
@@ -42,33 +44,37 @@ export class Game extends Control{
     }*/
     const head = new Control(this.node, 'div', red["global_header"]);
     const main = new Control(this.node, 'div', red["global_main"]);
-   //
+    //
     const buttonExit = new Control(main.node, 'button', red["exit_button"], 'Exit')
     buttonExit.node.onclick = () => {
       this.onExit();
     }
-   //
+    //
     //const field = new GameField(main.node, res);
     const gameModel = new GameModel();
 
     const player = new GamePlayer();
     player.setMoney(options.credits);
-    const botPlayer = new BotPlayer(new Vector(20, 20)); 
+    const botPlayer = new BotPlayer(new Vector(20, 20));
     const map = new GameMap(options.map, res);
-    const field = new GameField(main.node, res, [player, botPlayer], map);
+
+    //миниатюра карты
+    const miniMap = new MiniMapGame(options.map);
+
+    const field = new GameField(main.node, res, [player, botPlayer], map, miniMap);
     player.onBuild = (build, pos) => {
       field.addObject(0, build, pos.x, pos.y)
     }
-    botPlayer.onBuild = (build, pos)=>{
-  //     let build = botPlayer.getBuild();      
+    botPlayer.onBuild = (build, pos) => {
+      //     let build = botPlayer.getBuild();      
       //botPlayer.builds.push(build);
       //console.log(build.name)
       field.addObject(1, build, pos.x, pos.y);
       //field.addObject(1, tech.builds.find(it=>it.name == 'barracs'), pos.x, pos.y);
     }
 
-    botPlayer.onUnit = ()=>{
-     const availableUnit = botPlayer.getAvailableUnits();
+    botPlayer.onUnit = () => {
+      const availableUnit = botPlayer.getAvailableUnits();
       if (!availableUnit.length) {
         return;
       }
@@ -80,9 +86,9 @@ export class Game extends Control{
 
     //botPlayer.
 
-    botPlayer.onAttack = ()=>{
+    botPlayer.onAttack = () => {
       //let botUnits = field.units.filter(it=>it.player==1);
-      let playerBuilds = field.objects.list.filter(it=>it.player==0);
+      let playerBuilds = field.objects.list.filter(it => it.player == 0);
       if (playerBuilds.length == 0) return;
       /*botUnits.forEach(it=>{
         if (it.attackTarget.health<=0){
@@ -92,17 +98,22 @@ export class Game extends Control{
       //if (botUnits.length ==0) return;
       //botUnits[Math.floor(Math.random()* botUnits.length)].attackTarget = playerBuilds[Math.floor(Math.random()* playerBuilds.length)];
     }
-    
+
 
     //const side = new GameSide(main.node);
     //player.getAvailableBuilds();
-    
-    const side = new GameSide(main.node, player);
-    side.onBuildSelect = (name, callback)=>{
+
+
+
+    const side = new GameSide(main.node, player, miniMap);
+
+
+
+    side.onBuildSelect = (name, callback) => {
       //field.setMode(1, name.desc[0], callback);
       field.setPlanned(name.desc[0], callback);
     }
-    side.onUnitReady = (name:string)=>{
+    side.onUnitReady = (name: string) => {
       field.addUnit(0, name);
     }
   }

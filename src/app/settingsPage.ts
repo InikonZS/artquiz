@@ -13,8 +13,21 @@ export interface ISettings {
 
 }
 */
+//document.createElement('img');
+
+
+/*function setDefaultImage() {  
+  const img = new Image();
+  img.onload = () => {      
+    return img
+  };
+  img.src = './public/maps/64x96/1.png'; 
+  return img;
+}
+const defaultMap = setDefaultImage();*/
+
 const defaultSettings: IGameOptions = {
-  map: new Image(),
+  map: new Image(),//,defaultMap,
   credits: 10000
   //speed: 7,
 }
@@ -34,12 +47,13 @@ export class SettingsModel {
     if (!checkStorageData(storageData)) {
       this.settings = defaultSettings;
     } else {
-      const data: IGameOptions = JSON.parse(storageData);
+      const data: IGameOptions = JSON.parse(storageData); //todo не работает сохранение в локалстораж
       this.settings = data;
     }
   }
 
   getData() {
+    console.log(this.settings);
     return JSON.parse(JSON.stringify(this.settings));
   }
 
@@ -72,6 +86,9 @@ export class SettingsPage extends Control {
     this.filterMaps('64x64');  //TODO запихнуть в дефолтные настройки
 
     this.map = this.filteredMaps[0];
+    //this.mapImage = initialSettings.map;
+    //this.mapImage.src = this.map.src;
+  
     
 
     //const settings: ISettings = initialSettings;
@@ -159,8 +176,9 @@ export class SettingsPage extends Control {
       this.onBack();
     }
 
-    const saveButton = new Control(buttonsWrapper.node, 'button', '', 'play');
-    saveButton.node.onclick = () => {
+    const playButton = new Control(buttonsWrapper.node, 'button', '', 'play');
+    playButton.node.onclick = () => {
+
       const settings:IGameOptions = {
         map:this.mapImage,
         credits: this.credit
@@ -174,10 +192,10 @@ export class SettingsPage extends Control {
   }
 
   setImageMap(imageMap: HTMLImageElement, num:number = 0){
-    imageMap.src = this.filteredMaps[num].src; // TODO прописать правильный путь к изображениям
+    imageMap.src = this.filteredMaps[num].src; 
     imageMap.alt = `Карта ${this.filteredMaps[num].name} размером ${this.filteredMaps[num].size}`;
     this.map = this.filteredMaps[num];
-    console.log(this.map);
+    //console.log(this.map);
   }
 
   changeMap(imageMap: HTMLImageElement, selectedMapInput: Control<HTMLInputElement>, num:number = 0){

@@ -3,6 +3,7 @@ import style from "./style.css";
 import red from "./red.css";
 import { GamePlayer, IUnitInfo } from "./gamePlayer";
 import { ITechBuild } from "./interactives";
+import { MiniMapGame } from "./miniMapGame";
 
 export class GameSide extends Control{
   onBuildSelect: (name:ITechBuild, clearFunc:()=>void)=>void;
@@ -24,7 +25,7 @@ export class GameSide extends Control{
   blds: Array<ITechBuild>;
   uns: Array<IUnitInfo>;
 
-  constructor(parentNode: HTMLElement, player: GamePlayer){
+  constructor(parentNode: HTMLElement, player: GamePlayer, miniMap: MiniMapGame){
     super(parentNode, 'div', red['game_side']);
     this.model = player;
     this.blds = this.model.getAvailableBuilds();
@@ -40,7 +41,11 @@ export class GameSide extends Control{
     // console.log('red', red)
     player.onUpdateBuild.add(this.updateBuildHandler);
 
-    const radar = new Control(this.node, 'div', red["game_radar"])
+    const radar = new Control(this.node, 'div', red["game_radar"]);
+    radar.node.append(miniMap.canvas);//????
+
+    //добавить в радар миниканвас
+
     this.money = new Control(radar.node, 'div', red["aside-top-panel"]);
     const builds = new Control(this.node, 'div', red["game_builds"]);
     const buildTools = new Control(builds.node, 'div', red["builds_tool"]);

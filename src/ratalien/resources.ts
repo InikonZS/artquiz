@@ -24,7 +24,7 @@ import explosion from './sprites/explosion_1.png'
 export const resourceLoader = new ResourceLoader();
 
 export const resources = {
-  map: map,
+  //map: map,
   grass: grass,
   rocks: rocks, 
   goldFull: goldFull,

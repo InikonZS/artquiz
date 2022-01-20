@@ -191,13 +191,13 @@ export function getMapFromImageData(data:ImageData){
   const map = generateEmptyMap(data.width, data.height, Number.MAX_SAFE_INTEGER);
   iterateImageData(data, (pos, color)=>{
     let mapColor = 0;
-    if (isEqualColor(color, {r:255, g:255, b:0, a:255})){
+    if (isEqualColor(color, {r:255, g:255, b:0, a:255})){  //gold
      // mapColor = 1;
-    } else if (isEqualColor(color, {r:255, g:0, b:0, a:255})){
+    } else if (isEqualColor(color, {r:255, g:0, b:0, a:255})){  //red
       mapColor = 2;
-    } else if (isEqualColor(color, {r:0, g:255, b:0, a:255})){
+    } else if (isEqualColor(color, {r:0, g:255, b:0, a:255})){  // green
       mapColor = 3;
-    } else if (isEqualColor(color, {r:0, g:0, b:255, a:255})){
+    } else if (isEqualColor(color, {r:0, g:0, b:255, a:255})){   // blue
       mapColor = 4;
     }
     map[pos.x][pos.y] = mapColor;

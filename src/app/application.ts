@@ -68,7 +68,7 @@ export class Application extends Control {
     }
     settingsPage.onPlay = (settings) => {
       settingsPage.destroy();
-      this.settingsModel.setData(settings);
+     // this.settingsModel.setData(settings);
       this.loader.load(resources).then(res => { //в ресурсах есть мар??
         const game = new Game(this.main.node, res.textures, settings/*{credits: 30000, map: res.textures.map }*/);
         game.onExit = () => {

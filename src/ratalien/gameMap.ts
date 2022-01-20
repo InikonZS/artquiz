@@ -33,7 +33,7 @@ export class GameMap{
     }  */
   }
 
-  render(){
+  render(){ //камера - экран
     if (this.currentMove){
       this.position.x -= this.currentMove.x*10;
       this.position.y -= this.currentMove.y*10;
@@ -54,6 +54,8 @@ export class GameMap{
 
   renderMap(ctx:CanvasRenderingContext2D, canvasSize:any, visibleTileRect:any, cursorTile:any, pos:Vector){
     this.render();
+    //
+    //console.log('map', this.position.x,'  ', this.position.y);
    /* if (!this.cached){
       this.cached = true;
       this.canvas.width = 96*55;
@@ -65,6 +67,7 @@ export class GameMap{
     this._renderMap(ctx, canvasSize, visibleTileRect, cursorTile);
   }
 
+  // отрисовка карты в спрайтах
   _renderMap(ctx:CanvasRenderingContext2D, canvasSize:any, visibleTileRect:any, cursorTile:any){
     const obi:Array<string> = [
       "#fff",
@@ -109,6 +112,7 @@ export class GameMap{
     }
   }
 
+  // маска для постройки зданий
   renderMtx(map:Array<Array<number>>, obj:Array<Array<string>>, px:number, py:number, align:'center'|'corner'){
     //let sz = this.sz;
     //this.cursorTile.x = Math.floor((this.position.x % sz +Math.floor(this.cursor.x/sz)*sz)/sz);
@@ -129,6 +133,7 @@ export class GameMap{
         }
       }
     }
+    
     return map;
   }
 
