@@ -47,7 +47,7 @@ export class AbstractUnit extends InteractiveObject{
     return false;
   }
 
-  render(ctx:CanvasRenderingContext2D, camera:Vector,delta:number, size:number, selected:boolean){
+  render(ctx:CanvasRenderingContext2D, camera:Vector,delta:number, size:number, selected:boolean, prim:boolean, miniMap:CanvasRenderingContext2D){
     const sz = 10;
     ctx.fillStyle = this.isHovered?"#9999":consts.colors[this.player];
     ctx.strokeStyle = "#000";
@@ -60,7 +60,7 @@ export class AbstractUnit extends InteractiveObject{
     ctx.fillStyle = "#000";
     ctx.fillText(this.name, camera.x + this.positionPx.x, camera.y+ this.positionPx.y-10);
     // ctx.fillText(`health: ${this.health}`, camera.x + this.positionPx.x, camera.y + this.positionPx.y - 20);
-    // Прогресс-баз состояния здоровья Юнита
+    // Прогресс-бар состояния здоровья Юнита
     ctx.strokeStyle = '#666'
     ctx.strokeRect(camera.x + this.positionPx.x,camera.y + this.positionPx.y - 20, 100, 10);
     ctx.fillStyle = '#ccc'
@@ -68,6 +68,12 @@ export class AbstractUnit extends InteractiveObject{
     ctx.fillStyle = 'blue';
     ctx.fillRect(camera.x + this.positionPx.x, camera.y + this.positionPx.y - 20, this.health, 10);
     
+    //отрисовка на юнитов на мини карте
+    const miniCtx = miniMap;
+    console.log('mini', miniCtx)
+    miniCtx.fillStyle = '#ff0000';
+    miniCtx.fillRect(this.position.x*2, this.position.y*2, 2, 2);
+
     if (selected){
       ctx.fillText(`selected`, camera.x + this.positionPx.x, camera.y+ this.positionPx.y-30);  
     }

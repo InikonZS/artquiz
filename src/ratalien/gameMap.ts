@@ -33,7 +33,7 @@ export class GameMap{
     }  */
   }
 
-  render(){ //камера - экран
+  render(){ 
     if (this.currentMove){
       this.position.x -= this.currentMove.x*10;
       this.position.y -= this.currentMove.y*10;
@@ -67,7 +67,7 @@ export class GameMap{
     this._renderMap(ctx, canvasSize, visibleTileRect, cursorTile);
   }
 
-  // отрисовка карты в спрайтах
+  
   _renderMap(ctx:CanvasRenderingContext2D, canvasSize:any, visibleTileRect:any, cursorTile:any){
     const obi:Array<string> = [
       "#fff",

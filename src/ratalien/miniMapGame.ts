@@ -25,7 +25,7 @@ export class MiniMapGame {
     //console.log('map', this.map);
     //this.ctx.drawImage(map, 0, 0);
   }
-
+//отрисовка экрана
   render(ctx: CanvasRenderingContext2D, sizeRect: any) { //камера - экран
     ctx.strokeStyle = "#0005";
     ctx.fillStyle = '#f36374';
@@ -70,7 +70,7 @@ export class MiniMapGame {
     this.render(ctx, visibleTileRect);
   }
 
-
+//отрисовка деревьев, гор...
   _renderMap(ctx: CanvasRenderingContext2D) {//, canvasSize: any, visibleTileRect: any, cursorTile: any) {
     const obi: Array<string> = [
       "#fff",
