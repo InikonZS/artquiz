@@ -47,21 +47,20 @@ export class BotPlayer extends GamePlayer{
         let curX: number;
         let curY: number;
 
-        if (this.circlePoints.length === 0 && this.stepBuilding===0) {
-          // строим первое здание
-          curX = this.startPoint.x
-          curY = this.startPoint.y
-        } else {
-          const lastEl = this.circlePoints[this.circlePoints.length - 1]
-          curX = lastEl.x;
-          curY = lastEl.y;
-          this.circlePoints.pop();
-        }
-        let vector =  new Vector(
-            curX,
-            curY
-          )
+        // if (this.circlePoints.length === 0 && this.stepBuilding===0) {
+        //   // строим первое здание
+        //   curX = this.startPoint.x
+        //   curY = this.startPoint.y
+        // } else {
+        //   const lastEl = this.circlePoints[this.circlePoints.length - 1]
+        //   curX = lastEl.x;
+        //   curY = lastEl.y;
+        //   this.circlePoints.pop();
+        // }
+        // let vector =  new Vector(curX, curY)
+        let vector =  new Vector(Math.random()*10, Math.random()*10);
         let currentPointAdd = vector.clone().add(vector)
+        
         this.onBuild(build,
           this.startPoint.clone().add(currentPointAdd)
         );
@@ -120,7 +119,6 @@ export class BotPlayer extends GamePlayer{
 
 }
 
-//todo
 /*
 0) Если построек еще нет, строим произвольную точку start
 1) Получить координаты всех точек, лежащих на окружности с центром start и радиусом this.minDistance 

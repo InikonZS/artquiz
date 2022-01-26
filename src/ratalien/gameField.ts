@@ -264,7 +264,7 @@ export class GameField extends Control{
     let primary = player.getPrimary(spawn); //Object.values(this.primaries[player]).find(it=>it.name == spawn);
     console.log('spawn ', spawn)
     console.log('primary ', primary)
-    if (primary){
+    if (primary !== null){
       unit.positionPx = Vector.fromIVector({x:primary.position.x*this.sz, y: primary.position.y*this.sz});
     } 
     

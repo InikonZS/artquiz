@@ -28,7 +28,8 @@ export class AbstractUnit extends InteractiveObject{
   weapon: AbstractWeapon;
    targetEnemy: { distance: number; unit: AbstractUnit; } | { distance: number; unit: MapObject; tile: Vector; };
 
-  get position(){
+  get position() {
+    console.log('this.positionPx: ', this.positionPx)
     return new Vector(Math.floor(this.positionPx.x/55), Math.floor(this.positionPx.y / 55));
   }
 
