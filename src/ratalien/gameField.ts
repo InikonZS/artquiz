@@ -261,7 +261,9 @@ export class GameField extends Control{
     //unit.position = new Vector(20, 20); //for demo
     const spawn = tech.units.filter(item => item.name == name)[0].spawn[0];
     
-    let primary = player.getPrimary(spawn);//Object.values(this.primaries[player]).find(it=>it.name == spawn);
+    let primary = player.getPrimary(spawn); //Object.values(this.primaries[player]).find(it=>it.name == spawn);
+    console.log('spawn ', spawn)
+    console.log('primary ', primary)
     if (primary){
       unit.positionPx = Vector.fromIVector({x:primary.position.x*this.sz, y: primary.position.y*this.sz});
     } 
@@ -288,13 +290,14 @@ export class GameField extends Control{
   }
 
   addObject(player: GamePlayer, obj: ITechBuild, x: number, y: number) {
+    console.log('player.primaries ', player.primaries)
     //let buildMap:Record<string, IBuildConstructor> = {'tower':Tower, 'oreFactory':OreFactory};
     let buildConstructor = buildMap[obj.name] || Tower;
     let build = new buildConstructor(obj, this.res);//MapObject(obj, this.res);
     build.position = new Vector(x,y);
     build.player = player;
-    if (player.primaries[build.name]==null){
-      player.primaries[build.name] = build;
+    if (player.primaries[build.name]==null){ // Если такого здания нет, добавить
+      player.primaries[build.name] = build; //todo почему это условие не всегда выполняется при строительстве бота
     } 
 
     this.objects.add(build);

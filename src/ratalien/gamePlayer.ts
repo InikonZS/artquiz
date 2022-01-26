@@ -94,7 +94,10 @@ export class GamePlayer{
     this.onUnit(unit);
   }
 
-   getPrimary(name:string){
+  getPrimary(name: string) {
+    console.log('name ', name)
+    console.log('this.primaries ', this.primaries)
+    //todo Не находит carFactory, поэтому возвращает null
     return Object.values(this.primaries).find(it=>it.name == name) || null;
   }
 

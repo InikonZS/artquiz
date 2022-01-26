@@ -40,7 +40,7 @@ export class BotPlayer extends GamePlayer{
       let rnd = Math.random();
 
       // console.log(rnd)
-      if (rnd < 0.5) { // Создаем здание
+      if (rnd < 0.3) { // Создаем здание
         const build = this.getBuild(); // получение здания
         this.setBuilds(build);
 
@@ -76,7 +76,7 @@ export class BotPlayer extends GamePlayer{
           // console.log('randonUnit чтобы построить: ', unit)
           this.units.push(unit);
           // console.log('this.units ', this.units)
-          // this.onUnit(unit); //todo ошибка при постронении юнита
+          this.onUnit(unit); //todo ошибка при постронении юнита
         }        
       } else {
         //this.onAttack();
