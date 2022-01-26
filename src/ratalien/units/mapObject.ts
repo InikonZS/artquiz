@@ -53,10 +53,12 @@ export class MapObject extends InteractiveObject{
     }    
   }
 
-  render(ctx:CanvasRenderingContext2D, camera:Vector, delta:number, size?:number, selected?:boolean, primary?:boolean){
+  render(ctx:CanvasRenderingContext2D, camera:Vector, delta:number, size?:number, selected?:boolean, primary?:boolean, miniCtx?:CanvasRenderingContext2D){
     this.tiles.forEach((row, i)=>row.forEach((cell, j)=>{
       if (this.tiles[i][j]!=0){
         this.drawTile(ctx, new Vector(j+this.position.x, i+this.position.y), camera, this.isHovered?"#9999":consts.colors[this.player], size);
+        //buildings on miniMap
+        this.drawTileOnMiniMap(miniCtx, new Vector(j+this.position.x, i+this.position.y), consts.colors[this.player], 2);
       }
     })); 
     
@@ -109,6 +111,14 @@ export class MapObject extends InteractiveObject{
         break;
     }
       
+  }
+
+  drawTileOnMiniMap(miniCtx:CanvasRenderingContext2D, position:IVector,/* camera:IVector,*/ color:string, size:number){
+    //const miniCtx = miniMap;
+    console.log('mini', miniCtx)
+    const sz = size;
+    miniCtx.fillStyle = color;
+    miniCtx.fillRect(position.x*sz, position.y*sz, sz, sz);
   }
 
   drawTile(ctx:CanvasRenderingContext2D, position:IVector, camera:IVector, color:string, size:number){

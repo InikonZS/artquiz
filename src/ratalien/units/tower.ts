@@ -15,9 +15,9 @@ export class Tower extends MapObject{
     
   }
 
-  render(ctx:CanvasRenderingContext2D, camera:Vector, delta:number, size?:number, selected?:boolean, primary?:boolean){
+  render(ctx:CanvasRenderingContext2D, camera:Vector, delta:number, size?:number, selected?:boolean, primary?:boolean, miniCtx?:CanvasRenderingContext2D){
     this.weapon.position = this.position;
-    super.render(ctx, camera, delta, size, selected, primary);
+    super.render(ctx, camera, delta, size, selected, primary, miniCtx);
     this.step(delta);
     this.weapon.render(ctx, camera);
     this.logic(this.getUnits());
