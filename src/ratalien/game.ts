@@ -85,6 +85,7 @@ export class Game extends Control{
       if (!builds.length || closestBuild.distance >= 6) { 
         // строим здание на позиции pos
         field.addObject(botPlayer, build, pos.x, pos.y);
+        botPlayer.setBuilds(build);
       }      
     }
 

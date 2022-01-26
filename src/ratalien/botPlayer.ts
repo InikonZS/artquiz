@@ -39,26 +39,24 @@ export class BotPlayer extends GamePlayer{
       this.radius += this.radius< 10 ? 1 : 0.5;
       let rnd = Math.random();
 
-      // console.log(rnd)
       if (rnd < 0.3) { // Создаем здание
         const build = this.getBuild(); // получение здания
-        this.setBuilds(build);
-
         let curX: number;
         let curY: number;
 
-        // if (this.circlePoints.length === 0 && this.stepBuilding===0) {
-        //   // строим первое здание
-        //   curX = this.startPoint.x
-        //   curY = this.startPoint.y
-        // } else {
-        //   const lastEl = this.circlePoints[this.circlePoints.length - 1]
-        //   curX = lastEl.x;
-        //   curY = lastEl.y;
-        //   this.circlePoints.pop();
-        // }
-        // let vector =  new Vector(curX, curY)
-        let vector =  new Vector(Math.random()*10, Math.random()*10);
+        if (this.circlePoints.length === 0 && this.stepBuilding===0) {
+          // координаты для строительства первого здания
+          curX = this.startPoint.x
+          curY = this.startPoint.y
+        } else {
+          // для последующих
+          const lastEl = this.circlePoints[this.circlePoints.length - 1]
+          curX = lastEl.x;
+          curY = lastEl.y;
+          this.circlePoints.pop();
+        }
+        let vector =  new Vector(curX, curY)
+        // let vector =  new Vector(Math.random()*10, Math.random()*10);
         let currentPointAdd = vector.clone().add(vector)
         
         this.onBuild(build,
@@ -66,16 +64,12 @@ export class BotPlayer extends GamePlayer{
         );
       }
       else if (rnd < 0.6) { // строит юнита
-        // console.log('')
-        // console.log('строит юнита')
         const availableUnit = this.getAvailableUnits();
         if (availableUnit.length) {
           const randonUnit = Math.floor(Math.random() * availableUnit.length)
-          const unit = availableUnit[randonUnit];
-          // console.log('randonUnit чтобы построить: ', unit)
+          const unit = availableUnit[randonUnit]; // randonUnit чтобы построить unit
           this.units.push(unit);
-          // console.log('this.units ', this.units)
-          this.onUnit(unit); //todo ошибка при постронении юнита
+          this.onUnit(unit); 
         }        
       } else {
         //this.onAttack();
@@ -143,5 +137,9 @@ export class BotPlayer extends GamePlayer{
 
 3) По окончанию обхода, построить новую окружность с радиусом this.minDistance * 2 
 и повторять шаго 1 и 2
+//todo
+
+Атакующее здание сделать
+
 
 */

@@ -238,10 +238,6 @@ export class GameField extends Control{
 
 //возможно, тут лучше передвать не нейм, а сам объект созданного солдата? 
   addUnit(player: GamePlayer, name: string) {
-    console.log('')
-    console.log('fn addUnit')
-    console.log('player ', player)
-    console.log('name ', name)
     //TODO check is empty,else, check neighbor
   
     let UnitConstructor = units[name] || AbstractUnit;
@@ -262,8 +258,8 @@ export class GameField extends Control{
     const spawn = tech.units.filter(item => item.name == name)[0].spawn[0];
     
     let primary = player.getPrimary(spawn); //Object.values(this.primaries[player]).find(it=>it.name == spawn);
-    console.log('spawn ', spawn)
-    console.log('primary ', primary)
+    // console.log('spawn ', spawn)
+    // console.log('primary ', primary)
     if (primary !== null){
       unit.positionPx = Vector.fromIVector({x:primary.position.x*this.sz, y: primary.position.y*this.sz});
     } 
@@ -289,15 +285,18 @@ export class GameField extends Control{
     })
   }
 
+  // Добавление зданий
   addObject(player: GamePlayer, obj: ITechBuild, x: number, y: number) {
-    console.log('player.primaries ', player.primaries)
+    
     //let buildMap:Record<string, IBuildConstructor> = {'tower':Tower, 'oreFactory':OreFactory};
     let buildConstructor = buildMap[obj.name] || Tower;
     let build = new buildConstructor(obj, this.res);//MapObject(obj, this.res);
     build.position = new Vector(x,y);
     build.player = player;
+
+    // ЗАМЕЧАНИЕ: Тут здание должно иметь возможность построиться ВСЕГДА
     if (player.primaries[build.name]==null){ // Если такого здания нет, добавить
-      player.primaries[build.name] = build; //todo почему это условие не всегда выполняется при строительстве бота
+      player.primaries[build.name] = build;
     } 
 
     this.objects.add(build);

@@ -29,7 +29,6 @@ export class AbstractUnit extends InteractiveObject{
    targetEnemy: { distance: number; unit: AbstractUnit; } | { distance: number; unit: MapObject; tile: Vector; };
 
   get position() {
-    console.log('this.positionPx: ', this.positionPx)
     return new Vector(Math.floor(this.positionPx.x/55), Math.floor(this.positionPx.y / 55));
   }
 
@@ -138,7 +137,6 @@ export class AbstractUnit extends InteractiveObject{
   setPath(path:Array<Vector>, tileChecker:(pos:Vector)=>boolean, attackPoint:Vector = null){
     this.attackTarget = attackPoint
     const sz =55;
-   // console.log('sp ', path);
     this.path = [...path].reverse();
     this.target = this.path.pop()?.clone().scale(sz);
     this.tileChecker = tileChecker;

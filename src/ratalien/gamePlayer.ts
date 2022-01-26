@@ -34,7 +34,7 @@ export class GamePlayer{
   onUpdateBuild: Signal<void> = new Signal();
   primaries: Record<string, MapObject> ={};
   //onUpdate:()=>void;
-  minDistance: number = 6; // Минимально допустимое расстояние для постройки
+  minDistance: number = 3; // Минимально допустимое расстояние для постройки
   onBuild:(build: ITechBuild, pos:Vector)=>void;
   onUnit:(unit:IUnitInfo)=>void;
   onAttack: () => void;
