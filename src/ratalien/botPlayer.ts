@@ -55,7 +55,7 @@ export class BotPlayer extends GamePlayer{
           const lastEl = this.circlePoints[this.circlePoints.length - 1]
           curX = lastEl.x;
           curY = lastEl.y;
-          this.circlePoints.pop()
+          this.circlePoints.pop();
         }
         let vector =  new Vector(
             curX,
