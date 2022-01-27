@@ -26,9 +26,9 @@ export class BotPlayer extends GamePlayer{
   onAttack:()=>void;
   unitsBuildArray = ['barracs', 'techCenter', 'carFactory', 'dogHouse'];
   circlePoints: Array<IVector> = [];
-  startAngle: number = 10; // угол отклонения при расчете точек на окружности
+  startAngle: number = 4; // угол отклонения при расчете точек на окружности
   stepBuilding: number = 0; // номер круга допустимой постройки
-  constructor(startPoint:Vector, index:number){
+  constructor(startPoint: Vector, index: number) {
     super(index);
     this.startPoint = startPoint;
     this.randomMove();
@@ -82,7 +82,7 @@ export class BotPlayer extends GamePlayer{
         // console.log(`точки на ${this.stepBuilding}-й окружности: `, this.circlePoints)
       }
       this.randomMove();
-    }, 500);
+    }, 200);
   }
 
   setUnit(unit: IUnitInfo) {
@@ -102,12 +102,14 @@ export class BotPlayer extends GamePlayer{
 
   getCirclePoints(){
     let arrPoints: Array<IVector> = []
-    let angle = this.startAngle / this.stepBuilding;
+    let angle = (this.startAngle / 2) / this.stepBuilding;
     for(let i=0; i <=180; i = i + angle){
-      let x:number = this.startPoint.x + this.minDistance * this.stepBuilding * Math.cos(i);
-      let y:number = this.startPoint.y + this.minDistance * this.stepBuilding * Math.sin(i);
-      arrPoints.push({ x, y })
+      let x: number = this.startPoint.x + this.minDistance * this.stepBuilding * Math.cos(i);
+      let y: number = this.startPoint.y + this.minDistance * this.stepBuilding * Math.sin(i);
+      
+      arrPoints.push({ x: Math.floor(Math.abs(x)), y: Math.floor(Math.abs(y)) })
     }
+    // console.log('arrPoints: ', arrPoints)
     return arrPoints
   } 
 

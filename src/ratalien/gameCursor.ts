@@ -74,9 +74,20 @@ export class GameCursorStatus{
 
     const closestBuild = findClosestBuild(this.tilePosition.clone(), builds);
     if (!(!builds.length || closestBuild.distance <= 6)) { 
+      // console.log('redMask: ', redMask);
       return redMask;
     }
+    // console.log('mask: ', mask);
     return mask;
+
+    /* redMask массив вида
+    [[0, 0, 0, 0]
+     [1, 1, 0, 0]
+     [1, 1, 1, 1]
+     [1, 1, 1, 1]]
+
+     mask - такой же массив, состоящий только из нулей
+    */
   }
 
   isOnlyUnitsSelected(){

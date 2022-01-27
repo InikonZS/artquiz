@@ -13,7 +13,7 @@ import { GameMap } from "./gameMap";
 import { IGameOptions } from './IGameOptions';
 import { globalGameInfo } from './globalGameInfo';
 import { createIdGenerator } from './idGenerator';
-import { checkMap, findClosestBuild } from "./distance";
+import { checkMap, findClosestBuild, getRandomNumber } from "./distance";
 import { MapObject } from "./interactives";
 
 export class Game extends Control{
@@ -61,7 +61,10 @@ export class Game extends Control{
 
     const player = new GamePlayer(0);
     player.setMoney(options.credits);
-    const botPlayer = new BotPlayer((new Vector(20, 20)),1); 
+    let x = getRandomNumber(10) + player.minDistance,
+      y = getRandomNumber(10) + player.minDistance;
+    // console.log('стартовая точка для бота [x:y] ', x,y);
+    const botPlayer = new BotPlayer((new Vector(x, y)),1); // тут была стартовая точка 20:20
     const map = new GameMap(96, 96, options.map, res);
     const field = new GameField(main.node, res, [player, botPlayer], map);
     player.onBuild = (build, pos) => {
@@ -70,19 +73,23 @@ export class Game extends Control{
 
     player.onUnit = (unit) => {
       field.addUnit(player, unit.name)
-    }
-    
-    botPlayer.onBuild = (build, pos) => { // field.objects - все объекты, кот есть на поле игрока и бота
-      // const builds = field.objects.list.filter(it => (it.type === 'build')) as MapObject[];
-      const builds = field.objects.list.filter(it => it instanceof MapObject) as MapObject[];
-      // field.objects.list.filter(it => (it.player === 'GamePlayer' && it.type === 'build')) as MapObject[]; // Здания игрока
-      // field.objects.list.filter(it => (it.player === 'BotPlayer' && it.type === 'build')) as MapObject[]; // Здания бота
+    },
 
-      // console.log('pos.clone() ', pos.clone())
-      // console.log('builds ', builds)
+    botPlayer.onBuild = (build, pos) => { // field.objects - все объекты, кот есть на поле игрока и бота
+      // console.log('бот field.objects: ', field.objects)
+      const builds = field.objects.list.filter(it => it instanceof MapObject) as MapObject[];
+      // it.player === 'GamePlayer' && it.type === 'build') - Здания игрока
+      // it.player === 'BotPlayer' && it.type === 'build') - Здания бота
+
+      
+      //Если приходит маска mask только из нулей - строить можно
+      const mask = checkMap(map.map, build.mtx.map(it => it.map(jt => Number.parseInt(jt))), pos);
       const closestBuild = findClosestBuild(pos.clone(), builds);
 
-      if (!builds.length || closestBuild.distance >= 6) { 
+      let lengthNotAvalible = mask.flat().filter(itm => Number(itm) !== 0).length;
+      
+      // if ((!builds.length || closestBuild.distance >= 6)){ 
+      if ((!builds.length || closestBuild.distance >= 6) && lengthNotAvalible === 0) { 
         // строим здание на позиции pos
         field.addObject(botPlayer, build, pos.x, pos.y);
         botPlayer.setBuilds(build);
@@ -90,7 +97,6 @@ export class Game extends Control{
     }
 
     botPlayer.onUnit = (unit) => {
-      // console.log('unit.name', unit.name)
       field.addUnit(botPlayer, unit.name);
     }
 
