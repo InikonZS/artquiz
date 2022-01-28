@@ -26,15 +26,17 @@ export class AbstractUnit extends InteractiveObject{
   protected gold: number = 0;
   maxGold: number = 3000;
   weapon: AbstractWeapon;
-   targetEnemy: { distance: number; unit: AbstractUnit; } | { distance: number; unit: MapObject; tile: Vector; };
+  targetEnemy: { distance: number; unit: AbstractUnit; } | { distance: number; unit: MapObject; tile: Vector; };
+  goal: String;
 
   get position() {
     // console.log('this.positionPx: ', this.positionPx)
     return new Vector(Math.floor(this.positionPx.x/55), Math.floor(this.positionPx.y / 55));
   }
 
-  constructor(){
+  constructor(goal: String = 'wait'){
     super();
+    this.goal = goal;
     // this.weapon = new Weapon();
     // this.weapon.onBulletTarget = (point)=>{
     //   this.onDamageTile?.(point);

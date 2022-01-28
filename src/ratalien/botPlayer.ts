@@ -82,7 +82,7 @@ export class BotPlayer extends GamePlayer{
         // console.log(`точки на ${this.stepBuilding}-й окружности: `, this.circlePoints)
       }
       this.randomMove();
-    }, 200);
+    }, 1000);
   }
 
   setUnit(unit: IUnitInfo) {
@@ -109,7 +109,7 @@ export class BotPlayer extends GamePlayer{
       
       arrPoints.push({ x: Math.floor(Math.abs(x)), y: Math.floor(Math.abs(y)) })
     }
-    // console.log('arrPoints: ', arrPoints)
+    console.log('arrPoints: ', arrPoints)
     return arrPoints
   } 
 
