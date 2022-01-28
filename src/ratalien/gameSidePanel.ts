@@ -42,9 +42,7 @@ export class GameSide extends Control{
     player.onUpdateBuild.add(this.updateBuildHandler);
 
     const radar = new Control(this.node, 'div', red["game_radar"]);
-    radar.node.append(miniMap.canvas);//????
-
-    //добавить в радар миниканвас
+    radar.node.append(miniMap.canvas);
 
     this.money = new Control(radar.node, 'div', red["aside-top-panel"]);
     const builds = new Control(this.node, 'div', red["game_builds"]);

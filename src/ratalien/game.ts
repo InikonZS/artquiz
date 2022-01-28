@@ -13,6 +13,28 @@ import { GameMap } from "./gameMap";
 import { IGameOptions } from './IGameOptions';
 
 import { MiniMapGame } from './miniMapGame'
+import { ITechBuild } from "./interactives";
+
+const initialBuildingsData = [{
+  name: 'barracs',
+  x: 0,
+  y: 10
+},
+{
+  name: 'buildingCenter',
+  x: 5,
+  y: 10 
+},
+{
+  name: 'energyPlant',
+  x: 10,
+  y: 10
+},
+{
+  name: 'carFactory',
+  x: 5,
+  y: 15
+}]
 
 export class Game extends Control {
   player: GamePlayer;
@@ -62,6 +84,17 @@ export class Game extends Control {
     const miniMap = new MiniMapGame(options.map);
 
     const field = new GameField(main.node, res, [player, botPlayer], map, miniMap);
+
+    //add initial buildings
+    
+    initialBuildingsData.map(build => {
+      const building = tech.builds.find(item => item.name === build.name);
+      if(building){
+        field.addObject(0, building, build.x, build.y)
+      }
+    });
+    //console.log('builds',player.builds);
+
     player.onBuild = (build, pos) => {
       field.addObject(0, build, pos.x, pos.y)
     }
@@ -89,6 +122,7 @@ export class Game extends Control {
     botPlayer.onAttack = () => {
       //let botUnits = field.units.filter(it=>it.player==1);
       let playerBuilds = field.objects.list.filter(it => it.player == 0);
+      //console.log('playerBuilds',playerBuilds.length)
       if (playerBuilds.length == 0) return;
       /*botUnits.forEach(it=>{
         if (it.attackTarget.health<=0){

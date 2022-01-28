@@ -70,7 +70,7 @@ export class AbstractUnit extends InteractiveObject{
     
     //отрисовка на юнитов на мини карте
     const miniCtx = miniMap;
-    console.log('mini', miniCtx)
+    //console.log('mini', miniCtx)
     miniCtx.fillStyle = '#ff0000';
     miniCtx.fillRect(this.position.x*2, this.position.y*2, 2, 2);
 

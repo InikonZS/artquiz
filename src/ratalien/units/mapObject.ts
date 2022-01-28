@@ -115,7 +115,7 @@ export class MapObject extends InteractiveObject{
 
   drawTileOnMiniMap(miniCtx:CanvasRenderingContext2D, position:IVector,/* camera:IVector,*/ color:string, size:number){
     //const miniCtx = miniMap;
-    console.log('mini', miniCtx)
+    //console.log('mini', miniCtx)
     const sz = size;
     miniCtx.fillStyle = color;
     miniCtx.fillRect(position.x*sz, position.y*sz, sz, sz);
