@@ -10,12 +10,12 @@ import { Vector, IVector } from "../../common/vector";
 export class TruckUnit extends AbstractUnit{
   weapon: WeaponTrack;
   closestGold: InteractiveObject;
+  targetPosition: Vector;
   
  // getResource: () => InteractiveObject[];
   constructor(){
     super();
     this.weapon = new WeaponTrack();
-    
     
     this.weapon.onBulletTarget = (point)=>{
       this.onDamageTile?.(point);
@@ -32,15 +32,28 @@ export class TruckUnit extends AbstractUnit{
   }
 
   getAction(hovered: InteractiveObject, mapTile?: number) {
-    console.log('трак getAction')
-    console.log('hovered: ', hovered, 'mapTile: ', mapTile)
+    // console.log('трак getAction')
+    // console.log('hovered: ', hovered, 'mapTile: ', mapTile)
+
     let action = 'move';
-    if (hovered instanceof Gold) {
+    if (hovered instanceof Gold) { // действие - собирать золото
       action = 'gold';
+      // this.goal = 'gold';
+      // this.targetPosition = hovered.position;
+      // console.log('goal: ', this.goal)
     } else if (hovered instanceof OreFactory && hovered?.player == this.player){
       action = 'cash_in'
     }
-    console.log('action: ', action)      
+    console.log('action: ', action)     
+
+    // hovered.onClick = ()=>{
+    //   if (hovered instanceof Gold) { // действие - собирать золото
+    //     action = 'gold';
+    //     this.goal = 'gold';
+    //     this.targetPosition = hovered.position;
+    //     console.log('goal: ', this.goal)
+    //   }      
+    // }
     return action;
   }
   
@@ -49,31 +62,26 @@ export class TruckUnit extends AbstractUnit{
   }
 
   logic() {
-    // console.log('logit Track')
+    console.log('this.attackTarget: ', this.attackTarget)
+    console.log('this.attackTarget: ', this.attackTarget)
+    console.log('this.path: ', this.path)
 
     if (this.gold >= 3000) {
       const oreFactory = this.getList().list.filter(item => item.name == 'oreFactory' && this.player === item.player) as MapObject[];
       const closestBuild = findClosestBuild(this.position.clone(), oreFactory);
       if (closestBuild.tile) {
-        console.log(closestBuild.tile)        
+        // console.log(closestBuild.tile)        
         this.setTarget(closestBuild.tile);
       }
-      
-    } else if (!this.attackTarget) { // attackTarget - цель
-      console.log('goal: ', this.goal)
-      this.closestGold = findClosestGold(this.position.clone(), this.getList().list.filter(item=>item instanceof Gold));
-      if (this.goal !== 'wait') {
-        console.log('----------------отправляю трак к золоту')
-        this.setTarget(this.closestGold.position);
+    } 
+    else if(this.goal === 'gold'){ // если цель - золото
+      console.log('----- цель - золото')
+      if (!this.attackTarget){ //attackTarget - цель атаки трака - золото или null, когда золото закончилось
+        this.closestGold = findClosestGold(this.position.clone(), this.getList().list.filter(item=>item instanceof Gold));
+        this.setTarget(this.closestGold.position); // отправляю трак к золоту
+      } else {
+        this.setTarget(this.targetPosition);
       }
-
-      // console.log('this: ', this);
-      // console.log('this.position: ', this.position);
-      // console.log('this.positionPx: ', this.positionPx);
-      // console.log('this.target: ', this.target);
-      // console.log('this.path: ', this.path);
-      // console.log('this.closestGold.position ', this.closestGold.position)
-
     }
   }
 

@@ -70,6 +70,12 @@ export class GameField extends Control{
     });
 
     this.objects.onClick = (current=>{
+      console.log('this.objects.onClick: ', current)
+      // console.log(this.)
+      if(current.name === 'gold'){
+
+        //todo mari Послать сюда Трак в _position
+      }
       this.cursorStatus.selected = current?[current]:[];
     });
     
@@ -99,6 +105,7 @@ export class GameField extends Control{
     }
     
     canvas.node.onclick=e=>{
+      console.log('onclick')
       if (preventSelect){
         preventSelect = false;
         return;
@@ -106,6 +113,7 @@ export class GameField extends Control{
       const cursorTile = this.getTileCursor();
       const cursor = this.getPixelCursor();
       const action = this.cursorStatus.getAction();
+      console.log('action = ', action)
       if (action == 'select'){
         this.objects.handleClick(cursorTile, cursor);
       } else if (action == 'move'){
@@ -119,6 +127,7 @@ export class GameField extends Control{
       } else if (action == 'attack'){
         this.commandUnit(cursor.clone());
       } else if (action == 'gold'){
+        console.log('onclick gold')
         this.commandUnit(cursor.clone());
       } else if (action == 'cash_in'){
         this.commandUnit(cursor.clone());
@@ -206,7 +215,7 @@ export class GameField extends Control{
       return new Vector(Math.floor(unit.positionPx.x/this.sz), Math.floor(unit.positionPx.y/this.sz))
     });
     
-    tracePathes(traceMap, indexPoint, destinations, (pathes)=>{
+    tracePathes(traceMap, indexPoint, destinations, (pathes)=>{ // направление куда двигается
       this.pathes = pathes;
       pathes.forEach((path, i)=>{
         const unit = units[i];
