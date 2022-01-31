@@ -104,7 +104,6 @@ export class GameField extends Control{
     }
     
     canvas.node.onclick=e=>{
-      console.log('onclick')
       if (preventSelect){
         preventSelect = false;
         return;
@@ -112,7 +111,7 @@ export class GameField extends Control{
       const cursorTile = this.getTileCursor();
       const cursor = this.getPixelCursor();
       const action = this.cursorStatus.getAction();
-      console.log('action = ', action)
+      // console.log('action = ', action)
       if (action == 'select'){
         this.objects.handleClick(cursorTile, cursor);
       } else if (action == 'move'){
@@ -121,12 +120,14 @@ export class GameField extends Control{
         this.players[0].build(this.cursorStatus.planned, cursorTile.clone());       
         this.modeCallback();       
         this.cursorStatus.planned = null;    
-      } else if (action == 'primary'){
+      } else if (action == 'primary') {
+        console.log('')
+        console.log('состояние primary')
+        console.log('')
         this.players[0].primaries[this.cursorStatus.hovered[0].name] = this.cursorStatus.hovered[0] as MapObject;
       } else if (action == 'attack'){
         this.commandUnit(cursor.clone());
       } else if (action == 'gold'){
-        console.log('onclick gold')
         this.commandUnit(cursor.clone());
       } else if (action == 'cash_in'){
         this.commandUnit(cursor.clone());
@@ -266,8 +267,8 @@ export class GameField extends Control{
     const spawn = tech.units.filter(item => item.name == name)[0].spawn[0];
     
     let primary = player.getPrimary(spawn); //Object.values(this.primaries[player]).find(it=>it.name == spawn);
-    // console.log('spawn ', spawn)
-    // console.log('primary ', primary)
+    //spawn название того что будем строить
+    //primary объект с начальными данными постройки
     if (primary !== null){
       unit.positionPx = Vector.fromIVector({x:primary.position.x*this.sz, y: primary.position.y*this.sz});
     } 

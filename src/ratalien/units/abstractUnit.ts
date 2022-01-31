@@ -6,6 +6,14 @@ import AbstractWeapon from "./abstractWeapon";
 import { MapObject } from './mapObject';
 import { GamePlayer } from '../gamePlayer';
 
+/*
+this.attackTarget:  цель атаки, изначально - undefined. Тип Vector {x: 990, y: 550}
+this.path:  путь до цели, изначально - undefined. Тип - массив из векторов (3) [Vector, Vector, Vector]
+  Он уменьшается по мере приближения к цели
+positionPx - это стартовая точка, где отстроен юнит
+target - а таргет куда анимировать
+action:  Активность, по умолчанию - move. Если идти за золотом, то gold
+*/
 export class AbstractUnit extends InteractiveObject{
   positionPx: Vector;
   target: Vector = null;
@@ -27,18 +35,19 @@ export class AbstractUnit extends InteractiveObject{
   maxGold: number = 3000;
   weapon: AbstractWeapon;
   targetEnemy: { distance: number; unit: AbstractUnit; } | { distance: number; unit: MapObject; tile: Vector; };
-  // goal: String;
   action: String;
+  countSpendTime: number; // время, потраченное юнитом в бездействии, когда this.attackTarget = null
+
 
   get position() {
     // console.log('this.positionPx: ', this.positionPx)
     return new Vector(Math.floor(this.positionPx.x/55), Math.floor(this.positionPx.y / 55));
   }
 
-  constructor(goal: String = 'wait'){
+  constructor(){
     super();
-    // this.goal = goal;
-    this.action = 'move'; //? mari пробую завести переменную для хранения цели юнита
+    this.action = 'move'; //переменная для хранения цели юнита
+    this.countSpendTime = 0; // время, потраченное впустую
     // this.weapon = new Weapon();
     // this.weapon.onBulletTarget = (point)=>{
     //   this.onDamageTile?.(point);
@@ -65,8 +74,8 @@ export class AbstractUnit extends InteractiveObject{
     ctx.stroke();
     ctx.fillStyle = "#000";
     ctx.fillText(this.name, camera.x + this.positionPx.x, camera.y+ this.positionPx.y-10);
-    // ctx.fillText(`health: ${this.health}`, camera.x + this.positionPx.x, camera.y + this.positionPx.y - 20);
-    // Прогресс-баз состояния здоровья Юнита
+
+    // Прогресс-бар состояния здоровья Юнита
     ctx.strokeStyle = '#666'
     ctx.strokeRect(camera.x + this.positionPx.x,camera.y + this.positionPx.y - 20, 100, 10);
     ctx.fillStyle = '#ccc'
@@ -163,8 +172,9 @@ export class AbstractUnit extends InteractiveObject{
   }
 
   logic() {
-   const units = this.getList().list.filter(it=> it instanceof AbstractUnit&&it.player!=this.player) as AbstractUnit[];
-   const builds =this.getList().list.filter(it=> it instanceof MapObject&&it.player!=this.player) as MapObject[];
+    
+    const units = this.getList().list.filter(it=> it instanceof AbstractUnit&&it.player!=this.player) as AbstractUnit[];
+    const builds =this.getList().list.filter(it=> it instanceof MapObject&&it.player!=this.player) as MapObject[];
     const closestUnit = findClosestUnit(this.position.clone(), units);
     const closestBuild = findClosestBuild(this.position.clone(), builds);
     const targetEnemy = closestUnit.distance > closestBuild.distance ? closestBuild : closestUnit;
@@ -176,10 +186,12 @@ export class AbstractUnit extends InteractiveObject{
       } else if(this.targetEnemy.unit instanceof AbstractUnit){
         this.setTarget(closestUnit.unit.position);
       }
+
     } else if(this.targetEnemy.unit.health ===0) {
       this.attackTarget = null;
     }
   }
+
 
   findClosestEnemy() {
     const units = this.getList().list.filter(it=> it instanceof AbstractUnit&&it.player!=this.player) as AbstractUnit[];

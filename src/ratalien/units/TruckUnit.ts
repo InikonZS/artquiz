@@ -7,16 +7,10 @@ import { OreFactory } from './oreFactory';
 import { findClosestBuild, findClosestGold } from '../distance';
 import { Vector, IVector } from "../../common/vector";
 
-/*
-this.attackTarget:  цель атаки, изначально - undefined. Тип Vector {x: 990, y: 550}
-this.path:  путь до цели, изначально - undefined. Тип - массив из векторов (3) [Vector, Vector, Vector]
-  Он уменьшается по мере приближения к цели
-action:  Активность, по умолчанию - move. Если идти за золотом, то gold
-*/
+
 export class TruckUnit extends AbstractUnit{
   weapon: WeaponTrack;
   closestGold: InteractiveObject;
-  targetPosition: Vector;
   
  // getResource: () => InteractiveObject[];
   constructor(){
@@ -45,7 +39,6 @@ export class TruckUnit extends AbstractUnit{
     if (hovered instanceof Gold) { // действие - собирать золото
       action = 'gold';
       this.action = 'gold';
-      this.targetPosition = hovered.position;
     } else if (hovered instanceof OreFactory && hovered?.player == this.player){
       action = 'cash_in'
     }
@@ -57,8 +50,10 @@ export class TruckUnit extends AbstractUnit{
   }
 
   logic() {
+    // console.log('')
     // console.log('this.attackTarget: ', this.attackTarget)
-    // console.log('this.path: ', this.path)
+    // console.log('this.positionPx: ', this.positionPx)
+    console.log('countSpendTime: ', this.countSpendTime)    
 
     if (this.gold >= 3000) {
       const oreFactory = this.getList().list.filter(item => item.name == 'oreFactory' && this.player === item.player) as MapObject[];
@@ -67,14 +62,27 @@ export class TruckUnit extends AbstractUnit{
         this.setTarget(closestBuild.tile);
       }
     } 
-    else if(this.action === 'gold'){ // если цель - золото
+    else if (this.action === 'gold') { // если цель - золото
       if (!this.attackTarget){ //attackTarget - цель атаки трака - золото или null, когда золото закончилось
         this.closestGold = findClosestGold(this.position.clone(), this.getList().list.filter(item=>item instanceof Gold));
         this.setTarget(this.closestGold.position); // отправляю трак к золоту
       } else {
-        this.setTarget(this.targetPosition); // трак стоит на месте
+        this.setTarget(this.positionPx); // трак стоит на месте
       }
     }
+
+    // Задача. Юнит. Если стоит 20сек, то ищет себе сам цель. -----{
+
+    if (this.attackTarget === undefined) {
+      this.countSpendTime++;
+    }
+
+    if (this.countSpendTime >= 20*40) { //Ждет 20 сек и если его никуда не послали, едет за ближайшим золотом
+      this.action = 'gold';
+      this.countSpendTime = 0;
+      this.attackTarget = undefined;
+    }
+    // Задача. Юнит. Если стоит 20сек, то ищет себе сам цель. -----}
   }
   
   

@@ -38,8 +38,6 @@ export class GameCursorStatus{
       //no selected
       action = 'select';
     } else if (this.selected.find(it => !(it instanceof AbstractUnit)) == null) {
-      console.log('this.selected ',this.selected)
-      console.log('this.selected.find ',this.selected.find(it => !(it instanceof AbstractUnit)))
       action = this.selected[0].getAction(this.hovered[0],this.getRealMap()[this.tilePosition.y][this.tilePosition.x] )
 
       //selected only units
@@ -63,6 +61,7 @@ export class GameCursorStatus{
           action = 'no'
         } else {
           action = 'primary'
+          alert('action = primary')
         }
       }
     }
