@@ -1,5 +1,6 @@
 import { Vector } from "../common/vector";
 import { getImageData, getMapFromImageData, generateEmptyMap, parseData } from "./tracer";
+import {TilesCollection} from "./TileElement";
 
 export class GameMap{
   map: Array<Array<number>>;
@@ -13,11 +14,11 @@ export class GameMap{
   cached:boolean = false;
   imageData: ImageData;
 
-  constructor(sizeX:number, sizeY:number, map:HTMLImageElement, textures:Record<string, HTMLImageElement>){
+  constructor(sizeX:number, sizeY:number, map:HTMLImageElement, textures:Record<string, HTMLImageElement>,tileCollection:TilesCollection){
     this.map = [];
     this.imageData = getImageData(map);
     this.res = textures;
-    this.map = getMapFromImageData(this.imageData);
+    this.map = getMapFromImageData(this.imageData,tileCollection);
     this.opened = generateEmptyMap(96,96, 0);
     this.canvas = document.createElement('canvas');
     this.ctx = this.canvas.getContext('2d');

@@ -24,6 +24,7 @@ import { buildMap } from './units/buildMap';
 import { Explosion } from './units/explosion';
 import { Gold } from './gold';
 import { units } from './units/unitMap';
+import {TilesCollection} from "./TileElement";
 
 
 export class GameField extends Control{
@@ -39,12 +40,14 @@ export class GameField extends Control{
   pathes: Vector[][];
   players: GamePlayer[];
   fps: number;
+  private tileCollections: TilesCollection;
 
-  constructor(parentNode: HTMLElement, res: Record<string, HTMLImageElement>, players:GamePlayer[], map: GameMap){
+  constructor(parentNode: HTMLElement, res: Record<string, HTMLImageElement>,
+              players:GamePlayer[], map: GameMap,tilesCollection:TilesCollection){
     super(parentNode, 'div', red['game_field']);
     this.res = res;  
     this.players = players;
-
+    this.tileCollections = tilesCollection
     const canvas = new Control<HTMLCanvasElement>(this.node, 'canvas');
     this.canvas = canvas;
     this.map = map;
@@ -239,9 +242,8 @@ export class GameField extends Control{
 //возможно, тут лучше передвать не нейм, а сам объект созданного солдата? 
   addUnit(player: GamePlayer, name: string) {
     //TODO check is empty,else, check neighbor
-  
     let UnitConstructor = units[name] || AbstractUnit;
-    let unit = new UnitConstructor();//UnitObject();
+    let unit = new UnitConstructor(this.tileCollections);//UnitObject();
     unit.onDamageTile = (point)=>{
       const ex = new Explosion(point);
       this.objects.add(ex);
@@ -258,11 +260,25 @@ export class GameField extends Control{
     const spawn = tech.units.filter(item => item.name == name)[0].spawn[0];
     
     let primary = player.getPrimary(spawn); //Object.values(this.primaries[player]).find(it=>it.name == spawn);
-    // console.log('spawn ', spawn)
-    // console.log('primary ', primary)
     if (primary !== null){
-      unit.positionPx = Vector.fromIVector({x:primary.position.x*this.sz, y: primary.position.y*this.sz});
-    } 
+      //---unit.positionPx = Vector.fromIVector({x:primary.position.x*this.sz, y: primary.position.y*this.sz});
+      //найти свободный тайл
+      const tile = this.tileCollections.getTileData(`${primary.position.x}-${primary.position.y}`)
+     if(tile){
+        const emptySubtile = tile.findEmptySubTile()
+        tile.setSubTileUnit(unit,emptySubtile)
+        const subTileOffset=tile.calculatePosition(emptySubtile)
+        unit.positionPx = Vector.fromIVector({x:primary.position.x*this.sz+subTileOffset.x,
+          y: primary.position.y*this.sz+subTileOffset.y});
+        unit.tileCoordinates={x:primary.position.x,y:primary.position.y}
+        console.log(unit.tileCoordinates,'#$')
+      }else{
+        unit.tileCoordinates={x:primary.position.x,y:primary.position.y}
+        console.log(unit.tileCoordinates,'#$')
+        unit.positionPx = Vector.fromIVector({x:primary.position.x*this.sz, y: primary.position.y*this.sz});
+      }
+
+    }
     
     unit.name = name;
     this.objects.add(unit);

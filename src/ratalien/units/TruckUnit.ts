@@ -6,14 +6,15 @@ import { Gold } from '../gold';
 import { OreFactory } from './oreFactory';
 import { findClosestBuild, findClosestGold } from '../distance';
 import { Vector, IVector } from "../../common/vector";
+import {TilesCollection} from "../TileElement";
 
 export class TruckUnit extends AbstractUnit{
   weapon: WeaponTrack;
   closestGold: InteractiveObject;
   
  // getResource: () => InteractiveObject[];
-  constructor(){
-    super();
+  constructor(tilesCollection:TilesCollection){
+    super(tilesCollection);
     this.weapon = new WeaponTrack();
     
     

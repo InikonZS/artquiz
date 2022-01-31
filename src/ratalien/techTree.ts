@@ -32,7 +32,7 @@ const energyPlant = {
 
 //medium
 const barracs = {
-  deps: ['buildingCenter', 'energyPlant'],
+  deps: [/*'buildingCenter', 'energyPlant'*/'rootAccess'],
   desc: ['barracs'],
   name: 'barracs',
   energy: 3,

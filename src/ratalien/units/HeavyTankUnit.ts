@@ -1,10 +1,11 @@
 import {AbstractUnit} from './abstractUnit';
 import { InteractiveObject } from './interactiveObject';
 import { WeaponHeavyTank } from './weaponHeavyTank';
+import {TilesCollection} from "../TileElement";
 export class HeavyTankUnit extends AbstractUnit{
   weapon: WeaponHeavyTank;
-  constructor(){
-    super();
+  constructor(tilesCollection:TilesCollection){
+    super(tilesCollection);
     this.weapon = new WeaponHeavyTank();
     this.weapon.onBulletTarget = (point)=>{
       this.onDamageTile?.(point);

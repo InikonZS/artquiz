@@ -1,5 +1,6 @@
 import { IVector, Vector } from "../common/vector";
 import { Gold } from './gold';
+import {TilesCollection} from "./TileElement";
 function generate(){
   const map = [];
   for (let i=0; i<100; i++){
@@ -187,7 +188,7 @@ export function isEqualColor(a:{r:number, g:number, b:number, a:number}, b:{r:nu
   return a.r == b.r && a.g == b.g && a.b == b.b && a.a == b.a;
 }
 
-export function getMapFromImageData(data:ImageData){
+export function getMapFromImageData(data:ImageData,tileCollection:TilesCollection){
   const map = generateEmptyMap(data.width, data.height, Number.MAX_SAFE_INTEGER);
   iterateImageData(data, (pos, color)=>{
     let mapColor = 0;
@@ -200,6 +201,8 @@ export function getMapFromImageData(data:ImageData){
     } else if (isEqualColor(color, {r:0, g:0, b:255, a:255})){
       mapColor = 4;
     }
+    map[pos.x][pos.y] = mapColor;
+    tileCollection.addTile({x:pos.x,y:pos.y},mapColor)
     map[pos.x][pos.y] = mapColor;
   });
   return map;

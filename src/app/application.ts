@@ -53,14 +53,14 @@ export class Application extends Control {
   }
 
   private gameCycle() {
-    const settingsPage = new SettingsPage(this.main.node, this.settingsModel.getData());
-    settingsPage.onBack = () => {
-      settingsPage.destroy();
-      this.mainCycle();
-    }
-    settingsPage.onPlay = (settings) => {
-      settingsPage.destroy();
-      this.settingsModel.setData(settings);  //будет ли модель ??
+    // const settingsPage = new SettingsPage(this.main.node, this.settingsModel.getData());
+    // settingsPage.onBack = () => {
+    //   settingsPage.destroy();
+    //   this.mainCycle();
+    // }
+    // settingsPage.onPlay = (settings) => {
+    //   settingsPage.destroy();
+    //   this.settingsModel.setData(settings);  //будет ли модель ??
       this.loader.load(resources).then(res => {
         const game = new Game(this.main.node, res.textures, {credits: 30000, map: res.textures.map });
         game.onExit = () => {
@@ -68,17 +68,17 @@ export class Application extends Control {
           this.finishCycle();
         }
       })
-    }
+  //  }
   }
 
   private mainCycle() {
-    const startPage = new StartPage(this.main.node);
-    startPage.animateIn();
-    startPage.onGamePlay = (typeGame) => {
-      startPage.animateOut().then(() => {
-        startPage.destroy();
+    // const startPage = new StartPage(this.main.node);
+    // startPage.animateIn();
+    // startPage.onGamePlay = (typeGame) => {
+    //   startPage.animateOut().then(() => {
+    //     startPage.destroy();
         this.gameCycle();
-      });
-    }
+    //   });
+    // }
   }
 }
