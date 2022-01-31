@@ -61,8 +61,8 @@ export class Game extends Control{
 
     const player = new GamePlayer(0);
     player.setMoney(options.credits);
-    let x = getRandomNumber(20) + player.minDistance,
-      y = getRandomNumber(20) + player.minDistance;
+    let x = getRandomNumber(25) + player.minDistance,
+      y = getRandomNumber(25) + player.minDistance;
     console.log('стартовая точка для бота [x:y] ', x,y);
     const botPlayer = new BotPlayer((new Vector(x, y)),1); // тут была стартовая точка 20:20
     const map = new GameMap(96, 96, options.map, res);

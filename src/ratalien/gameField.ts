@@ -70,7 +70,6 @@ export class GameField extends Control{
     });
 
     this.objects.onClick = (current=>{
-      console.log('this.objects.onClick: ', current)
       // console.log(this.)
       if(current.name === 'gold'){
 

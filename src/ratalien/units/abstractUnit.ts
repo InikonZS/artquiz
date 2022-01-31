@@ -27,7 +27,8 @@ export class AbstractUnit extends InteractiveObject{
   maxGold: number = 3000;
   weapon: AbstractWeapon;
   targetEnemy: { distance: number; unit: AbstractUnit; } | { distance: number; unit: MapObject; tile: Vector; };
-  goal: String;
+  // goal: String;
+  action: String;
 
   get position() {
     // console.log('this.positionPx: ', this.positionPx)
@@ -36,7 +37,8 @@ export class AbstractUnit extends InteractiveObject{
 
   constructor(goal: String = 'wait'){
     super();
-    this.goal = goal;
+    // this.goal = goal;
+    this.action = 'move'; //? mari пробую завести переменную для хранения цели юнита
     // this.weapon = new Weapon();
     // this.weapon.onBulletTarget = (point)=>{
     //   this.onDamageTile?.(point);
