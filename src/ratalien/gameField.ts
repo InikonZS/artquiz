@@ -261,14 +261,10 @@ export class GameField extends Control{
     
     let primary = player.getPrimary(spawn); //Object.values(this.primaries[player]).find(it=>it.name == spawn);
     if (primary !== null){
-      //---unit.positionPx = Vector.fromIVector({x:primary.position.x*this.sz, y: primary.position.y*this.sz});
-      //найти свободный тайл
-      const tile = this.tileCollections.getTileData(`${primary.position.x}-${primary.position.y}`)
+     const tile = this.tileCollections.getTileData(`${primary.position.x}-${primary.position.y}`)
      if(tile){
         const emptySubtile = tile.findEmptySubTile()
         const subTileOffset=tile.setSubTileUnit(unit,emptySubtile)
-       console.log(emptySubtile,'emptySub')
-       console.log("CREATEunit",tile)
         unit.positionPx = Vector.fromIVector({x:primary.position.x*this.sz+subTileOffset.x,
           y: primary.position.y*this.sz+subTileOffset.y});
         unit.tileCoordinates={x:primary.position.x,y:primary.position.y}
@@ -285,7 +281,6 @@ export class GameField extends Control{
 
   setPlanned(name:string, callback:()=>void){
     //this.mode = mode;
-    console.log(name,'***');
     this.cursorStatus.planned = tech.builds.find(it=>it.desc[0] == name);//{name:name};
    // console.log(callback);
     this.modeCallback = callback;

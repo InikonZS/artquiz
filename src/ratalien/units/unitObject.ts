@@ -219,6 +219,7 @@ export class UnitObject1 extends AbstractUnit{
   } 
 
   setPath(path:Array<Vector>, tileChecker:(pos:Vector)=>boolean, attackPoint:Vector = null){
+    console.log('set Path',path,tileChecker)
     this.attackTarget = attackPoint
     const sz =55;
     console.log('sp ', path);

@@ -38,7 +38,7 @@ export class TilesCollection {
   clearSubTile(s: string, unit: AbstractUnit) {
     const tile = this.getTileData(s)
     const subIndex = tile.getIndexByUnit(unit)
-     console.log('subIndex',subIndex)
+    console.log('subIndex', subIndex)
     subIndex >= 0 && tile.clearSubTile(subIndex)
     return subIndex
   }
@@ -50,85 +50,153 @@ export class TilesCollection {
     //console.log('unitPrevSubTile',unitPrevSubTile)
     const newTileSubTileIndex = this.defineNewSubTileByPrevDirection(
       unitPrevSubTile, direction, newTile)
-   // console.log('newTileSubTileIndex',newTileSubTileIndex)
-   if (typeof newTileSubTileIndex == 'number') {
+    // console.log('newTileSubTileIndex',newTileSubTileIndex)
+    if (typeof newTileSubTileIndex == 'number') {
       const _newTile = this.getTileData(`${newTile.x}-${newTile.y}`)
-    // console.log("%^%^%^%",_newTile)
+      // console.log("%^%^%^%",_newTile)
       _newTile.setSubTileUnit(unit, newTileSubTileIndex)
-   //  console.log('NewTile',this.getTileData(`${newTile.x}-${newTile.y}`))
-    // console.log('oldTile',this.getTileData(`${tileCoordinates.x}-${tileCoordinates.y}`))
+      //  console.log('NewTile',this.getTileData(`${newTile.x}-${newTile.y}`))
+      // console.log('oldTile',this.getTileData(`${tileCoordinates.x}-${tileCoordinates.y}`))
 
-     return _newTile.calculatePosition(newTileSubTileIndex)
+      return _newTile.calculatePosition(newTileSubTileIndex)
     }
     return null
   }
 
+// checkNextStepSubtiles(first,second,third,forth){
+//
+// }
   defineNewSubTileByPrevDirection(prevSubTile: number, direction: string,
                                   _nextTile: { x: number, y: number }) {
     let subtile: number
     const nextX = _nextTile.x
     const nextY = _nextTile.y
-
+    //console.log("Tilecoords", this.tilesMap.get(`${nextX}-${nextY}`).coords)
+   // console.log("TILE", this.tilesMap.get(`${nextX}-${nextY}`).subTile)
     if (direction === 'up') {
-      if (prevSubTile === 3) {
-        this.tilesMap.get(`${nextX}-${nextY}`).subTile[0] == null && (subtile = 0)
-        this.tilesMap.get(`${nextX}-${nextY}`).subTile[1] == null && (subtile = 1)
-      }
-      else if (prevSubTile === 2) {
-        this.tilesMap.get(`${nextX}-${nextY}`).subTile[1] == null && (subtile = 1)
-        this.tilesMap.get(`${nextX}-${nextY}`).subTile[0] == null && (subtile = 0)
-      }else if(prevSubTile === 0){
-        this.tilesMap.get(`${nextX}-${nextY}`).subTile[3] == null && (subtile = 3)
-        this.tilesMap.get(`${nextX}-${nextY}`).subTile[2] == null && (subtile = 2)
-      }else if(prevSubTile === 1){
-        this.tilesMap.get(`${nextX}-${nextY}`).subTile[2] == null && (subtile = 2)
-        this.tilesMap.get(`${nextX}-${nextY}`).subTile[3] == null && (subtile = 3)
-      }
+      // if (prevSubTile === 3) {
+      //   this.tilesMap.get(`${nextX}-${nextY}`).subTile[0] == null && (subtile = 0)
+      //   this.tilesMap.get(`${nextX}-${nextY}`).subTile[1] == null && (subtile = 1)
+      // }
+      // else if (prevSubTile === 2) {
+      //   this.tilesMap.get(`${nextX}-${nextY}`).subTile[1] == null && (subtile = 1)
+      //   this.tilesMap.get(`${nextX}-${nextY}`).subTile[0] == null && (subtile = 0)
+      // }else if(prevSubTile === 0){
+      //   this.tilesMap.get(`${nextX}-${nextY}`).subTile[3] == null && (subtile = 3)
+      //   this.tilesMap.get(`${nextX}-${nextY}`).subTile[2] == null && (subtile = 2)
+      // }else if(prevSubTile === 1){
+      //   this.tilesMap.get(`${nextX}-${nextY}`).subTile[2] == null && (subtile = 2)
+      //   this.tilesMap.get(`${nextX}-${nextY}`).subTile[3] == null && (subtile = 3)
+      // }
+      this.tilesMap.get(`${nextX}-${nextY}`).subTile[2] == null && (subtile = 2)
+      this.tilesMap.get(`${nextX}-${nextY}`).subTile[3] == null && (subtile = 3)
+      this.tilesMap.get(`${nextX}-${nextY}`).subTile[0] == null && (subtile = 0)
+      this.tilesMap.get(`${nextX}-${nextY}`).subTile[1] == null && (subtile = 1)
+
     }
     else if (direction === 'left-up') {
-      this.tilesMap.get(`${nextX}-${nextY}`).subTile[3] == null && (subtile = 3)
+      if (prevSubTile === 1
+          && this.tilesMap.get(`${nextX}-${nextY - 1}`).subTile[2] == null
+          && this.tilesMap.get(`${nextX}-${nextY}`).subTile[1] == null) {
+        (subtile = 1)
+      }
+      else if (prevSubTile === 2
+               && this.tilesMap.get(`${nextX - 1}-${nextY}`).subTile[1] == null
+               && this.tilesMap.get(`${nextX}-${nextY}`).subTile[2] == null) {
+        (subtile = 2)
+      }else {
+        this.tilesMap.get(`${nextX}-${nextY}`).subTile[3] == null && (subtile = 3)
+      }
     }
     else if (direction === 'right-up') {
-      this.tilesMap.get(`${nextX}-${nextY}`).subTile[2] == null && (subtile = 2)
+     // console.log("Riup")
+      if (prevSubTile === 0
+          && this.tilesMap.get(`${nextX}-${nextY - 1}`).subTile[3] == null
+          && this.tilesMap.get(`${nextX}-${nextY}`).subTile[0] == null) {
+        (subtile = 0)
+      }
+      else if (prevSubTile === 3
+               && this.tilesMap.get(`${nextX + 1}-${nextY}`).subTile[0] == null
+               && this.tilesMap.get(`${nextX}-${nextY}`).subTile[3] == null) {
+        (subtile = 3)
+      }else{
+        this.tilesMap.get(`${nextX}-${nextY}`).subTile[2] == null && (subtile = 2)
+      }
     }
     else if (direction === 'left') {
-      if (prevSubTile === 0) {
-        this.tilesMap.get(`${nextX}-${nextY}`).subTile[3] == null && (subtile = 3)
-        this.tilesMap.get(`${nextX}-${nextY}`).subTile[1] == null && (subtile = 1)
-      }
-      else if (prevSubTile === 2) {
-        this.tilesMap.get(`${nextX}-${nextY}`).subTile[3] == null && (subtile = 3)
-        this.tilesMap.get(`${nextX}-${nextY}`).subTile[1] == null && (subtile = 1)
-      }
-     else{
-       return
-     }
+      // if (prevSubTile === 0) {
+      //   this.tilesMap.get(`${nextX}-${nextY}`).subTile[3] == null && (subtile = 3)
+      //   this.tilesMap.get(`${nextX}-${nextY}`).subTile[1] == null && (subtile = 1)
+      // }
+      // else if (prevSubTile === 2) {
+      //   this.tilesMap.get(`${nextX}-${nextY}`).subTile[3] == null && (subtile = 3)
+      //   this.tilesMap.get(`${nextX}-${nextY}`).subTile[1] == null && (subtile = 1)
+      // }
+      // else {
+      //   return
+      // }
+      this.tilesMap.get(`${nextX}-${nextY}`).subTile[1] == null && (subtile = 1)
+      this.tilesMap.get(`${nextX}-${nextY}`).subTile[3] == null && (subtile = 3)
+      this.tilesMap.get(`${nextX}-${nextY}`).subTile[2] == null && (subtile = 2)
+      this.tilesMap.get(`${nextX}-${nextY}`).subTile[0] == null && (subtile = 0)
+
     }
     else if (direction === 'right') {
-      if (prevSubTile === 1) {
-        this.tilesMap.get(`${nextX}-${nextY}`).subTile[2] == null && (subtile = 2)
-        this.tilesMap.get(`${nextX}-${nextY}`).subTile[0] == null && (subtile = 0)
-      }
-      else if (prevSubTile === 3) {
-        this.tilesMap.get(`${nextX}-${nextY}`).subTile[0] == null && (subtile = 0)
-        this.tilesMap.get(`${nextX}-${nextY}`).subTile[2] == null && (subtile = 2)
-      }
+      // if (prevSubTile === 1) {
+      //   this.tilesMap.get(`${nextX}-${nextY}`).subTile[2] == null && (subtile = 2)
+      //   this.tilesMap.get(`${nextX}-${nextY}`).subTile[0] == null && (subtile = 0)
+      // }
+      // else if (prevSubTile === 3) {
+      //   this.tilesMap.get(`${nextX}-${nextY}`).subTile[0] == null && (subtile = 0)
+      //   this.tilesMap.get(`${nextX}-${nextY}`).subTile[2] == null && (subtile = 2)
+      // }
+
+      this.tilesMap.get(`${nextX}-${nextY}`).subTile[2] == null && (subtile = 2)
+      this.tilesMap.get(`${nextX}-${nextY}`).subTile[0] == null && (subtile = 0)
+      this.tilesMap.get(`${nextX}-${nextY}`).subTile[1] == null && (subtile = 1)
+      this.tilesMap.get(`${nextX}-${nextY}`).subTile[3] == null && (subtile = 3)
     }
     else if (direction === 'down') {
-      if (prevSubTile === 2) {
-        this.tilesMap.get(`${nextX}-${nextY}`).subTile[1] == null && (subtile = 1)
-        this.tilesMap.get(`${nextX}-${nextY}`).subTile[0] == null && (subtile = 0)
-      }
-      else if (prevSubTile === 3) {
-        this.tilesMap.get(`${nextX}-${nextY}`).subTile[0] == null && (subtile = 0)
-        this.tilesMap.get(`${nextX}-${nextY}`).subTile[1] == null && (subtile = 1)
-      }
+      // if (prevSubTile === 2) {
+      //   this.tilesMap.get(`${nextX}-${nextY}`).subTile[1] == null && (subtile = 1)
+      //   this.tilesMap.get(`${nextX}-${nextY}`).subTile[0] == null && (subtile = 0)
+      // }
+      // else if (prevSubTile === 3) {
+      //   this.tilesMap.get(`${nextX}-${nextY}`).subTile[0] == null && (subtile = 0)
+      //   this.tilesMap.get(`${nextX}-${nextY}`).subTile[1] == null && (subtile = 1)
+      // }
+      this.tilesMap.get(`${nextX}-${nextY}`).subTile[1] == null && (subtile = 1)
+      this.tilesMap.get(`${nextX}-${nextY}`).subTile[0] == null && (subtile = 0)
+      this.tilesMap.get(`${nextX}-${nextY}`).subTile[2] == null && (subtile = 2)
+      this.tilesMap.get(`${nextX}-${nextY}`).subTile[3] == null && (subtile = 3)
     }
     else if (direction === 'right-down') {
+      if (prevSubTile === 1
+          && this.tilesMap.get(`${nextX}-${nextY - 1}`).subTile[2] == null
+          && this.tilesMap.get(`${nextX}-${nextY}`).subTile[1] == null) {
+        (subtile = 1)
+      }
+      else if (prevSubTile === 2
+               && this.tilesMap.get(`${nextX - 1}-${nextY}`).subTile[1] == null
+               && this.tilesMap.get(`${nextX}-${nextY}`).subTile[2] == null) {
+        (subtile = 2)
+      }else {
       this.tilesMap.get(`${nextX}-${nextY}`).subTile[0] == null && (subtile = 0)
+      }
     }
     else if (direction === 'left-down') {
-      this.tilesMap.get(`${nextX}-${nextY}`).subTile[1] == null && (subtile = 1)
+      if (prevSubTile === 0
+          && this.tilesMap.get(`${nextX}-${nextY - 1}`).subTile[3] == null
+          && this.tilesMap.get(`${nextX}-${nextY}`).subTile[0] == null) {
+        (subtile = 0)
+      }
+      else if (prevSubTile === 3
+               && this.tilesMap.get(`${nextX - 1}-${nextY}`).subTile[0] == null
+               && this.tilesMap.get(`${nextX}-${nextY}`).subTile[3] == null) {
+        (subtile = 3)
+      }else {
+        this.tilesMap.get(`${nextX}-${nextY}`).subTile[1] == null && (subtile = 1)
+      }
     }
     // console.log("&&",subtile,'&&')
     return subtile
@@ -150,12 +218,12 @@ export class Tile {
 
   newSubtileInside(unit: AbstractUnit, currentSub: number, newSubtile: number) {
     if (currentSub === newSubtile) {
-     // console.log('newSubtileInside',currentSub,newSubtile)
+      // console.log('newSubtileInside',currentSub,newSubtile)
       return this.calculatePosition(newSubtile)
     }
     this.subTile[currentSub] = null
     this.subTile[newSubtile] = unit
-  //  console.log('newSubtileInside', this.subTile)
+    //  console.log('newSubtileInside', this.subTile)
     return this.calculatePosition(newSubtile)
   }
 
@@ -164,7 +232,7 @@ export class Tile {
   }
 
   getIndexByUnit(unit: AbstractUnit) {
-    console.log(this.subTile)
+    //console.log(this.subTile)
     return this.subTile.findIndex(e => e === unit)
   }
 
@@ -182,26 +250,26 @@ export class Tile {
       if (this.subTile[tileIndex] == null) {
         freeIndex = tileIndex
         this.subTile[tileIndex] = unit
-        this.occupancyRatio = this.subTile.filter(e=>e).length
+        this.occupancyRatio = this.subTile.filter(e => e).length
       }
       else {
         const isHasEmpty = this.subTile.findIndex(e => e == null)
         if (isHasEmpty) {
           this.subTile[isHasEmpty] = unit
           freeIndex = isHasEmpty
-          this.occupancyRatio = this.subTile.filter(e=>e).length
+          this.occupancyRatio = this.subTile.filter(e => e).length
         }
         else console.log("FULL setSubTileUnit")
       }
     }
-    console.log(this.subTile,'?????')
+    console.log(this.subTile, '?????')
     return this.calculatePosition(tileIndex)
 
   }
 
   clearSubTile(subTileIndex: number) {
-     this.subTile[subTileIndex] = null
-    this.occupancyRatio = this.subTile.filter(e=>e).length
+    this.subTile[subTileIndex] = null
+    this.occupancyRatio = this.subTile.filter(e => e).length
   }
 
   setTotalOccupancy() {
@@ -217,21 +285,45 @@ export class Tile {
       this.subTile[i] = 0
     }
   }
+//todo
+  //multiselect class
 
-  defineSubtileByNextStepDirection(nextDirection: string, currentSubtile: number) {
+  defineSubtileByNextStepDirection(nextDirection: string, currentSubtile: number,
+                                   tilesCollection:TilesCollection) {
     let subtile: number
-    //console.log(currentSubtile,'define SubtileByNextStepDirection')
+   // console.log(this.coords,'define SubtileByNextStepDirection')
     if (nextDirection === 'up') {
       currentSubtile === 2 && (subtile = 0)
-        currentSubtile === 3 && (subtile = 1)
-        currentSubtile=== 0 && (subtile = currentSubtile)
-        currentSubtile=== 1 && (subtile = currentSubtile)
+      currentSubtile === 3 && (subtile = 1)
+      currentSubtile === 0 && (subtile = currentSubtile)
+      currentSubtile === 1 && (subtile = currentSubtile)
     }
     else if (nextDirection === 'left-up') {
-      subtile = 0
+      if(tilesCollection.getTileData(
+        `${this.coords.x}-${this.coords.y-1}`).subTile[2]===null
+      && currentSubtile===1){
+        subtile=1
+      }else if(tilesCollection.getTileData(
+        `${this.coords.x-1}-${this.coords.y}`).subTile[1]===null
+               && currentSubtile===2){
+        subtile=2
+      }else{
+        subtile = 0
+      }
+
     }
     else if (nextDirection === 'right-up') {
+      if(tilesCollection.getTileData(
+        `${this.coords.x}-${this.coords.y-1}`).subTile[3]===null
+         && currentSubtile===0){
+        subtile=0
+      }else if(tilesCollection.getTileData(
+        `${this.coords.x+1}-${this.coords.y}`).subTile[0]===null
+               && currentSubtile===3){
+        subtile=3
+      }else{
       subtile = 1
+      }
     }
     else if (nextDirection === 'left') {
       currentSubtile === 1 ? subtile = 0 : currentSubtile === 3 ? subtile = 2 : subtile = currentSubtile
@@ -244,12 +336,32 @@ export class Tile {
         currentSubtile === 1 ? subtile = 3 : subtile = currentSubtile
     }
     else if (nextDirection === 'right-down') {
+      if(tilesCollection.getTileData(
+        `${this.coords.x+1}-${this.coords.y}`).subTile[2]===null
+         && currentSubtile===1){
+        subtile=1
+      }else if(tilesCollection.getTileData(
+        `${this.coords.x}-${this.coords.y+1}`).subTile[1]===null
+               && currentSubtile===2){
+        subtile=2
+      }else{
       subtile = 3
+      }
     }
     else if (nextDirection === 'left-down') {
+      if(tilesCollection.getTileData(
+        `${this.coords.x-1}-${this.coords.y}`).subTile[3]===null
+         && currentSubtile===0){
+        subtile=0
+      }else if(tilesCollection.getTileData(
+        `${this.coords.x}-${this.coords.y+1}`).subTile[0]===null
+               && currentSubtile===3){
+        subtile=3
+      }else{
       subtile = 2
+      }
     }
-   // console.log(subtile,'EnddefineSubtileByNextStepDirection')
+    // console.log(subtile,'EnddefineSubtileByNextStepDirection')
     return subtile
   }
 }

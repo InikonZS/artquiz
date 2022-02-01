@@ -415,6 +415,7 @@ export class MainCanvas extends Control{
           this.pathes = pathes;
           pathes.forEach((path, i)=>{
             const unit = units[i];
+            console.log('SS S')
             unit.setPath(path, (pos)=>this.isEmptyTile(pos, unit));
             (unit as RoundNode).attackTarget = Vector.fromIVector(indexPoint).scale(10);
           })

@@ -34,7 +34,6 @@ export class AbstractUnit extends InteractiveObject {
   private subTile: { x: any; y: any };
 
   get position() {
-    // console.log('this.positionPx: ', this.positionPx)
     return new Vector(Math.floor(this.positionPx.x / 55), Math.floor(this.positionPx.y / 55));
   }
 
@@ -115,22 +114,19 @@ export class AbstractUnit extends InteractiveObject {
   step(delta: number) {
     const speed = this.speed;
     const sz = 55;
-    if (this.target && this.tileChecker && !this.tileChecker(new Vector(Math.floor(this.target.x / sz), Math.floor(this.target.y / sz)))) {
-      return;
+    if (this.target && this.tileChecker
+        && !this.tileChecker(new Vector(Math.floor(this.target.x / sz), Math.floor(this.target.y / sz)))) {
+     // return;
     }
     if (this.target) {
       const tile = this.tileCollection.getTileData(`${this.tileCoordinates.x}-${this.tileCoordinates.y}`)
-    // console.log("tile--inStep",tile)
       const direction = this.defineDirection({x: this.target.x / 55, y: this.target.y / 55}, this.tileCoordinates)
       const completeMoveInsideTile = this.moveInsideTile(tile, direction)
-     // console.log(completeMoveInsideTile,'%%%%')
       if (typeof completeMoveInsideTile === 'number') {
         const subTileInNextTile = this.tileCollection.unitChangeTile(
           this, this.tileCoordinates, {x: this.target.x / 55, y: this.target.y / 55},
           direction)
-        console.log('subTileInNextTile',subTileInNextTile)
         if (subTileInNextTile) {
-          console.log('INsubTileInNextTile',subTileInNextTile)
           this.subTile = subTileInNextTile
         }
       }
@@ -165,9 +161,9 @@ export class AbstractUnit extends InteractiveObject {
   }
 
   setPath(path: Array<Vector>, tileChecker: (pos: Vector) => boolean, attackPoint: Vector = null) {
+    console.log('set Path',path,tileChecker)
     this.attackTarget = attackPoint
     const sz = 55;
-    // console.log('sp ', path);
     this.path = [...path].reverse();
     this.target = this.path.pop()?.clone().scale(sz);
     this.tileChecker = tileChecker;
@@ -230,7 +226,6 @@ export class AbstractUnit extends InteractiveObject {
   }
 
   defineDirection(target: { x: number, y: number }, positionPx: { x: number, y: number }) {
-    // console.log(target, positionPx, '$$$')
     let direction = ''
     if (target.x < positionPx.x) {
       if (target.y < positionPx.y) {
@@ -269,7 +264,6 @@ export class AbstractUnit extends InteractiveObject {
   }
 
   private reachCorrectSubtile(tile: Tile, currentSubIndex: number, subTileDirection: number) {
-    console.log('reachCorrectSubtile',currentSubIndex,subTileDirection)
     if(currentSubIndex===subTileDirection)return currentSubIndex
     const offset = tile.calculatePosition(subTileDirection)
     const x = tile.coords.x * 55 + offset.x
@@ -298,13 +292,9 @@ export class AbstractUnit extends InteractiveObject {
   }
 
   private moveInsideTile(tile: Tile, direction: string) {
-   // console.log('moveInsideTile',tile, direction)
-    //console.log('-->',direction, tile.getIndexByUnit(this))
-    console.log("__++",tile.getIndexByUnit(this))
-    const nextSub = tile.defineSubtileByNextStepDirection(direction, tile.getIndexByUnit(this))
-    console.log('nextSub',nextSub)
-    const reach = !this.subTile && this.reachCorrectSubtile(tile, tile.getIndexByUnit(this), nextSub)
-    console.log('reach',reach)
+    const nextSub = tile.defineSubtileByNextStepDirection(direction,
+      tile.getIndexByUnit(this),this.tileCollection)
+   const reach = !this.subTile && this.reachCorrectSubtile(tile, tile.getIndexByUnit(this), nextSub)
     if (typeof reach === 'number') {
       tile.newSubtileInside(this, tile.getIndexByUnit(this), nextSub)
       return reach
@@ -312,71 +302,3 @@ export class AbstractUnit extends InteractiveObject {
     return false
   }
 }
-
-// const subTileDirection = tile.defineSubtileByNextStepDirection(this.tileCoordinates, direction)
-// const currentIndex = tile.subTile.findIndex((e) => e === this)
-// //console.log(direction, '%%', tile, '%%', subTileDirection)
-// //---check subtile for free
-// let newSubtile: number
-// if (subTileDirection.length > 0) {
-//   //check thistile free subtiles
-//   if (subTileDirection.some((e) => e == currentIndex)) {
-//     newSubtile = currentIndex
-//   }
-//   else {
-//     subTileDirection.forEach(subtile => {
-//       if (tile.subTile[subtile] === null) {
-//         newSubtile = subtile
-//       }
-//       else {
-//         newSubtile = null
-//       }
-//     })
-//   }
-//
-// }
-// //console.log(newSubtile, '$')
-// if (newSubtile) {
-//   const currentSub = tile.subTile.findIndex(e => e === this)
-//   const newSubtileCoords = tile.newSubtileInside(this, currentSub, newSubtile)
-//   // console.log('this.tileCoordinates', this.tileCoordinates)
-//   // console.log('pos->', this.positionPx)
-//   // console.log('newSubtileCoords->', newSubtileCoords)
-//   // console.log('***', this.tileCoordinates.x * 55 + newSubtileCoords.x, '*',
-//   //   this.tileCoordinates.y * 55 + newSubtileCoords.y)
-//   // this.positionPx = new Vector(this.tileCoordinates.x * 55 + newSubtileCoords.x,
-//   //  this.tileCoordinates.y * 55 + newSubtileCoords.y).clone().add(this.target.clone().sub(this.positionPx).normalize().scale(speed))
-//
-//   //In targetSublite
-//   if (Math.ceil(this.positionPx.x) - (this.tileCoordinates.x * 55 + newSubtileCoords.x) &&
-//       Math.ceil(this.positionPx.y) - (this.tileCoordinates.y * 55 + newSubtileCoords.y)) {
-//
-//     console.log("****HERE*****ChangeTile")
-//     const newTile = {x: this.target.x / 55, y: this.target.y / 55}
-//     const subtileOffset = this.tileCollection.unitChangeTile(this, this.tileCoordinates, newTile, direction)
-//     console.log('NEWTILE', this.tileCollection.getTileData(`${newTile.x}-${newTile.y}`))
-//     console.log('prev',this.tileCollection.getTileData(`${this.tileCoordinates.x}-${this.tileCoordinates.y}`))
-//     // console.log("subtileOffset", subtileOffset, '#', this.target.x + subtileOffset.x, '#', this.target.y + subtileOffset.y)
-//     console.log('!!!',this.target.x + subtileOffset.x,this.target.y + subtileOffset.y)
-//     this.positionPx = this.positionPx.clone().add(new Vector(this.target.x + subtileOffset.x,
-//       this.target.y + subtileOffset.y).clone().sub(this.positionPx).normalize().scale(speed))
-//
-//     // this.positionPx = this.positionPx.clone().add(this.target.clone().sub(this.positionPx).normalize().scale(speed))
-//     //rewrite subtiles
-//
-//     //  this.positionPx = this.positionPx.clone().add(new Vector(this.target.x + subtileOffset.x,
-//     //    this.target.y + subtileOffset.y).clone().sub(this.positionPx).normalize().scale(speed))
-//     //console.log(this.tileCoordinates,'--',this.target.x/55,this.target.y/55)
-//
-//   }
-//   // this.positionPx = this.positionPx.clone().add(new Vector(this.tileCoordinates.x * 55 + newSubtileCoords.x,
-//   //   this.tileCoordinates.y * 55 + newSubtileCoords.y).clone().sub(this.positionPx).normalize().scale(speed))
-//   //console.log(Math.round(this.positionPx.x), Math.round(this.positionPx.y), new Vector(this.tileCoordinates.x * 55 + newSubtileCoords.x,
-//   // this.tileCoordinates.y * 55 + newSubtileCoords.y))
-//   //else return
-//   //while not currentTile dontChange
-// }
-// else {
-//   //  console.log("FULLTile")
-//   //  return
-// }
