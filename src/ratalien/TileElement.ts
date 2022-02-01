@@ -35,38 +35,8 @@ export class TilesCollection {
     return this.tilesMap.get(key)
   }
 
-  // addUnitTile(s: string, unit: AbstractUnit) {
-  //   const tile = this.getTileData(s)
-  //   console.log(tile,'==',s)
-  //   if (tile.occupancyRatio < 4) {
-  //     return tile.setSubTileUnit(unit)
-  //   }
-  //   return {x: 0, y: 0}
-  // }
-
-  checkTile(s: string, subTileToNext: number[], unit: AbstractUnit) {
-    const tile = this.getTileData(s)
-    console.log('til', tile)
-    if (tile && tile.occupancyRatio < 4) {
-      //проверь если хоть для одного из сабтайлов свободен
-      const subTile = subTileToNext.find((e) => !tile.subTile[subTileToNext[e]])
-      console.log("checkTile-subTule", subTile)
-      if (subTile >= 0) {
-        return tile.setSubTileUnit(unit, subTileToNext[subTile])
-      }
-      else {//либо займи любую свободную
-        const index = tile.findEmptySubTile()
-        return tile.setSubTileUnit(unit, subTileToNext[index])
-      }
-    }
-    else {
-      return null
-    }
-  }
-
   clearSubTile(s: string, unit: AbstractUnit) {
     const tile = this.getTileData(s)
-    //console.log("@@@",tile)
     const subIndex = tile.getIndexByUnit(unit)
      console.log('subIndex',subIndex)
     subIndex >= 0 && tile.clearSubTile(subIndex)
@@ -75,17 +45,20 @@ export class TilesCollection {
 
   unitChangeTile(unit: AbstractUnit, tileCoordinates: { x: any; y: any },
                  newTile: { x: number; y: number }, direction: string) {
-    //console.log('unitChangeTile')
+    //console.log('----unitChangeTile',newTile)
     const unitPrevSubTile = this.clearSubTile(`${tileCoordinates.x}-${tileCoordinates.y}`, unit)
-
+    //console.log('unitPrevSubTile',unitPrevSubTile)
     const newTileSubTileIndex = this.defineNewSubTileByPrevDirection(
       unitPrevSubTile, direction, newTile)
-    console.log('NewTile',this.getTileData(`${newTile.x}-${newTile.y}`))
-    console.log('oldTile',this.getTileData(`${tileCoordinates.x}-${tileCoordinates.y}`))
-    if (typeof newTileSubTileIndex == 'number') {
+   // console.log('newTileSubTileIndex',newTileSubTileIndex)
+   if (typeof newTileSubTileIndex == 'number') {
       const _newTile = this.getTileData(`${newTile.x}-${newTile.y}`)
+    // console.log("%^%^%^%",_newTile)
       _newTile.setSubTileUnit(unit, newTileSubTileIndex)
-      return _newTile.calculatePosition(newTileSubTileIndex)
+   //  console.log('NewTile',this.getTileData(`${newTile.x}-${newTile.y}`))
+    // console.log('oldTile',this.getTileData(`${tileCoordinates.x}-${tileCoordinates.y}`))
+
+     return _newTile.calculatePosition(newTileSubTileIndex)
     }
     return null
   }
@@ -95,7 +68,7 @@ export class TilesCollection {
     let subtile: number
     const nextX = _nextTile.x
     const nextY = _nextTile.y
-    //console.log(nextX,'& &',nextY)
+
     if (direction === 'up') {
       if (prevSubTile === 3) {
         this.tilesMap.get(`${nextX}-${nextY}`).subTile[0] == null && (subtile = 0)
@@ -104,6 +77,12 @@ export class TilesCollection {
       else if (prevSubTile === 2) {
         this.tilesMap.get(`${nextX}-${nextY}`).subTile[1] == null && (subtile = 1)
         this.tilesMap.get(`${nextX}-${nextY}`).subTile[0] == null && (subtile = 0)
+      }else if(prevSubTile === 0){
+        this.tilesMap.get(`${nextX}-${nextY}`).subTile[3] == null && (subtile = 3)
+        this.tilesMap.get(`${nextX}-${nextY}`).subTile[2] == null && (subtile = 2)
+      }else if(prevSubTile === 1){
+        this.tilesMap.get(`${nextX}-${nextY}`).subTile[2] == null && (subtile = 2)
+        this.tilesMap.get(`${nextX}-${nextY}`).subTile[3] == null && (subtile = 3)
       }
     }
     else if (direction === 'left-up') {
@@ -121,6 +100,9 @@ export class TilesCollection {
         this.tilesMap.get(`${nextX}-${nextY}`).subTile[3] == null && (subtile = 3)
         this.tilesMap.get(`${nextX}-${nextY}`).subTile[1] == null && (subtile = 1)
       }
+     else{
+       return
+     }
     }
     else if (direction === 'right') {
       if (prevSubTile === 1) {
@@ -167,7 +149,10 @@ export class Tile {
   }
 
   newSubtileInside(unit: AbstractUnit, currentSub: number, newSubtile: number) {
-
+    if (currentSub === newSubtile) {
+     // console.log('newSubtileInside',currentSub,newSubtile)
+      return this.calculatePosition(newSubtile)
+    }
     this.subTile[currentSub] = null
     this.subTile[newSubtile] = unit
   //  console.log('newSubtileInside', this.subTile)
@@ -179,6 +164,7 @@ export class Tile {
   }
 
   getIndexByUnit(unit: AbstractUnit) {
+    console.log(this.subTile)
     return this.subTile.findIndex(e => e === unit)
   }
 
@@ -191,7 +177,6 @@ export class Tile {
   }
 
   setSubTileUnit(unit: AbstractUnit, tileIndex?: number) {
-    console.log(tileIndex, 'INDEX setSubTileUnit')
     let freeIndex: number
     if (this.occupancyRatio < 4) {
       if (this.subTile[tileIndex] == null) {
@@ -209,6 +194,7 @@ export class Tile {
         else console.log("FULL setSubTileUnit")
       }
     }
+    console.log(this.subTile,'?????')
     return this.calculatePosition(tileIndex)
 
   }
@@ -234,9 +220,12 @@ export class Tile {
 
   defineSubtileByNextStepDirection(nextDirection: string, currentSubtile: number) {
     let subtile: number
+    //console.log(currentSubtile,'define SubtileByNextStepDirection')
     if (nextDirection === 'up') {
-      currentSubtile === 2 ? (subtile = 0) :
-        currentSubtile === 3 ? (subtile = 1) : subtile = currentSubtile
+      currentSubtile === 2 && (subtile = 0)
+        currentSubtile === 3 && (subtile = 1)
+        currentSubtile=== 0 && (subtile = currentSubtile)
+        currentSubtile=== 1 && (subtile = currentSubtile)
     }
     else if (nextDirection === 'left-up') {
       subtile = 0
@@ -260,6 +249,7 @@ export class Tile {
     else if (nextDirection === 'left-down') {
       subtile = 2
     }
+   // console.log(subtile,'EnddefineSubtileByNextStepDirection')
     return subtile
   }
 }

@@ -266,16 +266,15 @@ export class GameField extends Control{
       const tile = this.tileCollections.getTileData(`${primary.position.x}-${primary.position.y}`)
      if(tile){
         const emptySubtile = tile.findEmptySubTile()
-        tile.setSubTileUnit(unit,emptySubtile)
-        const subTileOffset=tile.calculatePosition(emptySubtile)
+        const subTileOffset=tile.setSubTileUnit(unit,emptySubtile)
+       console.log(emptySubtile,'emptySub')
+       console.log("CREATEunit",tile)
         unit.positionPx = Vector.fromIVector({x:primary.position.x*this.sz+subTileOffset.x,
           y: primary.position.y*this.sz+subTileOffset.y});
         unit.tileCoordinates={x:primary.position.x,y:primary.position.y}
-        console.log(unit.tileCoordinates,'#$')
-      }else{
+        }else{
         unit.tileCoordinates={x:primary.position.x,y:primary.position.y}
-        console.log(unit.tileCoordinates,'#$')
-        unit.positionPx = Vector.fromIVector({x:primary.position.x*this.sz, y: primary.position.y*this.sz});
+       unit.positionPx = Vector.fromIVector({x:primary.position.x*this.sz, y: primary.position.y*this.sz});
       }
 
     }

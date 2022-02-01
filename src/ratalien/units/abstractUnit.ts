@@ -120,14 +120,17 @@ export class AbstractUnit extends InteractiveObject {
     }
     if (this.target) {
       const tile = this.tileCollection.getTileData(`${this.tileCoordinates.x}-${this.tileCoordinates.y}`)
+    // console.log("tile--inStep",tile)
       const direction = this.defineDirection({x: this.target.x / 55, y: this.target.y / 55}, this.tileCoordinates)
       const completeMoveInsideTile = this.moveInsideTile(tile, direction)
+     // console.log(completeMoveInsideTile,'%%%%')
       if (typeof completeMoveInsideTile === 'number') {
-
         const subTileInNextTile = this.tileCollection.unitChangeTile(
           this, this.tileCoordinates, {x: this.target.x / 55, y: this.target.y / 55},
           direction)
+        console.log('subTileInNextTile',subTileInNextTile)
         if (subTileInNextTile) {
+          console.log('INsubTileInNextTile',subTileInNextTile)
           this.subTile = subTileInNextTile
         }
       }
@@ -266,7 +269,8 @@ export class AbstractUnit extends InteractiveObject {
   }
 
   private reachCorrectSubtile(tile: Tile, currentSubIndex: number, subTileDirection: number) {
-    console.log('reachCorrectSubtile')
+    console.log('reachCorrectSubtile',currentSubIndex,subTileDirection)
+    if(currentSubIndex===subTileDirection)return currentSubIndex
     const offset = tile.calculatePosition(subTileDirection)
     const x = tile.coords.x * 55 + offset.x
     const y = tile.coords.y * 55 + offset.y
@@ -294,9 +298,13 @@ export class AbstractUnit extends InteractiveObject {
   }
 
   private moveInsideTile(tile: Tile, direction: string) {
-    //console.log(tile, direction)
+   // console.log('moveInsideTile',tile, direction)
+    //console.log('-->',direction, tile.getIndexByUnit(this))
+    console.log("__++",tile.getIndexByUnit(this))
     const nextSub = tile.defineSubtileByNextStepDirection(direction, tile.getIndexByUnit(this))
+    console.log('nextSub',nextSub)
     const reach = !this.subTile && this.reachCorrectSubtile(tile, tile.getIndexByUnit(this), nextSub)
+    console.log('reach',reach)
     if (typeof reach === 'number') {
       tile.newSubtileInside(this, tile.getIndexByUnit(this), nextSub)
       return reach
