@@ -53,7 +53,7 @@ export class TruckUnit extends AbstractUnit{
     // console.log('')
     // console.log('this.attackTarget: ', this.attackTarget)
     // console.log('this.positionPx: ', this.positionPx)
-    console.log('countSpendTime: ', this.countSpendTime)    
+    // console.log('countSpendTime: ', this.countSpendTime)    
 
     if (this.gold >= 3000) {
       const oreFactory = this.getList().list.filter(item => item.name == 'oreFactory' && this.player === item.player) as MapObject[];

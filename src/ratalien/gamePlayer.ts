@@ -3,6 +3,8 @@ import Signal from '../common/signal';
 import { InteractiveObject, ITechBuild, MapObject } from './interactives';
 import { Vector } from '../common/vector';
 import { IUnitConstructor } from './units/IUnitConstructor';
+// import { IStatistic, Statistic } from "./statistic"
+
 export interface IBuildInfo{
   desc:Array<string>,
   energy:number,
@@ -38,9 +40,11 @@ export class GamePlayer{
   onBuild:(build: ITechBuild, pos:Vector)=>void;
   onUnit:(unit:IUnitInfo)=>void;
   onAttack: () => void;
+  // statistic: Statistic;
   
   constructor(index: number){
     this.colorIndex = index;
+    // this.statistic = new Statistic();
   }
 
   setBuilds(build: ITechBuild) {
@@ -60,7 +64,8 @@ export class GamePlayer{
     return {incoming, outcoming};
   }
 
-  getAvailableBuilds():Array<ITechBuild> {
+  getAvailableBuilds(): Array<ITechBuild> { // Доступные к постройке здания
+    
     if (!this.builds.length) {
       return tech.builds.filter(item => item.deps.includes('rootAccess'));
     }
@@ -70,8 +75,9 @@ export class GamePlayer{
       .concat(tech.builds.filter(item => item.deps.every(elem=>nameBuild.includes(elem))));
   }
 
-  getAvailableUnits(): Array<IUnitInfo>{
+  getAvailableUnits(): Array<IUnitInfo>{ // Доступные к постройке юниты
     const nameBuild = this.builds.map(item => item.desc[0]);
+
     return tech.units.filter(item=>item.deps.every(elem=>nameBuild.includes(elem)))
   }
 

@@ -25,7 +25,7 @@ export class GamePlayer{
   colorIndex:number;
   money:number=5000;
   //energy:number;
-  builds: Array<IBuildInfo> = [];
+  builds: Array<IBuildInfo> = []; // todo вероятно тип следует заменить на ITechBuild
   units:Array<IUnitInfo> = [];
   openedMap: Array<Array<any>>;
   onUpdateBuild: Signal<void> = new Signal();

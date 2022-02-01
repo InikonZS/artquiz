@@ -4,6 +4,7 @@ import { ITechBuild } from "./interactives";
 import { tech } from './techTree';
 import { IUnitConstructor } from "./units/IUnitConstructor";
 import { checkMap, findClosestBuild } from "./distance";
+// import { IStatistic, Statistic} from "./statistic"
 
 interface IUnitInfo{
   spawn:Array<string>,
@@ -28,11 +29,15 @@ export class BotPlayer extends GamePlayer{
   circlePoints: Array<IVector> = [];
   startAngle: number = 4; // угол отклонения при расчете точек на окружности
   stepBuilding: number = 0; // номер круга допустимой постройки
+  // statistic: Statistic;
+
   constructor(startPoint: Vector, index: number) {
     super(index);
     this.startPoint = startPoint;
     this.randomMove();
+    // this.statistic = new Statistic();
   }
+  
 
   randomMove() {
     setTimeout(()=>{
