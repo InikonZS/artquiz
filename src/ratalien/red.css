@@ -1,0 +1,152 @@
+*{
+  box-sizing: border-box;
+  /*border: solid 1px; */
+}
+
+.global_wrapper{
+  margin: 3px;
+}
+
+.global_main{
+  display: flex;
+  height: calc(100vh - 6px);  
+}
+
+.global_header{
+  height: 0px;
+  display: flex; 
+  border: 0px;
+}
+
+.game_field{
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border: solid 1px;  
+}
+
+.game_side{
+  width: 200px;
+  height: 100%;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: solid 1px;  
+}
+
+.game_radar{
+  width: 100%;
+  height: 201px;
+  flex-shrink: 0;
+  background: url("../assets/img/aside/asid-logo.jpg") no-repeat center center;
+  filter: grayscale(.6);
+}
+
+.aside-top-panel{
+  background: url("../assets/img/aside/fon-metall.jpg") no-repeat center center;
+  color: #fff;
+  border: none;
+  padding: 3px;
+  filter: grayscale(1);
+  font-size: 18px;  
+  border-radius: 3px;
+  border: 1px solid #777;  
+}
+.game_builds{
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+  height: 100%;
+  background: url("../assets/img/aside/fon-metall.jpg") no-repeat center top;
+}
+
+.builds_tools{
+  display: flex;
+  justify-content: space-between;
+}
+
+.builds_tool{
+  width: 30%;
+  height: 50px;
+}
+        
+.builds_items{
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+  background-color: #111;
+  color:#fff;
+  border:none;
+}
+
+.builds_item{
+  width: 100%;
+  height: 100px;
+  cursor: pointer;
+  border: 1px solid #666;
+  box-shadow: 3px 3px 4px #666;  
+}
+.builds_item:hover{
+  border: 1px solid #999;
+  box-shadow: 3px 3px 4px #999;  
+}
+
+.builds_item__ready{
+  border: 1px solid #009933;
+  box-shadow: 3px 3px 4px #009933; 
+}
+.builds_item__ready:hover{
+  border: 1px solid #006600;
+  box-shadow: 3px 3px 4px #006600; 
+}
+
+.builds_column{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: none;
+  border-right: 1px solid #111;
+  position: relative;
+}
+.builds_column:last-child{
+  border-right: none;
+}
+.column_items{
+  width: 100%;
+  border: none;
+  /* height: calc(100vh - 300px); */
+  position: absolute;
+  top:0;
+}
+
+.column_footer{
+  display: flex;
+  width: 100%;
+  flex-shrink: 0;
+  border:none;
+  position: absolute;
+  bottom: 0;
+  background: #000;
+}
+.button{
+  width: 100%;
+  height: 20px;
+  background: url("../assets/img/aside/fon-metall.jpg") no-repeat center top;
+  cursor: pointer;
+  border-radius: 3px;
+  border: 1px solid #777;  
+}
+.button_up{
+  background: url("../assets/img/aside/arrow-down.png") no-repeat center center;
+  background-size: contain;
+}
+.button_down{
+  background: url("../assets/img/aside/arrow-up.png") no-repeat center center;
+  background-size: contain;
+}
+.button__inactive{
+  filter: grayscale(1);
+  cursor: default;
+}

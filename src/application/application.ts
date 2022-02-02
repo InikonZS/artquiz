@@ -32,7 +32,7 @@ export class Application extends Control{
     this.model = new QuizDataModel();
     this.model.build().then(result=>{
       preloader.destroy();
-      console.log(result.data);
+     // console.log(result.data);
       //main
       this.mainCycle();
     })
@@ -63,6 +63,7 @@ export class Application extends Control{
       gameField.destroy();
       this.mainCycle();
     }
+    
     gameField.onBack = ()=>{
       gameField.destroy();
       this.categoryCycle(gameName);

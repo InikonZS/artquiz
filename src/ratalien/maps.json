@@ -1,0 +1,26 @@
+[
+  {
+    "size": "64x64",
+    "players": 4,
+    "name": "Green fields",
+    "src": "./public/maps/64x64/1.png"
+  },
+  {
+    "size": "64x96",
+    "players": 6,
+    "name": "Green fields, part 2",
+    "src": "./public/maps/64x96/1.png"
+  },
+  {
+    "size": "64x64",
+    "players": 4,
+    "name": "Cold winter",
+    "src": "./public/maps/64x64/2.png"
+  },
+  {
+    "size": "96x96",
+    "players": 6,
+    "name": "Basic map",
+    "src": "./public/maps/96x96/1.png"
+  }
+]

@@ -29,6 +29,8 @@ const config = {
             patterns: [
               { from: "./src/assets/img", to: "./public/img" },
               { from: "./src/assets/sound", to: "./public/sound" },
+              { from: "./src/ratalien/maps", to: "./public/maps" },
+
             ],
           }),
 
@@ -44,7 +46,17 @@ const config = {
             },
             {
                 test: /\.css$/i,
-                use: [stylesHandler,'css-loader'],
+                use: [
+                    stylesHandler, 
+                    {
+                        loader: "css-loader",
+                        options: {
+                            modules: {
+                                exportLocalsConvention: "camelCase",
+                            },
+                        },
+                    }
+                ],
             },
             {
                 test: /\.(eot|svg|ttf|woff|woff2|png|jpg|gif)$/i,

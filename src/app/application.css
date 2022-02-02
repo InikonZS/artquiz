@@ -1,0 +1,22 @@
+.global_wrapper{
+  --header-color: #f00;
+  --footer-color: #ff0;
+  --main-color: #ccc;
+  /*background-color: #000;*/
+}
+
+.global_header{
+  height: 30px;
+  background-color: var(--header-color);
+}
+
+.global_main{
+  min-height: calc(100vh - 30px - 30px);
+  overflow: hidden;
+  
+}
+
+.global_footer{
+  background-color: var(--footer-color);
+  height: 30px;
+}

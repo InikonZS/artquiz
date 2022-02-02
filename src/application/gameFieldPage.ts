@@ -35,7 +35,7 @@ export class GameFieldPage<QuetionDataType> extends Control{
   ){
     super(parentNode);
     this.GameQuestionConstructor = GameQuestionConstructor;
-    console.log(gameOptions);
+   // console.log(gameOptions);
     this.gameOptions = gameOptions;
     const header = new Control(this.node, 'h1', '', `${gameOptions.gameName} - ${gameOptions.categoryIndex}`);
 
