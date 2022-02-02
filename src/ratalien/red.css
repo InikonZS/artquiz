@@ -61,15 +61,56 @@
   background: url("../assets/img/aside/fon-metall.jpg") no-repeat center top;
 }
 
+.builds_tool{
+  /* width: 30%; */
+  height: 50px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;  
+}
 .builds_tools{
   display: flex;
   justify-content: space-between;
 }
 
-.builds_tool{
-  width: 30%;
-  height: 50px;
+/*     Кнопки      */
+.btn{
+  border: 1px solid #333;
+  border-radius: 5px;
 }
+.btn:hover{
+  box-shadow: 0px 0px 7px #333;
+  cursor: pointer;
+}
+.btn_aside{
+  width: 47px;
+  height: 47px;
+  background: url("../assets/img/aside/fon-metall.jpg") no-repeat center top;  
+}
+.btn_repair{
+  background: url("../assets/img/aside/repair.png") no-repeat center top;  
+  background-size: 75%;
+  background-position: center;  
+}
+.btn_dollar{
+  background: url("../assets/img/aside/dollar.png") no-repeat center top;  
+  background-size: 75%;
+  background-position: center;  
+}
+.btn_planet{
+  background: url("../assets/img/aside/planet.png") no-repeat center top;  
+  background-size: 75%;
+  background-position: center;  
+}
+.btn_notactive{
+  filter: grayscale(1);
+}
+.btn_notactive:hover{
+  cursor: not-allowed;
+}
+
+
+
         
 .builds_items{
   display: flex;

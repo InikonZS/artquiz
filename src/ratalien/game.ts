@@ -93,6 +93,7 @@ export class Game extends Control{
         // строим здание на позиции pos
         field.addObject(botPlayer, build, pos.x, pos.y);
         botPlayer.setBuilds(build);
+        
       }      
     }
 
@@ -110,6 +111,8 @@ export class Game extends Control{
     //player.getAvailableBuilds();
     
     const side = new GameSide(main.node, player);
+
+    // Выбор здания в правом еню
     side.onBuildSelect = (name, callback)=>{
       //field.setMode(1, name.desc[0], callback);
       field.setPlanned(name.desc[0], callback);

@@ -5,6 +5,10 @@ import { ITechBuild } from "./interactives";
 export interface IStatistic{
   builds: Array<ITechBuild>,
   units: Array<IUnitInfo>,
+};
+export interface IState{
+  bot: IStatistic,
+  player: IStatistic
 }
 
 export class Statistic{

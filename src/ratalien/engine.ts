@@ -198,6 +198,7 @@ class RoundNode extends InteractiveObject{
 
   select(){
     this.selected = true;
+    console.log('engine select')
   }
 
   unselect(){
@@ -304,6 +305,7 @@ class MainSlot{
   selectNode(node:ISelectable){
     node.select();
     this.list.push(node);
+    console.log('engine selectNode')
   }
 }
 

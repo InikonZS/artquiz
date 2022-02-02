@@ -70,11 +70,6 @@ export class GameField extends Control{
     });
 
     this.objects.onClick = (current=>{
-      // console.log(this.)
-      if(current.name === 'gold'){
-
-        //todo mari Послать сюда Трак в _position
-      }
       this.cursorStatus.selected = current?[current]:[];
     });
     
@@ -112,8 +107,18 @@ export class GameField extends Control{
       const cursor = this.getPixelCursor();
       const action = this.cursorStatus.getAction();
       // console.log('action = ', action)
-      if (action == 'select'){
+      if (action == 'select') {
+        console.log('this = ', this)
         this.objects.handleClick(cursorTile, cursor);
+
+        const builds = this.objects.list.filter(it => it instanceof MapObject
+          && it.type === 'build'
+          && it.player instanceof GamePlayer) as MapObject[];
+        
+        // it.player === 'GamePlayer' && it.type === 'build') - Здания игрока
+        console.log('player builds: ', builds)
+        console.log('this.cursorStatus: ', this.cursorStatus)
+
       } else if (action == 'move'){
         this.commandUnit();
       } else if (action == 'build'){
@@ -121,9 +126,6 @@ export class GameField extends Control{
         this.modeCallback();       
         this.cursorStatus.planned = null;    
       } else if (action == 'primary') {
-        console.log('')
-        console.log('состояние primary')
-        console.log('')
         this.players[0].primaries[this.cursorStatus.hovered[0].name] = this.cursorStatus.hovered[0] as MapObject;
       } else if (action == 'attack'){
         this.commandUnit(cursor.clone());
@@ -163,7 +165,8 @@ export class GameField extends Control{
     })
   }
 
-  handleMultiselect(start:Vector, onSelect:()=>void){
+  handleMultiselect(start: Vector, onSelect: () => void) {
+    console.log('handleMultiselect')
     this.cursorStatus.multiStart = start; //new Vector(e.clientX, e.clientY);
     let listener = ()=>{
       
@@ -281,7 +284,6 @@ export class GameField extends Control{
     //this.mode = mode;
     console.log(name,'***');
     this.cursorStatus.planned = tech.builds.find(it=>it.desc[0] == name);//{name:name};
-   // console.log(callback);
     this.modeCallback = callback;
   }
 
