@@ -133,7 +133,12 @@ const defendTower = {
     '0110'.split(''),
     '0000'.split(''),
     '0000'.split(''),
-  ]
+  ],
+  //оружие для стреляющего здания
+  radius: 20,
+  speed: 10,
+  minRadius: 10, 
+  reloadingTime: 20
 }
 
 //high

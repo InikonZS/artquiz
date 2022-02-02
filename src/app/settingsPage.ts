@@ -44,12 +44,12 @@ export class SettingsModel {
     const checkStorageData = (data: string | null) => {
       return !!data;
     }
-    if (!checkStorageData(storageData)) {
+    //if (!checkStorageData(storageData)) {
       this.settings = defaultSettings;
-    } else {
-      const data: IGameOptions = JSON.parse(storageData); //todo не работает сохранение в локалстораж
-      this.settings = data;
-    }
+    // } else {
+    //   const data: IGameOptions = JSON.parse(storageData); //todo не работает сохранение в локалстораж
+    //   this.settings = data;
+    // }
   }
 
   getData() {
