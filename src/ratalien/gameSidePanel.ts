@@ -63,7 +63,6 @@ export class GameSide extends Control{
       let colMarginTop = this.buildings.node.style.marginTop.replace(/[^0-9,-]/g, "")
       let freeSpace = (window.innerHeight - 300 - (this.blds.length * 100) - Number(colMarginTop))
       if (freeSpace < 100) {
-        // console.log('up colMarginTop = ', colMarginTop)
         this.buildings.node.style.marginTop = String(Number(colMarginTop) - 100) + 'px';
         this.changeFirstColumnButtonsState()
       }
@@ -71,7 +70,6 @@ export class GameSide extends Control{
     this.buttonFirstColumnDown.node.onclick = () => {
       let colMarginTop = this.buildings.node.style.marginTop.replace(/[^0-9,-]/g, "")
       if (Number(colMarginTop) < 0) {
-        // console.log('down colMarginTop = ', colMarginTop)
         this.buildings.node.style.marginTop = String(Number(colMarginTop) + 100) + 'px';
         this.changeFirstColumnButtonsState()
       }
@@ -91,7 +89,6 @@ export class GameSide extends Control{
       let colMarginTop = this.units.node.style.marginTop.replace(/[^0-9,-]/g, "")
       let freeSpace = (window.innerHeight - 300 - (this.uns.length * 100) - Number(colMarginTop))
       if (freeSpace < 100) {
-        // console.log('up colMarginTop = ', colMarginTop)
         this.units.node.style.marginTop = String(Number(colMarginTop) - 100) + 'px';
         this.changeSecondColumnButtonsState()
       }
@@ -99,7 +96,6 @@ export class GameSide extends Control{
     this.buttonSecondColumnDown.node.onclick = () => {
       let colMarginTop = this.units.node.style.marginTop.replace(/[^0-9,-]/g, "")
       if (Number(colMarginTop) < 0) {
-        // console.log('down colMarginTop = ', colMarginTop)
         this.units.node.style.marginTop = String(Number(colMarginTop) + 100) + 'px';
         this.changeSecondColumnButtonsState()
       }
@@ -227,21 +223,15 @@ export class GameSide extends Control{
     // Менять состояние кнопок вверх/вниз в зависимости от количества Юнитов
     let colMarginTop = this.units.node.style.marginTop.replace(/[^0-9,-]/g, "")
     let freeSpace = (window.innerHeight - 300 - (this.uns.length * 100) - Number(colMarginTop))
-    console.log('colMarginTop: ', colMarginTop)
-    console.log('freeSpace: ', freeSpace)
     if (freeSpace > 100) {
       this.buttonSecondColumnUp.node.classList.add(red["button__inactive"]) //перемотка вверх не нужна
-      console.log('перемотка вверх не нужна')
     } else {
       this.buttonSecondColumnUp.node.classList.remove(red["button__inactive"]) //перемотка вверх нужна
-      console.log('перемотка вверх нужна')
     }
     if (Number(colMarginTop) < 0) {
       this.buttonSecondColumnDown.node.classList.remove(red["button__inactive"]) //перемотка вниз нужна
-      console.log('перемотка вниз нужна')
     } else {
       this.buttonSecondColumnDown.node.classList.add(red["button__inactive"]) //перемотка вниз не нужна
-      console.log('перемотка вниз не нужна')
     }    
   }
 

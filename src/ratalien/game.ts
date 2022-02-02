@@ -11,6 +11,10 @@ import { GameField } from "./gameField";
 import { GameModel } from './gameModel';
 import { GameMap } from "./gameMap";
 import { IGameOptions } from './IGameOptions';
+import { globalGameInfo } from './globalGameInfo';
+import { createIdGenerator } from './idGenerator';
+import { checkMap, findClosestBuild, getRandomNumber } from "./distance";
+import { MapObject } from "./interactives";
 
 import { MiniMapGame } from './miniMapGame'
 import { ITechBuild } from "./interactives";
@@ -42,9 +46,13 @@ export class Game extends Control {
   onExit: () => void;
   constructor(parentNode: HTMLElement, res: Record<string, HTMLImageElement>, options: IGameOptions) {
     super(parentNode, 'div', red['global_wrapper']);
-    this.node.onmouseleave = (e) => {
-      // console.log(e.offsetX, e.offsetY);
-      if (e.offsetX > this.node.clientWidth) {
+    const idGenerator =  createIdGenerator('playerId')
+    globalGameInfo.nextId = () => {
+      return idGenerator() //TODO add options
+    }
+    this.node.onmouseleave = (e)=>{
+     // console.log(e.offsetX, e.offsetY);
+      if (e.offsetX>this.node.clientWidth){
         field.map.currentMove = consts.moves[5]
       }
       if (e.offsetX < 0) {
@@ -75,9 +83,16 @@ export class Game extends Control {
     //const field = new GameField(main.node, res);
     const gameModel = new GameModel();
 
-    const player = new GamePlayer();
+    const player = new GamePlayer(0);
     player.setMoney(options.credits);
-    const botPlayer = new BotPlayer(new Vector(20, 20));
+   
+
+    let x = getRandomNumber(20) + player.minDistance,
+      y = getRandomNumber(20) + player.minDistance;
+    console.log('стартовая точка для бота [x:y] ', x,y);
+    const botPlayer = new BotPlayer((new Vector(x, y)),1); // тут была стартовая точка 20:20
+    //const map = new GameMap(96, 96, options.map, res);
+
     const map = new GameMap(options.map, res);
 
     //миниатюра карты
@@ -90,19 +105,19 @@ export class Game extends Control {
     initialBuildingsData.map(build => {
       const building = tech.builds.find(item => item.name === build.name);
       if(building){
-        field.addObject(0, building, build.x, build.y)
+        field.addObject(player, building, build.x, build.y)
       }
     });
     //console.log('builds',player.builds);
 
-    player.onBuild = (build, pos) => {
-      field.addObject(0, build, pos.x, pos.y)
-    }
+    // player.onBuild = (build, pos) => {
+    //   field.addObject(0, build, pos.x, pos.y)
+    // }
     botPlayer.onBuild = (build, pos) => {
       //     let build = botPlayer.getBuild();      
       //botPlayer.builds.push(build);
       //console.log(build.name)
-      field.addObject(1, build, pos.x, pos.y);
+      field.addObject(player, build, pos.x, pos.y);
       //field.addObject(1, tech.builds.find(it=>it.name == 'barracs'), pos.x, pos.y);
     }
 
@@ -114,14 +129,33 @@ export class Game extends Control {
       const unit = availableUnit[Math.floor(Math.random() * availableUnit.length)];
       console.log(unit.name)
       botPlayer.units.push(unit);
-      field.addUnit(1, unit.name);
+      field.addUnit(player, unit.name);
     }
 
-    //botPlayer.
+//////////////////////////////////////////////////////////
+    // let x = getRandomNumber(20) + player.minDistance,
+    //   y = getRandomNumber(20) + player.minDistance;
+    // console.log('стартовая точка для бота [x:y] ', x,y);
+    // const botPlayer = new BotPlayer((new Vector(x, y)),1); // тут была стартовая точка 20:20
+    // const map = new GameMap(96, 96, options.map, res);
+   // const field = new GameField(main.node, res, [player, botPlayer], map);
+    player.onBuild = (build, pos) => {
+      field.addObject(player, build, pos.x, pos.y)
+    }
+
+    player.onUnit = (unit) => {
+      field.addUnit(player, unit.name)
+    },
+//////////////////////////////////////////
+    botPlayer.onBuild = (build, pos) => { // field.objects - все объекты, кот есть на поле игрока и бота
+      // console.log('бот field.objects: ', field.objects)
+      const builds = field.objects.list.filter(it => it instanceof MapObject) as MapObject[];
+      // it.player === 'GamePlayer' && it.type === 'build') - Здания игрока
+      // it.player === 'BotPlayer' && it.type === 'build') - Здания бота
 
     botPlayer.onAttack = () => {
       //let botUnits = field.units.filter(it=>it.player==1);
-      let playerBuilds = field.objects.list.filter(it => it.player == 0);
+      let playerBuilds = field.objects.list.filter(it => it.id == 0); ///???????
       //console.log('playerBuilds',playerBuilds.length)
       if (playerBuilds.length == 0) return;
       /*botUnits.forEach(it=>{
@@ -133,6 +167,30 @@ export class Game extends Control {
       //botUnits[Math.floor(Math.random()* botUnits.length)].attackTarget = playerBuilds[Math.floor(Math.random()* playerBuilds.length)];
     }
 
+      
+      //Если приходит маска mask только из нулей - строить можно
+      const mask = checkMap(map.map, build.mtx.map(it => it.map(jt => Number.parseInt(jt))), pos);
+      const closestBuild = findClosestBuild(pos.clone(), builds);
+
+      let lengthNotAvalible = mask.flat().filter(itm => Number(itm) !== 0).length;
+      
+      // if ((!builds.length || closestBuild.distance >= 6)){ 
+      if ((!builds.length || closestBuild.distance >= 6) && lengthNotAvalible === 0) { 
+        // строим здание на позиции pos
+        field.addObject(botPlayer, build, pos.x, pos.y);
+        botPlayer.setBuilds(build);
+      }      
+    }
+
+    botPlayer.onUnit = (unit) => {
+      field.addUnit(botPlayer, unit.name);
+    }
+
+    // botPlayer.onAttack = ()=>{
+      // let playerBuilds = field.objects.list.filter(it=>it.player==player);
+    //   if (playerBuilds.length == 0) return;
+    // }
+    
 
     //const side = new GameSide(main.node);
     //player.getAvailableBuilds();
@@ -147,8 +205,8 @@ export class Game extends Control {
       //field.setMode(1, name.desc[0], callback);
       field.setPlanned(name.desc[0], callback);
     }
-    side.onUnitReady = (name: string) => {
-      field.addUnit(0, name);
+    side.onUnitReady = (name:string)=>{
+      field.addUnit(player, name);
     }
   }
 }

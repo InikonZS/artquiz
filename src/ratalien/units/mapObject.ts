@@ -11,7 +11,6 @@ export class MapObject extends InteractiveObject{
   sprite: HTMLImageElement;
   health:number;
   name:string;
-  player:number;
   type:string = 'build';
   get position(){
     return this._position;
@@ -21,7 +20,7 @@ export class MapObject extends InteractiveObject{
   }
 
   onDestroyed: () => void;
-   getUnits: ()=>AbstractUnit[];
+  // getUnits: ()=>AbstractUnit[];
   res: Record<string, HTMLImageElement>;
 
   constructor(build:ITechBuild, res:Record<string, HTMLImageElement>){
@@ -56,16 +55,15 @@ export class MapObject extends InteractiveObject{
   render(ctx:CanvasRenderingContext2D, camera:Vector, delta:number, size?:number, selected?:boolean, primary?:boolean, miniCtx?:CanvasRenderingContext2D){
     this.tiles.forEach((row, i)=>row.forEach((cell, j)=>{
       if (this.tiles[i][j]!=0){
-        this.drawTile(ctx, new Vector(j+this.position.x, i+this.position.y), camera, this.isHovered?"#9999":consts.colors[this.player], size);
+        this.drawTile(ctx, new Vector(j+this.position.x, i+this.position.y), camera, this.isHovered?"#9999":consts.colors[this.player.colorIndex], size);
         //buildings on miniMap
-        this.drawTileOnMiniMap(miniCtx, new Vector(j+this.position.x, i+this.position.y), consts.colors[this.player], 2);
+        this.drawTileOnMiniMap(miniCtx, new Vector(j+this.position.x, i+this.position.y), consts.colors[this.player.colorIndex], 2);
       }
     })); 
     
     ctx.fillStyle = '#049';
     const pos = new Vector(this.position.x*size, this.position.y*size).add(camera);
     
-    // ctx.fillText(`health: ${this.health.toString()}/100`, pos.x, pos.y + 10);
     // Прогресс-баз состояния здоровья Постройки
     ctx.strokeStyle = '#666'
     ctx.strokeRect(pos.x, pos.y, 100, 10);

@@ -3,6 +3,7 @@ import { InteractiveObject, ITechBuild, MapObject } from "./interactives";
 import { checkMap, findClosestBuild } from "./distance";
 import {AbstractUnit} from './units/abstractUnit'
 import { InteractiveList } from "./interactiveList";
+import { GamePlayer } from "./gamePlayer";
 
 export class GameCursorStatus{
   pixelPosition:Vector = new Vector(0, 0);
@@ -14,7 +15,9 @@ export class GameCursorStatus{
   getPrimaries: () => Record<string, MapObject>;
   getMap: () => Array<Array<number>>;
   getRealMap: () => Array<Array<number>>;
+  getCurrentPlayer: () => import("d:/rs_school/rs-clone/artquiz/src/ratalien/gamePlayer").GamePlayer;
   getObjects: () => InteractiveList;
+  //getCurrentPlayer: () => GamePlayer;
 
   constructor(getPrimaries:()=>Record<string, MapObject>, getMap:()=>Array<Array<number>>, getRealMap:()=>Array<Array<number>>){
     this.getPrimaries = getPrimaries;
@@ -67,12 +70,25 @@ export class GameCursorStatus{
   getBuildMask() {
     const mask = checkMap(this.getMap(), this.planned.mtx.map(it => it.map(jt => Number.parseInt(jt))), this.tilePosition);
     const redMask = this.planned.mtx.map(it => it.map(jt => Number.parseInt(jt)));
-    const builds = this.getObjects().list.filter(it => it.player === 0 && it instanceof MapObject) as MapObject[];
+    const player = this.getCurrentPlayer();
+    const builds = this.getObjects().list.filter(it => it.player === player&& it instanceof MapObject) as MapObject[];
+
     const closestBuild = findClosestBuild(this.tilePosition.clone(), builds);
     if (!(!builds.length || closestBuild.distance <= 6)) { 
+      // console.log('redMask: ', redMask);
       return redMask;
     }
+    // console.log('mask: ', mask);
     return mask;
+
+    /* redMask массив вида
+    [[0, 0, 0, 0]
+     [1, 1, 0, 0]
+     [1, 1, 1, 1]
+     [1, 1, 1, 1]]
+
+     mask - такой же массив, состоящий только из нулей
+    */
   }
 
   isOnlyUnitsSelected(){
