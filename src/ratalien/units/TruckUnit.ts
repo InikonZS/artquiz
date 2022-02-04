@@ -7,6 +7,7 @@ import { OreFactory } from './oreFactory';
 import { findClosestBuild, findClosestGold } from '../distance';
 import { Vector, IVector } from "../../common/vector";
 
+
 export class TruckUnit extends AbstractUnit{
   weapon: WeaponTrack;
   closestGold: InteractiveObject;
@@ -15,7 +16,6 @@ export class TruckUnit extends AbstractUnit{
   constructor(){
     super();
     this.weapon = new WeaponTrack();
-    
     
     this.weapon.onBulletTarget = (point)=>{
       this.onDamageTile?.(point);
@@ -32,15 +32,16 @@ export class TruckUnit extends AbstractUnit{
   }
 
   getAction(hovered: InteractiveObject, mapTile?: number) {
-    console.log('трак getAction')
-    console.log('hovered: ', hovered, 'mapTile: ', mapTile)
+    // console.log('трак get Action')
+    // console.log('hovered: ', hovered, 'mapTile: ', mapTile)
+
     let action = 'move';
-    if (hovered instanceof Gold) {
+    if (hovered instanceof Gold) { // действие - собирать золото
       action = 'gold';
+      this.action = 'gold';
     } else if (hovered instanceof OreFactory && hovered?.player == this.player){
       action = 'cash_in'
     }
-    console.log('action: ', action)      
     return action;
   }
   
@@ -49,34 +50,42 @@ export class TruckUnit extends AbstractUnit{
   }
 
   logic() {
-    // console.log('logit Track')
+    // console.log('')
+    // console.log('this.attackTarget: ', this.attackTarget)
+    // console.log('this.positionPx: ', this.positionPx)
+    // console.log('countSpendTime: ', this.countSpendTime)    
 
     if (this.gold >= 3000) {
       const oreFactory = this.getList().list.filter(item => item.name == 'oreFactory' && this.player === item.player) as MapObject[];
       const closestBuild = findClosestBuild(this.position.clone(), oreFactory);
       if (closestBuild.tile) {
-        console.log(closestBuild.tile)        
         this.setTarget(closestBuild.tile);
       }
-      
-    } else if (!this.attackTarget) { // attackTarget - цель
-      console.log('goal: ', this.goal)
-      this.closestGold = findClosestGold(this.position.clone(), this.getList().list.filter(item=>item instanceof Gold));
-      if (this.goal !== 'wait') {
-        console.log('----------------отправляю трак к золоту')
-        this.setTarget(this.closestGold.position);
+    } 
+    else if (this.action === 'gold') { // если цель - золото
+      if (!this.attackTarget){ //attackTarget - цель атаки трака - золото или null, когда золото закончилось
+        this.closestGold = findClosestGold(this.position.clone(), this.getList().list.filter(item=>item instanceof Gold));
+        this.setTarget(this.closestGold.position); // отправляю трак к золоту
+      } else {
+        this.setTarget(this.positionPx); // трак стоит на месте
       }
-
-      // console.log('this: ', this);
-      // console.log('this.position: ', this.position);
-      // console.log('this.positionPx: ', this.positionPx);
-      // console.log('this.target: ', this.target);
-      // console.log('this.path: ', this.path);
-      // console.log('this.closestGold.position ', this.closestGold.position)
-
     }
-  }
 
+    // Задача. Юнит. Если стоит 20сек, то ищет себе сам цель. -----{
+
+    if (this.attackTarget === undefined) {
+      this.countSpendTime++;
+    }
+
+    if (this.countSpendTime >= 20*40) { //Ждет 20 сек и если его никуда не послали, едет за ближайшим золотом
+      this.action = 'gold';
+      this.countSpendTime = 0;
+      this.attackTarget = undefined;
+    }
+    // Задача. Юнит. Если стоит 20сек, то ищет себе сам цель. -----}
+  }
+  
+  
   render(ctx: CanvasRenderingContext2D, camera: Vector, delta: number, size: number, selected: boolean) {
     super.render(ctx, camera, delta, size, selected)
     // const sz = 10;
@@ -112,9 +121,3 @@ export class TruckUnit extends AbstractUnit{
 
 }
 
-/*
-- сразу после создания - стоять
-цель - ожидание
-
-
-*/

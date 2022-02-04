@@ -106,15 +106,26 @@ export class GameField extends Control{
       const cursorTile = this.getTileCursor();
       const cursor = this.getPixelCursor();
       const action = this.cursorStatus.getAction();
-      if (action == 'select'){
+      // console.log('action = ', action)
+      if (action == 'select') {
+        console.log('this = ', this)
         this.objects.handleClick(cursorTile, cursor);
+
+        const builds = this.objects.list.filter(it => it instanceof MapObject
+          && it.type === 'build'
+          && it.player instanceof GamePlayer) as MapObject[];
+        
+        // it.player === 'GamePlayer' && it.type === 'build') - Здания игрока
+        console.log('player builds: ', builds)
+        console.log('this.cursorStatus: ', this.cursorStatus)
+
       } else if (action == 'move'){
         this.commandUnit();
       } else if (action == 'build'){
         this.players[0].build(this.cursorStatus.planned, cursorTile.clone());       
         this.modeCallback();       
         this.cursorStatus.planned = null;    
-      } else if (action == 'primary'){
+      } else if (action == 'primary') {
         this.players[0].primaries[this.cursorStatus.hovered[0].name] = this.cursorStatus.hovered[0] as MapObject;
       } else if (action == 'attack'){
         this.commandUnit(cursor.clone());
@@ -154,7 +165,8 @@ export class GameField extends Control{
     })
   }
 
-  handleMultiselect(start:Vector, onSelect:()=>void){
+  handleMultiselect(start: Vector, onSelect: () => void) {
+    console.log('handleMultiselect')
     this.cursorStatus.multiStart = start; //new Vector(e.clientX, e.clientY);
     let listener = ()=>{
       
@@ -206,7 +218,7 @@ export class GameField extends Control{
       return new Vector(Math.floor(unit.positionPx.x/this.sz), Math.floor(unit.positionPx.y/this.sz))
     });
     
-    tracePathes(traceMap, indexPoint, destinations, (pathes)=>{
+    tracePathes(traceMap, indexPoint, destinations, (pathes)=>{ // направление куда двигается
       this.pathes = pathes;
       pathes.forEach((path, i)=>{
         const unit = units[i];
@@ -258,8 +270,8 @@ export class GameField extends Control{
     const spawn = tech.units.filter(item => item.name == name)[0].spawn[0];
     
     let primary = player.getPrimary(spawn); //Object.values(this.primaries[player]).find(it=>it.name == spawn);
-    // console.log('spawn ', spawn)
-    // console.log('primary ', primary)
+    //spawn название того что будем строить
+    //primary объект с начальными данными постройки
     if (primary !== null){
       unit.positionPx = Vector.fromIVector({x:primary.position.x*this.sz, y: primary.position.y*this.sz});
     } 
@@ -272,7 +284,6 @@ export class GameField extends Control{
     //this.mode = mode;
     console.log(name,'***');
     this.cursorStatus.planned = tech.builds.find(it=>it.desc[0] == name);//{name:name};
-   // console.log(callback);
     this.modeCallback = callback;
   }
 

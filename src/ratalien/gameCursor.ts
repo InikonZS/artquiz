@@ -34,11 +34,12 @@ export class GameCursorStatus{
       } else {
         action = 'no_build';
       }
-    } else if (this.selected.length == 0){
+    } else if (this.selected.length == 0) {
       //no selected
       action = 'select';
     } else if (this.selected.find(it => !(it instanceof AbstractUnit)) == null) {
       action = this.selected[0].getAction(this.hovered[0],this.getRealMap()[this.tilePosition.y][this.tilePosition.x] )
+
       //selected only units
       // action = 'move';
       // if (this.selected.find(it=>it.name =='solder') && (this.getRealMap()[this.tilePosition.y][this.tilePosition.x] == 1)|| (this.hovered[0] instanceof MapObject && this.hovered[0]?.player == 0)){
@@ -60,6 +61,7 @@ export class GameCursorStatus{
           action = 'no'
         } else {
           action = 'primary'
+          alert('action = primary')
         }
       }
     }
@@ -74,10 +76,8 @@ export class GameCursorStatus{
 
     const closestBuild = findClosestBuild(this.tilePosition.clone(), builds);
     if (!(!builds.length || closestBuild.distance <= 6)) { 
-      // console.log('redMask: ', redMask);
       return redMask;
     }
-    // console.log('mask: ', mask);
     return mask;
 
     /* redMask массив вида

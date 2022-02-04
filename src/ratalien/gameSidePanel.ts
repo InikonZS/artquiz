@@ -16,6 +16,7 @@ export class GameSide extends Control{
   buildingsSecondColumnFooter: Control<HTMLElement>;
   buttonSecondColumnUp: Control<HTMLButtonElement>;
   buttonSecondColumnDown: Control<HTMLButtonElement>;
+  btnRepair: Control<HTMLButtonElement>;
   dataBuild: Control<HTMLElement>[]=[];
   money: Control<HTMLElement>;
   isReadingBuild: boolean = false;
@@ -43,7 +44,12 @@ export class GameSide extends Control{
     const radar = new Control(this.node, 'div', red["game_radar"])
     this.money = new Control(radar.node, 'div', red["aside-top-panel"]);
     const builds = new Control(this.node, 'div', red["game_builds"]);
-    const buildTools = new Control(builds.node, 'div', red["builds_tool"]);
+    const buildTools = new Control(builds.node, 'div', red["builds_tool"]); 
+    // кнопки:
+    this.btnRepair = new Control(buildTools.node, 'button', red["btn"] +' '+ red["btn_aside"] +' '+ red["btn_repair"]); // .btn_notactive
+    this.btnRepair = new Control(buildTools.node, 'button', red["btn"] +' '+ red["btn_aside"] +' '+ red["btn_dollar"]); 
+    this.btnRepair = new Control(buildTools.node, 'button', red["btn"] +' '+ red["btn_aside"] +' '+ red["btn_planet"]); 
+
     const buildItems = new Control(builds.node, 'div', red["builds_items"]);
     const buildingsW = new Control(buildItems.node, 'div', red["builds_column"]);
     this.buildings = new Control(buildingsW.node, 'div', red["column_items"]);
