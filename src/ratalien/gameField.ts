@@ -25,6 +25,7 @@ import { Explosion } from './units/explosion';
 import { Gold } from './gold';
 import { units } from './units/unitMap';
 import {TilesCollection} from "./TileElement";
+import {MultiSelectController} from "../application/MultiSelect";
 
 
 export class GameField extends Control{
@@ -41,6 +42,7 @@ export class GameField extends Control{
   players: GamePlayer[];
   fps: number;
   private tileCollections: TilesCollection;
+  private multiSelectElement: MultiSelectController;
 
   constructor(parentNode: HTMLElement, res: Record<string, HTMLImageElement>,
               players:GamePlayer[], map: GameMap,tilesCollection:TilesCollection){
@@ -171,6 +173,8 @@ export class GameField extends Control{
       this.cursorStatus.multiStart = null;
       window.removeEventListener('mouseup', listener);
       if (selection.length){
+
+        this.multiSelectElement= new MultiSelectController(selection as AbstractUnit[])
         this.cursorStatus.selected = selection;
         onSelect();
       }
@@ -241,7 +245,6 @@ export class GameField extends Control{
 
 //возможно, тут лучше передвать не нейм, а сам объект созданного солдата? 
   addUnit(player: GamePlayer, name: string) {
-    //TODO check is empty,else, check neighbor
     let UnitConstructor = units[name] || AbstractUnit;
     let unit = new UnitConstructor(this.tileCollections);//UnitObject();
     unit.onDamageTile = (point)=>{
@@ -264,10 +267,33 @@ export class GameField extends Control{
      const tile = this.tileCollections.getTileData(`${primary.position.x}-${primary.position.y}`)
      if(tile){
         const emptySubtile = tile.findEmptySubTile()
-        const subTileOffset=tile.setSubTileUnit(unit,emptySubtile)
-        unit.positionPx = Vector.fromIVector({x:primary.position.x*this.sz+subTileOffset.x,
-          y: primary.position.y*this.sz+subTileOffset.y});
-        unit.tileCoordinates={x:primary.position.x,y:primary.position.y}
+        if(emptySubtile<0){
+         const newTile =  this.tileCollections.findFreeNeighbor(tile)
+          const tileUnits = tile.getTileUnits()
+          tileUnits.forEach((unit,ind)=>{
+            unit.transposition=true
+            unit.subTile=tile.calculatePosition(ind)
+            unit.target=new Vector(newTile.coords.x*55,newTile.coords.y*55)
+            //unitChangeTile
+            this.tileCollections.unitChangeTile(unit,{x:tile.coords.x,y:tile.coords.y},
+              {x:newTile.coords.x,y:newTile.coords.y},'',ind)
+          })
+
+         const isRewrite =  this.tileCollections.rewriteTiles(tile,newTile)
+          if(isRewrite){
+
+             const subTileOffset=tile.setSubTileUnit(unit,emptySubtile)
+             unit.positionPx = Vector.fromIVector({x:primary.position.x*this.sz+subTileOffset.x,
+               y: primary.position.y*this.sz+subTileOffset.y});
+             unit.tileCoordinates={x:primary.position.x,y:primary.position.y}
+          }
+        }else{
+         const subTileOffset=tile.setSubTileUnit(unit,emptySubtile)
+         unit.positionPx = Vector.fromIVector({x:primary.position.x*this.sz+subTileOffset.x,
+           y: primary.position.y*this.sz+subTileOffset.y});
+         unit.tileCoordinates={x:primary.position.x,y:primary.position.y}
+       }
+
         }else{
         unit.tileCoordinates={x:primary.position.x,y:primary.position.y}
        unit.positionPx = Vector.fromIVector({x:primary.position.x*this.sz, y: primary.position.y*this.sz});

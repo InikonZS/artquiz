@@ -29,6 +29,7 @@ export class AbstractUnit extends InteractiveObject {
   weapon: AbstractWeapon;
   targetEnemy: { distance: number; unit: AbstractUnit; } | { distance: number; unit: MapObject; tile: Vector; };
   goal: String;
+  transposition:boolean=false
   tileCoordinates: { x: any; y: any };
   private tileCollection: TilesCollection;
   private subTile: { x: any; y: any };
@@ -119,18 +120,23 @@ export class AbstractUnit extends InteractiveObject {
      // return;
     }
     if (this.target) {
-      const tile = this.tileCollection.getTileData(`${this.tileCoordinates.x}-${this.tileCoordinates.y}`)
-      const direction = this.defineDirection({x: this.target.x / 55, y: this.target.y / 55}, this.tileCoordinates)
-      const completeMoveInsideTile = this.moveInsideTile(tile, direction)
-      if (typeof completeMoveInsideTile === 'number') {
-        const subTileInNextTile = this.tileCollection.unitChangeTile(
-          this, this.tileCoordinates, {x: this.target.x / 55, y: this.target.y / 55},
-          direction)
-        if (subTileInNextTile) {
-          this.subTile = subTileInNextTile
+
+        const tile = this.tileCollection.getTileData(`${this.tileCoordinates.x}-${this.tileCoordinates.y}`)
+      if(!this.transposition){
+        const direction = this.defineDirection({x: this.target.x / 55, y: this.target.y / 55}, this.tileCoordinates)
+        const completeMoveInsideTile = this.moveInsideTile(tile, direction)
+        if (typeof completeMoveInsideTile === 'number') {
+          const subTileInNextTile = this.tileCollection.unitChangeTile(
+            this, this.tileCoordinates, {x: this.target.x / 55, y: this.target.y / 55},
+            direction)
+          if (subTileInNextTile) {
+            this.subTile = subTileInNextTile
+          }
         }
       }
+
       if (this.subTile) {
+      //  console.log("****",this.subTile)
         this.positionPx = this.positionPx.clone().add(new Vector(this.target.x + this.subTile.x, this.target.y + this.subTile.y).clone()
           .sub(this.positionPx).normalize().scale(speed));
         if (Math.abs(Math.floor(this.positionPx.x) - Math.floor(this.target.x + this.subTile.x)) <= 2
@@ -142,6 +148,7 @@ export class AbstractUnit extends InteractiveObject {
           }
           else {
             this.target = null
+            this.transposition=false
             return
           }
         }
@@ -161,7 +168,7 @@ export class AbstractUnit extends InteractiveObject {
   }
 
   setPath(path: Array<Vector>, tileChecker: (pos: Vector) => boolean, attackPoint: Vector = null) {
-    console.log('set Path',path,tileChecker)
+   // console.log('set Path',path,tileChecker)
     this.attackTarget = attackPoint
     const sz = 55;
     this.path = [...path].reverse();
